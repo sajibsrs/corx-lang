@@ -8,6 +8,15 @@ body {
     padding: 0.5em;
 }
 
+pre code.hljs {
+    padding: 1rem 3rem;
+}
+
+.code-wrapper {
+    width: 1080px;
+    margin: 0 auto;
+}
+
 .hljs,
 .hljs-subst {
     color: #fff;
@@ -41,13 +50,4 @@ body {
 
 .hljs-function {
     color: #a2e981;
-}
-
-pre code.hljs {
-    padding: 1rem 3rem;
-}
-
-.code-wrapper {
-    width: 1080px;
-    margin: 0 auto;
 }
