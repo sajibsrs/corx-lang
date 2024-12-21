@@ -18,7 +18,6 @@ body {
 .hljs-quote,
 .hljs-selector-class,
 .hljs-selector-id,
-.hljs-string,
 .hljs-template-tag {
     color: #ff6d6d;
 }
@@ -27,17 +26,25 @@ body {
     color: #ff6d6d;
 }
 
+.hljs-keyword {
+    color: #76c7e9;
+    font-weight: unset;
+}
+
+.hljs-string {
+    color: #a2e981;
+}
+
+.hljs-number {
+    color: #e98d47;
+}
+
 .hljs-function {
     color: #a2e981;
 }
 
 pre code.hljs {
     padding: 1rem 3rem;
-}
-
-.hljs-keyword {
-    color: #76c7e9;
-    font-weight: unset;
 }
 
 .code-wrapper {
