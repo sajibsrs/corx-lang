@@ -70,15 +70,49 @@ hljs.registerLanguage('corn', function (hljs) {
         keywords: KEYWORDS,
         disableAutodetect: true,
         contains: [
-            hljs.C_LINE_COMMENT_MODE,
-            hljs.C_BLOCK_COMMENT_MODE,
-            hljs.HASH_COMMENT_MODE,
             hljs.APOS_STRING_MODE,
             hljs.QUOTE_STRING_MODE,
             {
+                scope: 'comment',
+                variants: [
+                    hljs.C_LINE_COMMENT_MODE,
+                    hljs.C_BLOCK_COMMENT_MODE,
+                    {
+                        begin: /#/,
+                        end: /\n/,
+                        'on:begin': (m, n) => {
+                            console.log(m, n);
+                        },
+                        contains: [
+                            {
+                                scope: 'doctag',
+                                match: /@\w+/, ///@\w+/
+                                'on:begin': (m, n) => {
+                                    console.log(m, n);
+                                },
+                            },
+                            {
+                                scope: 'type',
+                                begin: '\\<',
+                                end: '\\>',
+                                excludeBegin: true,
+                                excludeEnd: true,
+                            },
+                            {
+                                scope: 'keyword',
+                                begin: '\\[',
+                                end: '\\]',
+                                excludeBegin: true,
+                                excludeEnd: true,
+                            },
+                        ],
+                    }
+                ],
+            },
+            {
                 scope: 'number',
                 begin: /\b\d+.*_*\b/,
-            }
+            },
         ],
     };
 });
