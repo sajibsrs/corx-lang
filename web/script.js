@@ -9,14 +9,12 @@ const CORN_KEYWORDS = [
     'do',
     'else',
     'enum',
-    'extern',
     'for',
     'goto',
     'if',
     'interface',
     'inline',
     'register',
-    'restrict',
     'return',
     'sizeof',
     'struct',
@@ -27,6 +25,15 @@ const CORN_KEYWORDS = [
     'union',
     'volatile',
     'while',
+
+    // encapsulation
+    'external',
+    'internal',
+    'restrict',
+
+    'private',
+    'protect',
+    'public',
 ];
 
 const CORN_TYPES = [
@@ -38,6 +45,7 @@ const CORN_TYPES = [
     'signed',
     'unsigned',
     'void',
+
     // modifiers
     'const',
     'static',
