@@ -8,7 +8,6 @@ const CORN_KEYWORDS = [
     'default',
     'do',
     'else',
-    'enum',
     'for',
     'goto',
     'if',
@@ -17,7 +16,6 @@ const CORN_KEYWORDS = [
     'register',
     'return',
     'sizeof',
-    'struct',
     'switch',
     'this',
     'typeof',
@@ -43,8 +41,14 @@ const CORN_TYPES = [
     'long',
     'short',
     'signed',
+    'string',
     'unsigned',
     'void',
+    'wchar',
+
+    // abstract
+    'enum',
+    'struct',
 
     // modifiers
     'const',
@@ -68,37 +72,13 @@ hljs.registerLanguage('corn', function (hljs) {
         contains: [
             hljs.C_LINE_COMMENT_MODE,
             hljs.C_BLOCK_COMMENT_MODE,
-            hljs.C_NUMBER_MODE,
             hljs.HASH_COMMENT_MODE,
             hljs.APOS_STRING_MODE,
             hljs.QUOTE_STRING_MODE,
-            // {
-            //     scope: 'aggregate',
-            //     beginKeywords: 'enum interface struct union',
-            //     end: /[{;]/,
-            //     contains: [
-            //         {
-            //             scope: 'type',
-            //             begin: /\b[A-Za-z_]\w*\b/, // Matches type names like `vec2`
-            //             relevance: 0,
-            //         },
-            //         // hljs.TITLE_MODE
-            //     ]
-            // },
-            // {
-            //     scope: 'function',
-            //     begin: /(\s+|,)[a-zA-Z0-9_\.*]+\(/,
-            //     end: /\)/,
-            //     relevance: 0,
-            //     contains: [
-            //         hljs.C_NUMBER_MODE,
-            //         {
-            //             scope: 'type',
-            //             begin: /\b[A-Za-z_]\w*\b/, // Matches type names like `vec2`
-            //             relevance: 0,
-            //         }
-            //     ]
-            // },
+            {
+                scope: 'number',
+                begin: /\b\d+.*_*\b/,
+            }
         ],
     };
 });
