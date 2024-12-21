@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORN 🌽 LANG</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/default.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+    <script src="script.js"></script>
+</head>
+
+<body>
+<div class="code-wrapper">
+<h1>CORN 🌽 LANG</h1>
+
+    <pre><code class="language-corn">
+interface calc {
+    intern int sum();
+}
+
+interface act {
+    extern vec2 *add(int val);
+}
+
+struct vec2 {
+    int x = 1;
+    int y = 2;
+}
+
+vec2 <- calc, act; // Implements
+
+vec2 : int sum() {
+    return x + y;
+}
+
+vec2 : vec2 *add(int val) {
+    x = x + val;
+    y = y + val;
+
+    return this;
+}
+
+# Uses
+vec2 v = vec2;
+
+# Everything is public by default
+int x = v.x; // 1
+int y = v.y; // 2
+
+int sum = v.sum(); // 3
+vec2 *p = v.add(10); // now, v = {11, 12}
+    </code></pre>
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+body {
+    font: 16px sans-serif;
+}
+
+.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+}
+
+.hljs,
+.hljs-subst {
+    color: #fff;
+}
+
+.hljs-deletion,
+.hljs-number,
+.hljs-quote,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-string,
+.hljs-template-tag {
+    color: #ff6d6d;
+}
+
+.hljs-type {
+    color: #ff6d6d;
+}
+
+.hljs-function {
+    color: #a2e981;
+}
+
+pre code.hljs {
+    padding: 1rem 3rem;
+}
+
+.hljs-keyword {
+    color: #76c7e9;
+    font-weight: unset;
+}
+
+.code-wrapper {
+    width: 1080px;
+    margin: 0 auto;
+}
