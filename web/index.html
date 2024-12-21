@@ -18,10 +18,23 @@
 <h1>CORN 🌽 LANG</h1>
 
     <pre><code class="language-corn">
+# Variable Declaration
+# -----------------------------------------------------------------------------
+int num = 10;
+float pi = 3.1416;
+
+long int ln_num = 1000000;
+long long int ll_num = 1000_000_000;
+
+char ch = 'a';
+wchar wch = 'ক';
+string name = "John Coffee";
+
 # Access Modifiers for Fields & Functions:
 # [external] = [default], [internal], [restrict]
 # -----------------------------------------------------------------------------
 # - They have their generic behavior.
+# -----------------------------------------------------------------------------
 
 # Access Modifiers for Types:
 # [external] = default, [internal]
@@ -30,6 +43,7 @@
 # - [external] which is default, means anyone has access to it as they
 #   include/import this file/module.
 # - [internal] indicates, it's available exclusively inside that file/module.
+# -----------------------------------------------------------------------------
 
 # Interface Declaration:
 # [interface] [tag] [{}]
@@ -37,7 +51,7 @@
 # - Method declarations should be placed inside the body of the interface.
 # - Only the method signature and not it's body.
 # - Note: 'self' reserved for interface. So it can refer itself.
-#
+# -----------------------------------------------------------------------------
 interface ivec2 {
     internal int get_x();
     internal int get_y();
@@ -73,14 +87,14 @@ struct location {
 #   and pointer to the memory returned.
 #
 # - No explicit return value, implicitly returns [this].
-#
+# -----------------------------------------------------------------------------
 location : location () {}
 
 # Destructor
 # -----------------------------------------------------------------------------
 # - No access modifiers.
 # - No explicit return value.
-#
+# -----------------------------------------------------------------------------
 location : ~location () {}
 
 location : vec2 *get_pos() {
