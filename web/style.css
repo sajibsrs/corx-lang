@@ -51,3 +51,8 @@ pre code.hljs {
 .hljs-function {
     color: #a2e981;
 }
+
+.hljs-doctag {
+    color: #5ac5b1;
+    font-weight: unset;
+}
