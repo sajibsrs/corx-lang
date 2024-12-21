@@ -14,11 +14,33 @@
 </head>
 
 <body>
-<div class="code-wrapper">
-<h1>CORN 🌽 LANG</h1>
+    <div class="code-wrapper">
+        <h1>CORN 🌽 LANG</h1>
 
-    <pre><code class="language-corn">
-# Variable Declaration
+        <pre><code class="language-corn">
+# Single line comment.
+
+// This initializes the vector with default values.
+
+/**
+* A multiline comment block.
+* Used to describe complex logic, important details,
+* or provide additional context about the code.
+*/
+
+# Box Comment:
+# This topmost section is for the description of the topic it is intended for.
+# -----------------------------------------------------------------------------
+# - These lines are for specific points that start with a [-].
+# - These can have special keywords to describe parameters, return values, etc.
+# - Syntax is similar to other documentation formats.
+# - Example provided below.
+#
+# - @param &lt;type&gt; [tag] Description of the parameter.
+# - @return &lt;type&gt; Description of the return value.
+# -----------------------------------------------------------------------------
+
+# Variable Declaration:
 # -----------------------------------------------------------------------------
 int num = 10;
 float pi = 3.1416;
@@ -105,11 +127,11 @@ location : vec2 *get_pos() {
 vec2 v = vec2;
 
 # Everything is public by default
-int x = v.x; // 1
-int y = v.y; // 2
+int x = v.x; # 1
+int y = v.y; # 2
 
-int x = v.get_y(); // 1
-int y = v.get_y(); // 2
+int x = v.get_y(); # 1
+int y = v.get_y(); # 2
 
 location loc = location();
 vec2 pos = loc.get_pos();
@@ -118,7 +140,7 @@ int py = pos->y;
 
 location *_loc = new location();
     </code></pre>
-</div>
+    </div>
 
 </body>
 
