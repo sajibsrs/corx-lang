@@ -4,61 +4,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORN 🌽 LANG</title>
+    <title>index - corn</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/default.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./assets/highlight.min.css">
+    <link rel="stylesheet" href="./assets/style.css">
 
-    <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
-    <script src="script.js"></script>
+    <script src="./assets/highlight.min.js"></script>
+    <script src="./assets/script.js"></script>
 </head>
 
 <body>
     <div class="code-wrapper">
-        <h1>CORN 🌽 LANG</h1>
+        <h1>🌽 corn</h1>
+        <p>strictly typed, general purpose programming language</p>
+
+        <nav>
+            # ->
+            <a href="intro.html">introduction</a>
+            <a href="comments.html">comments</a>
+            <a href="primitives.html">primitives</a>
+            <a href="variable.html">variable</a>
+            <a href="array.html">array</a>
+            <a href="conditionals.html">conditionals</a>
+            <a href="loops.html">loops</a>
+            <a href="function.html">function</a>
+        </nav>
+        <br>
+        <nav>
+            # ->
+            <a href="module.html">module</a>
+            <a href="struct.html">struct</a>
+            <a href="contract.html">contract</a>
+            <a href="modifiers.html">modifiers</a>
+            <a href="composition.html">composition</a>
+            <a href="memory.html">memory</a>
+        </nav>
+        <br>
 
         <pre><code class="language-corn">
-# Single line comment.
+# Basic struct declaration and definition #
+struct point {
+    int x;      # Declaration only
+    int y = 2;  # Declaration with default value
+};
 
-// This initializes the vector with default values.
+# Struct with access modifiers #
+internal struct point {  # Module level access modifier
+    external int x = 1;  # Accessible publicly. Type level access modifier
+    internal int y = 2;  # Accessible within inheritance
+    restrict int z = 3;  # Accessible only within the struct
+};
 
-/**
-* A multiline comment block.
-* Used to describe complex logic, important details,
-* or provide additional context about the code.
-*/
+# Struct composition #
+struct point {
+    int x = 1;
+    int y = 2;
+};
 
-# Box Comment:
-# This topmost section is for the description of the topic it is intended for.
+struct circle : point {
+    float radius;        # Inherits members from 'point'
+};
+
+# Struct implementing contracts #
+contract action {
+    void move();         # Abstract method in the contract
+};
+
+struct point {
+    int x = 1;
+    int y = 2;
+} action;                # 'point' implements the 'action' contract
+
+# Struct composition with contract implementation #
+contract action {
+    void move();
+};
+
+struct point {
+    int x = 1;
+    int y = 2;
+};
+
+struct circle : point {
+    float radius;
+} action;                # 'circle' implements the 'action' contract
+
+# Struct with type definition #
+contract action {
+    void move();
+};
+
+struct point {
+    int x = 1;
+    int y = 2;
+};
+
+type struct circle : point {
+    float radius;
+} action : shape;         # 'shape' is a type alias for this struct
+
+# Type aliases #
+type struct circle {
+    float radius;
+};
+
+type circle shape;       # 'shape' is a type alias for this struct
+
+# or
+
+type struct circle {
+    float radius;
+} : shape;                 # 'shape' is a type alias for this struct
+
+# or
+
+type struct circle : point {
+    float radius;
+} action : shape;         # 'shape' is a type alias for this struct
+
+# Primitive Data Types: Numbers
 # -----------------------------------------------------------------------------
-# - These lines are for specific points that start with a [-].
-# - These can have special keywords to describe parameters, return values, etc.
-# - Syntax is similar to other documentation formats.
-# - Example provided below.
-#
-# - @param &lt;type&gt; [tag] Description of the parameter.
-# - @return &lt;type&gt; Description of the return value.
+# These are the fundamental data types available in the language, covering
+# integer types, floating-point types, and character types with varying
+# bit-lengths and precision. Each type has a signed and unsigned counterpart.
+# -----------------------------------------------------------------------------
+# - &lt;int&gt;: Platform-dependent (typically 16/32/64-bit)
+# - &lt;int8&gt;: 8-bit integer (range: 0-255 unsigned, -128 to 127 signed)
+# - &lt;int16&gt;: 16-bit integer (range: 0-65535 unsigned, -32768 to 32767 signed)
+# - &lt;int32&gt;: 32-bit integer (same as &lt;int&gt; on most platforms)
+#   (range: 0-4,294,967,295 unsigned, -2,147,483,648 to 2,147,483,647 signed)
+# - &lt;int64&gt;: 64-bit integer (large range, supports very big numbers)
+#   (range: 0 to 18,446,744,073,709,551,615 unsigned,
+#   -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 signed)
+# - &lt;float&gt;: Platform-dependent float (typically 32-bit or higher precision)
+#   (range: ~±3.4e−38 to ±3.4e+38)
+# - &lt;float16&gt;: 16-bit floating-point (half precision) (range: ~±6.55e−5 to ±6.55e+4)
+# - &lt;float32&gt;: 32-bit floating-point (single precision) (range: ~±1.5e−45 to ±3.4e+38)
+# - &lt;float64&gt;: 64-bit floating-point (double precision) (range: ~±5.0e−324 to ±1.8e+308)
+# -----------------------------------------------------------------------------
+# - Every &lt;int&gt; and &lt;char&gt; type has its unsigned counterpart.
 # -----------------------------------------------------------------------------
 
-# Variable Declaration:
+int num = 42;
+int8 num8 = -55;
+int16 num16 = 32767;
+int32 num32 = -2147483648;
+int64 num64 = 9_223_372_036_854_775_807; # alternative syntax
+
+float dec = 3.14;
+float16 dec16 = 1.6;
+float32 dec32 = -2.71828;
+float64 dec64 = 6.022_140_76e23;
+
+# Primitive Data Types: Strings
 # -----------------------------------------------------------------------------
-int num = 10;
-float pi = 3.1416;
+# - &lt;char&gt;: Single character, typically 1 byte (ASCII range).
+# - &lt;string&gt;: A sequence of &lt;char&gt; or UTF types, used for handling text.
+# - &lt;utf8&gt;: UTF-8 encoded string (1 to 4 bytes per character).
+# - &lt;utf16&gt;: UTF-16 encoded string (2 or 4 bytes per character).
+# - &lt;utf32&gt;: UTF-32 encoded string (4 bytes per character).
+# -----------------------------------------------------------------------------
 
-long int li_num = 1000000;
-long long int lli_num = 1000_000_000;
-
-char ch = 'a';
-wchar wch = 'ক';
-string name = "John Coffee";
+char ch = 'A';
+string str = "Hello, World";
+utf8 u8_str = U8"আপনার দিনটি শুভ হোক"; # Have a great day
+utf16 u16_str = U16"こんにちは、世界！"; # Hello, World!
+utf32 u32_str = U32"😊";
 
 # Access Modifiers for Fields & Functions:
+# -----------------------------------------------------------------------------
 # [external] = [default], [internal], [restrict]
 # -----------------------------------------------------------------------------
 # - They have their generic behavior.
 # -----------------------------------------------------------------------------
 
 # Access Modifiers for Types:
+# -----------------------------------------------------------------------------
 # [external] = default, [internal]
 # -----------------------------------------------------------------------------
 # - [struct], [interface] and [type] etc can have this modifier.
@@ -68,77 +189,56 @@ string name = "John Coffee";
 # -----------------------------------------------------------------------------
 
 # Interface Declaration:
+# -----------------------------------------------------------------------------
 # [interface] [tag] [{}]
 # -----------------------------------------------------------------------------
 # - Method declarations should be placed inside the body of the interface.
 # - Only the method signature and not it's body.
 # - Note: 'self' reserved for interface. So it can refer itself.
 # -----------------------------------------------------------------------------
-interface ivec2 {
-    internal int get_x();
-    internal int get_y();
+
+module main; # until EOF
+
+import "std:math";
+
+# external -> public
+# internal -> protected
+# restrict -> private
+
+# contract -> interface
+contract action {
+   float area();
+};
+
+# protected struct
+internal struct point {
+    internal int x = 1;  # declaration and definition
+    internal int y = 2;
+};
+
+# inherits point
+struct circle : point {
+    float radius;        # declaration only
+} action;                # implements action
+
+# constructor
+circle : circle(float radius) {
+    radius = radius;     # or this->radius = radius;
 }
 
-# Interface Implementation
-internal struct vec2 : ivec2 {
-    int x = 1;
-    int y = 2;
+# destructor
+circle : ~circle() {}
+
+circle : float area() {
+    return math:pi * radius ^ 2;
 }
 
-# Method Definition
-vec2 : int get_x() {
-    return this.x;
-}
+circle *pcirc = new position(10.0); # dynamic memory allocation
 
-vec2 : int get_y() {
-    return this.y;
-}
+print(pcirc->radius);  # 10.0 (pcirc->x, prirc->y not allowed, as they are protected)
+printn(pcirc->area()); # print value with new line
 
-struct location {
-    vec2 pos;
-}
-
-# Constructor
-# -----------------------------------------------------------------------------
-# - When simply called like [vec2 pos = vec2()], that calls the constructor.
-#   This allocates static memory and return value. Which is same as calling
-#   [vec2 pos = vec2]. If there is no constructor, a struct will always provide
-#   implicit one. e.g. [location : location () {}].
-#
-# - When called like [vec2 *pos = new vec2()] dynamic memory gets allocated,
-#   and pointer to the memory returned.
-#
-# - No explicit return value, implicitly returns [this].
-# -----------------------------------------------------------------------------
-location : location () {}
-
-# Destructor
-# -----------------------------------------------------------------------------
-# - No access modifiers.
-# - No explicit return value.
-# -----------------------------------------------------------------------------
-location : ~location () {}
-
-location : vec2 *get_pos() {
-    return this.pos;
-}
-
-# Uses
-vec2 v = vec2;
-
-# Everything is public by default
-int x = v.x; # 1
-int y = v.y; # 2
-
-int x = v.get_y(); # 1
-int y = v.get_y(); # 2
-
-location loc = location();
-vec2 pos = loc.get_pos();
-int px = pos->x;
-int py = pos->y;
-
-location *_loc = new location();
+purge pcirc; # dynamic memory deallocation
     </code></pre>
     </div>
 

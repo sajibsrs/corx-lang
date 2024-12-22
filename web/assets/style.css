@@ -2,14 +2,17 @@ body {
     font: 16px sans-serif;
 }
 
+/* highlight js */
 .hljs {
     display: block;
     overflow-x: auto;
     padding: 0.5em;
+    background: #202229;
 }
 
 pre code.hljs {
-    padding: 1rem 3rem;
+    padding: 0rem 1.5rem;
+    line-height: 1.2;
 }
 
 .code-wrapper {
@@ -36,7 +39,7 @@ pre code.hljs {
 }
 
 .hljs-keyword {
-    color: #76c7e9;
+    color: #63c3ed;
     font-weight: unset;
 }
 
@@ -45,7 +48,7 @@ pre code.hljs {
 }
 
 .hljs-number {
-    color: #f3934a;
+    color: #f3a14a;
 }
 
 .hljs-function {
