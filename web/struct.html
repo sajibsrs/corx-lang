@@ -18,7 +18,7 @@
 <body>
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
-        <p>strictly typed, general purpose programming language</p>
+        <p>A strictly typed, general purpose programming language.</p>
 
         <nav>
             # <- <a href="index.html">index</a>
@@ -66,11 +66,14 @@ internal struct point {  # Module level access modifier
 };
         </code></pre>
 
-            <br>
-            <h3># Inheritance</h3>
-            <code>struct</code> can inherit from one or more structs. In the example below the commented lines shows
-            how a <code>struct</code> changes after inheriting from other <code>struct</code>.
-            <pre><code class="language-corn">
+        <br>
+        <h3># Inheritance / <code>struct</code> composition</h3>
+        <p>A <code>struct</code> can inherit from one or more structs. In the example below the commented lines shows
+            how a <code>struct</code> changes after inheriting from other <code>struct</code>. Though if a structs field
+            has <code>restrict</code> visibility, it won't be available in the child <code>struct</code>. In
+            <code>corn</code> everything has <code>external</code> or public visibility by default.
+        </p>
+        <pre><code class="language-corn">
 struct point {
     int x = 1;
     int y = 2;
@@ -83,9 +86,9 @@ struct circle : point {
 };
             </code></pre>
 
-            <br>
-            <h3># Multiple inheritance</h3>
-            <pre><code class="language-corn">
+        <br>
+        <h3># Multiple inheritance</h3>
+        <pre><code class="language-corn">
 struct point {
     int x = 1;
     int y = 2;
@@ -102,11 +105,11 @@ struct circle : point, element {
 };
             </code></pre>
 
-            <br>
-            <h3># Contracts implementation</h3>
-            <pre><code class="language-corn">
+        <br>
+        <h3># Contracts implementation</h3>
+        <pre><code class="language-corn">
 contract action {
-    void move();         # declaration
+    void move();   # declaration
 };
 
 struct point {
@@ -115,9 +118,9 @@ struct point {
 } action;
             </code></pre>
 
-            <br>
-            <h3># Multiple contracts implementation</h3>
-            <pre><code class="language-corn">
+        <br>
+        <h3># Multiple contracts implementation</h3>
+        <pre><code class="language-corn">
 contract action {
     void move();
 };
@@ -132,8 +135,9 @@ struct point {
 } action, visual;
             </code></pre>
 
+        <br>
+        <h3># Composition with contract implementation</h3>
         <pre><code class="language-corn">
-# Struct composition with contract implementation #
 contract action {
     void move();
 };
@@ -146,8 +150,11 @@ struct point {
 struct circle : point {
     float radius;
 } action;                # 'circle' implements the 'action' contract
+            </code></pre>
 
-# Struct with type definition #
+        <br>
+        <h3># Type definition</h3>
+        <pre><code class="language-corn">
 contract action {
     void move();
 };
@@ -160,22 +167,29 @@ struct point {
 type struct circle : point {
     float radius;
 } action : shape;         # 'shape' is a type alias for this struct
+            </code></pre>
 
-# Type aliases #
-type struct circle {
+        or
+
+        <pre><code class="language-corn">
+struct circle {
     float radius;
 };
 
-type circle shape;       # 'shape' is a type alias for this struct
+type circle shape;        # 'shape' is a type alias for this struct
+            </code></pre>
 
-# or
+        or
 
+        <pre><code class="language-corn">
 type struct circle {
     float radius;
 } : shape;                 # 'shape' is a type alias for this struct
+            </code></pre>
 
-# or
+        or
 
+        <pre><code class="language-corn">
 type struct circle : point {
     float radius;
 } action : shape;         # 'shape' is a type alias for this struct
