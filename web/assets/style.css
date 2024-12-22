@@ -1,5 +1,24 @@
 body {
     font: 16px sans-serif;
+    color: #bbbfc8;
+    background-color: #17181c;
+}
+
+p {
+    line-height: 1.4;
+}
+
+p, h1, h2, h3 {
+    letter-spacing: 0.6px;
+}
+
+nav a {
+    color: #bbbfc8;
+}
+
+nav a:hover {
+    color: #a2e981;
+    text-decoration: none;
 }
 
 /* highlight js */
