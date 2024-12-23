@@ -83,7 +83,7 @@ const KEYWORDS = {
     type: CORN_TYPES,
     literal: 'true false null',
     built_in: 'std math '
-        + 'print printn ',
+        + 'print printn alloc ',
 };
 
 const decimalDigits = '[0-9](_?[0-9])*';
