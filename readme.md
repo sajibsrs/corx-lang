@@ -1,4 +1,5 @@
 # 🌽 `corn` programming language
+A strictly typed, general-purpose programming language, crafted for simplicity and performance.
 
 ![corn programming language](./corn-lang.png)
 
