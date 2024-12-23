@@ -1,14 +1,18 @@
 body {
     font: 16px sans-serif;
     color: #bbbfc8;
-    background-color: #17181c;
+    background-color: #121215;
 }
 
 p {
     line-height: 1.4;
 }
 
-p, h1, h2, h3 {
+p,
+h1,
+h2,
+h3,
+h4 {
     letter-spacing: 0.6px;
 }
 
@@ -17,7 +21,7 @@ nav a {
 }
 
 nav a:hover {
-    color: #a2e981;
+    color: #ff6d6d;
     text-decoration: none;
 }
 
@@ -30,8 +34,8 @@ nav a:hover {
 }
 
 pre code.hljs {
-    padding: 0rem 1.5rem;
-    line-height: 1.2;
+    padding: 0.5rem 2.5rem;
+    line-height: 1.3;
 }
 
 .code-wrapper {
@@ -58,7 +62,7 @@ pre code.hljs {
 }
 
 .hljs-keyword {
-    color: #63c3ed;
+    color: #5ad9fc;
     font-weight: unset;
 }
 
@@ -70,6 +74,10 @@ pre code.hljs {
     color: #f3a14a;
 }
 
+.hljs-addition,
+.hljs-built_in,
+.hljs-bullet,
+.hljs-code,
 .hljs-function {
     color: #a2e981;
 }
