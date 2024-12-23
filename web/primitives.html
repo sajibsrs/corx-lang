@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>variable - corn</title>
+    <title>primitives</title>
 
     <link rel="stylesheet" href="./assets/highlight.min.css">
     <link rel="stylesheet" href="./assets/style.css">
@@ -16,11 +16,10 @@
 <body>
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
-        <p>strictly typed, general purpose programming language</p>
+        <p>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</p>
 
         <nav>
-            # <-
-            <a href="index.html">index</a>
+            # <- <a href="index.html">index</a>
         </nav>
         <br>
         <nav>
@@ -44,10 +43,83 @@
             <a href="composition.html">composition</a>
             <a href="memory.html">memory</a>
         </nav>
+
         <br>
-
         <pre><code class="language-corn">
+# Primitive Data Types: Numbers
+# -----------------------------------------------------------------------------
+# These are the fundamental data types available in the language, covering
+# integer types, floating-point types, and character types with varying
+# bit-lengths and precision. Each type has a signed and unsigned counterpart.
+# -----------------------------------------------------------------------------
+# - &lt;int&gt;: Platform-dependent (typically 16/32/64-bit)
+# - &lt;int8&gt;: 8-bit integer (range: 0-255 unsigned, -128 to 127 signed)
+# - &lt;int16&gt;: 16-bit integer (range: 0-65535 unsigned, -32768 to 32767 signed)
+# - &lt;int32&gt;: 32-bit integer (same as &lt;int&gt; on most platforms)
+#   (range: 0-4,294,967,295 unsigned, -2,147,483,648 to 2,147,483,647 signed)
+# - &lt;int64&gt;: 64-bit integer (large range, supports very big numbers)
+#   (range: 0 to 18,446,744,073,709,551,615 unsigned,
+#   -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807 signed)
+# - &lt;float&gt;: Platform-dependent float (typically 32-bit or higher precision)
+#   (range: ~±3.4e−38 to ±3.4e+38)
+# - &lt;float16&gt;: 16-bit floating-point (half precision) (range: ~±6.55e−5 to ±6.55e+4)
+# - &lt;float32&gt;: 32-bit floating-point (single precision) (range: ~±1.5e−45 to ±3.4e+38)
+# - &lt;float64&gt;: 64-bit floating-point (double precision) (range: ~±5.0e−324 to ±1.8e+308)
+# -----------------------------------------------------------------------------
+# - Every &lt;int&gt; and &lt;char&gt; type has its unsigned counterpart.
+# -----------------------------------------------------------------------------
 
+int num = 42;
+int8 num8 = -55;
+int16 num16 = 32767;
+int32 num32 = -2147483648;
+int64 num64 = 9_223_372_036_854_775_807; # alternative syntax
+
+float dec = 3.14;
+float16 dec16 = 1.6;
+float32 dec32 = -2.71828;
+float64 dec64 = 6.022_140_76e23;
+
+# Primitive Data Types: Strings
+# -----------------------------------------------------------------------------
+# - &lt;char&gt;: Single character, typically 1 byte (ASCII range).
+# - &lt;string&gt;: A sequence of &lt;char&gt; or UTF types, used for handling text.
+# - &lt;utf8&gt;: UTF-8 encoded string (1 to 4 bytes per character).
+# - &lt;utf16&gt;: UTF-16 encoded string (2 or 4 bytes per character).
+# - &lt;utf32&gt;: UTF-32 encoded string (4 bytes per character).
+# -----------------------------------------------------------------------------
+
+char ch = 'A';
+string str = "Hello, World";
+utf8 u8_str = U8"আপনার দিনটি শুভ হোক"; # Have a great day
+utf16 u16_str = U16"こんにちは、世界！"; # Hello, World!
+utf32 u32_str = U32"😊";
+
+# Access Modifiers for Fields & Functions:
+# -----------------------------------------------------------------------------
+# [external] = [default], [internal], [restrict]
+# -----------------------------------------------------------------------------
+# - They have their generic behavior.
+# -----------------------------------------------------------------------------
+
+# Access Modifiers for Types:
+# -----------------------------------------------------------------------------
+# [external] = default, [internal]
+# -----------------------------------------------------------------------------
+# - [struct], [interface] and [type] etc can have this modifier.
+# - [external] which is default, means anyone has access to it as they
+#   include/import this file/module.
+# - [internal] indicates, it's available exclusively inside that file/module.
+# -----------------------------------------------------------------------------
+
+# Interface Declaration:
+# -----------------------------------------------------------------------------
+# [interface] [tag] [{}]
+# -----------------------------------------------------------------------------
+# - Method declarations should be placed inside the body of the interface.
+# - Only the method signature and not it's body.
+# - Note: 'self' reserved for interface. So it can refer itself.
+# -----------------------------------------------------------------------------
         </code></pre>
     </div>
 
