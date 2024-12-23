@@ -1,4 +1,4 @@
-# `corn` programming language
+# 🌽 `corn` programming language
 
 ![corn programming language](./corn-lang.png)
 
