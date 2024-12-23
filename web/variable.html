@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>variable - corn</title>
+    <title>variable</title>
 
     <link rel="stylesheet" href="./assets/highlight.min.css">
     <link rel="stylesheet" href="./assets/style.css">
@@ -16,15 +16,15 @@
 <body>
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
-        <p>strictly typed, general purpose programming language</p>
+        <p>Strictly typed, general purpose programming language</p>
 
         <nav>
-            # <-
-            <a href="index.html">index</a>
+            @ <- <a href="index.html">index</a>
         </nav>
         <br>
+
         <nav>
-            # ->
+            @ ->
             <a href="intro.html">introduction</a>
             <a href="comments.html">comments</a>
             <a href="primitives.html">primitives</a>
@@ -35,19 +35,66 @@
             <a href="function.html">function</a>
         </nav>
         <br>
+
         <nav>
-            # ->
+            @ ->
             <a href="module.html">module</a>
             <a href="struct.html">struct</a>
             <a href="contract.html">contract</a>
             <a href="modifiers.html">modifiers</a>
             <a href="composition.html">composition</a>
+            <a href="object.html">object</a>
             <a href="memory.html">memory</a>
         </nav>
         <br>
 
+        <h3># Declaration</h3>
+        <p>A variable can be declared without a value. If no value is assigned, it contains a garbage value (data
+        previously present in the memory location). Always assign a value before using a variable to avoid undefined
+        behavior.</p>
         <pre><code class="language-corn">
+int num;     # num contains garbage value
+float speed; # speed contains garbage value
+string name; # name contains garbage value
+        </code></pre>
 
+        <br>
+        <h3># Multiple declaration</h3>
+        <p>Variables of the same type can be declared together. Each variable will have its own garbage value until
+        explicitly initialized.</p>
+        <pre><code class="language-corn">
+int num, count;      # num, count contains garbage value
+float speed, height; # speed, height contains garbage value
+string name, email;  # name, email contains garbage value
+         </code></pre>
+
+        <br>
+        <h3># Declaration then initialization</h3>
+        <p>Variables can be declared first and initialized later.</p>
+        <pre><code class="language-corn">
+int num;
+float speed;
+string name;
+
+num = 5;              # num is now assigned the value 5
+speed = 20.0;         # speed is now assigned 20.0
+name = "John Coffee"; # name is now initialized
+        </code></pre>
+
+        <br>
+        <h3># Declaration and initialization</h3>
+        <p>Variables can be declared and initialized in one statement.</p>
+        <pre><code class="language-corn">
+int num = 5;                 # num is initialized to 5
+float speed = 20.0;          # speed is initialized to 20.0
+string name = "John Coffee"; # name is initialized with a string
+        </code></pre>
+
+        <br>
+        <h3># Multiple declaration and initialization</h3>
+        <p>Variables of the same type can be declared together, each with its own initial value.</p>
+        <pre><code class="language-corn">
+int width = 20, height = 10; # width and height are initialized to 20 and 10, respectively
         </code></pre>
     </div>
 
