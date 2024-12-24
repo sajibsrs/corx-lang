@@ -19,8 +19,7 @@
         <p>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</p>
 
         <nav>
-            # <-
-            <a href="index.html">index</a>
+            # <- <a href="index.html">index</a>
         </nav>
         <br>
         <nav>
@@ -46,8 +45,150 @@
         </nav>
         <br>
 
+        <br>
+        <h3># Static</h3>
+        <p></p>
         <pre><code class="language-corn">
+int arr[3];  # allocate memory for 3 int
+int *parr[3]; # allocate memory for 3 int pointers
+        </code></pre>
 
+        <br>
+        <h3>#</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int cols[3] = {1, 2, 3};
+int rows[]  = {4, 5, 6}; # number of elements can be omitted
+        </code></pre>
+
+        <br>
+        <h3>#</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int nums[3];
+
+nums[0] = 1;
+nums[1] = 2;
+nums[2] = 3;
+        </code></pre>
+
+        <br>
+        <h3># Dynamic</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int *arr = new int[3];    # allocate memory for 3 int
+int **parr = new *int[3]; # allocate memory for 3 int pointers
+        </code></pre>
+
+        <br>
+        <h3>#</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int a = 1;
+int b = 2;
+int c = 3;
+
+int *arr = new int[3] {1, 2, 3};       # allocate and initialize 3 int values
+int **parr = new *int[3] {&a, &b, &c}; # allocate and initialize 3 int pointer
+        </code></pre>
+
+        <br>
+        <h3>#</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int *a = new int(1);
+int *b = new int(1);
+int *c = new int(1);
+
+int *arr = new int[3] {1, 2, 3};    # allocate and initialize 3 int values
+int **parr = new *int[3] {a, b, c}; # allocate and initialize 3 int pointer
+        </code></pre>
+
+        <br>
+        <h2>Multidimensional Arrays</h2>
+
+        <br>
+        <h3># Static</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int grid[3][3]; # Allocate a 3x3 grid of integers
+        </code></pre>
+
+        <br>
+        <h3>#</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int grid[2][3] = {
+    {1, 2, 3},
+    {4, 5, 6}
+};
+        </code></pre>
+
+        <br>
+        <h3>#</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int grid[2][3];
+
+grid[0][0] = 1;
+grid[0][1] = 2;
+grid[0][2] = 3;
+grid[1][0] = 4;
+grid[1][1] = 5;
+grid[1][2] = 6;
+
+        </code></pre>
+
+        <br>
+        <h3># Dynamic allocation of a 2D array</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int **grid = new *int[3]; # Create an array of 3 int pointers
+
+for (int i = 0; i < 3; i++) {
+    grid[i] = new int[3]; # Each pointer now points to an array of 3 integers
+}
+        </code></pre>
+
+        <br>
+        <h3># Accessing and initializing values</h3>
+        <p></p>
+        <pre><code class="language-corn">
+grid[0][0] = 1;
+grid[0][1] = 2;
+grid[0][2] = 3;
+
+grid[1][0] = 4;
+grid[1][1] = 5;
+grid[1][2] = 6;
+        </code></pre>
+
+        <br>
+        <h3># Cleaning up</h3>
+        <p></p>
+        <pre><code class="language-corn">
+for (int i = 0; i < 3; i++) {
+    purge grid[i]; # Free each row
+}
+
+purge grid; # Free the array of pointers
+        </code></pre>
+
+        <br>
+        <h3># Mixed dimensionality</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int *grid[3]; # Fixed array of 3 pointers
+
+for (int i = 0; i < 3; i++) {
+    grid[i] = new int[3]; # Dynamically allocate rows
+}
+        </code></pre>
+
+        <br>
+        <h3>#</h3>
+        <p></p>
+        <pre><code class="language-corn">
         </code></pre>
     </div>
 
