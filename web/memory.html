@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>variable - corn</title>
+    <title>memory</title>
 
     <link rel="stylesheet" href="./assets/highlight.min.css">
     <link rel="stylesheet" href="./assets/style.css">
@@ -19,8 +19,7 @@
         <p>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</p>
 
         <nav>
-            # <-
-            <a href="index.html">index</a>
+            # <- <a href="index.html">index</a>
         </nav>
         <br>
         <nav>
@@ -46,8 +45,72 @@
         </nav>
         <br>
 
+        <h3># Static memory</h3>
+        <p>When a variable is initialized, it gets its value stored in the static memory. Static memory is managed
+            automatically, so there is no additional steps needed. It gets allocated at definition and gets removed when
+            it's out of scope.</p>
         <pre><code class="language-corn">
+int amount = 10_000_000; # automatic memory management
+amount     = 25_000_000; # old value getting replaced with new value
+        </code></pre>
 
+        <br>
+        <h3># Dynamic memory</h3>
+        <p>Dynamic memory allocation allows programs to request and release memory at runtime, enabling efficient use of
+            memory based on the program's needs. It provides flexibility for creating data structures like arrays or
+            objects whose size is not known at compile time.</p>
+
+        <h4># Pointer</h4>
+        <p>A pointer is a special type of variable that stores the memory address of another variable. Pointer
+            declarations differ from regular variable declarations. A pointer always begins with an asterisk
+            (<code>*</code>) symbol, which indicates that it is a special variable designed to hold memory addresses.
+        </p>
+
+        <pre><code class="language-corn">
+int   *ptr;  # Declares a pointer to an integer
+float *fptr; # Declares a pointer to a float
+        </code></pre>
+
+        <p>Pointers are essential for dynamic memory allocation, efficient memory management, and advanced programming
+            techniques.</p>
+        <br>
+
+        <p># Address-of operator</p>
+        <p>The address-of operator is used to obtain the memory address of a variable. It is represented by the
+            ampersand (<code>&</code>) symbol. The operator retrieves the location in memory where the value of the
+            variable is stored.</p>
+        <pre><code class="language-corn">
+int count = 42;
+int  *ptr = &count; # The pointer 'ptr' now holds the address of 'count'
+
+print(ptr); # prints the address of 'count' (e.g. 0x7ffeefbff5b0)
+        </code></pre>
+
+        <br>
+        <h3># Dereferencing a pointer</h3>
+        <p>Dereferencing a pointer returns the value stored in the address, the pointer pointing at.</p>
+        <pre><code class="language-corn">
+int count = 42;
+int  *ptr = &count;
+
+print(ptr*); # print the value stored in 'count' (42)
+        </code></pre>
+
+        <br>
+        <h3># Multi-level pointer and dereferencing</h3>
+        <p>Multi-level pointers are pointers that store the address of another pointer. This allows accessing or
+            manipulating data indirectly at multiple levels of indirection. Dereferencing a multi-level pointer
+            retrieves the value stored at the target memory location or addresses further down the chain.
+        </p>
+        <p>This example demonstrates using a pointer to a pointer and how to dereference it to access values or
+            addresses.</p>
+        <pre><code class="language-corn">
+int count = 42;
+int  *ptr = &count; # 'ptr' contains address of 'count'
+int *pptr = &ptr;   # 'pptr' contains address of 'ptr'
+
+print(ptr*);  # prints the value stored in 'count' (42)
+print(ptr**); # prints the address of 'count' via double dereference
         </code></pre>
     </div>
 
