@@ -1,26 +1,10 @@
 # 🌽 `corn`
-A strictly typed, general-purpose programming language, crafted for simplicity and performance.
+*A strictly typed, general-purpose programming language, crafted for simplicity and performance.*
+
+"Trust the programmer" - `corn`
 
 ![corn programming language](./corn-lang.png)
 
-## # Comments
-## # Variable
-## # Constant
-### # Compile-Time
-### # Runtime
-## # Function
-## # Interface
-## # Structure
-## Type Definition
-### Primitive Types
-### Aggregate Types
-### Composite Types
-## # Method
-## # Constructor
-## # Destructor
-## # Memory Management
-## Code Organization
-### Module
-## Memory Management
-## Concurrency
-## Error Handling
+ `corn` is a simple, efficient programming language designed for systems-level programming with a focus on manual memory management and minimalistic syntax. With `corn`, you have full control over system resources, offering maximum performance and clarity, without the overhead of complex language features. Whether you're developing performance-critical applications or need a low-level language with modern features like contract-based design, `corn` is built to meet those needs.
+
+Explore the documentation and learn how `corn` can help you write clean, efficient, and performance-driven code.
