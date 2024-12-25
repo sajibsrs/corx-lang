@@ -36,6 +36,6 @@ popcorn *pcorn = new popcorn(200.0, 5);
 bool completed = pcorn->make();
 
 print(pcorn->temp);
-printn(completed);  # print if popped (true/false)
+printn(completed);  # prints if popped (true/false)
 
 purge pcorn;
