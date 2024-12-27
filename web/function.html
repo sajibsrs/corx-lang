@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>variable - corn</title>
+    <title>function</title>
 
     <link rel="stylesheet" href="./assets/highlight.min.css">
     <link rel="stylesheet" href="./assets/style.css">
@@ -16,41 +16,347 @@
 <body>
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
-        <p>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</p>
+        <hr>
+        <p><em>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</em></p>
+        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <hr>
+        <br>
 
         <nav>
-            # <-
-            <a href="index.html">index</a>
+            @ <- <a href="index.html">index</a>
         </nav>
         <br>
+
         <nav>
-            # ->
+            @ ->
             <a href="intro.html">introduction</a>
             <a href="comments.html">comments</a>
             <a href="primitives.html">primitives</a>
-            <a href="variable.html">variable</a>
+            <a href="variable-and-constant.html">variable & constant</a>
             <a href="array.html">array</a>
             <a href="conditionals.html">conditionals</a>
             <a href="loops.html">loops</a>
             <a href="function.html">function</a>
         </nav>
         <br>
+
         <nav>
-            # ->
+            @ ->
             <a href="module.html">module</a>
             <a href="struct.html">struct</a>
             <a href="contract.html">contract</a>
             <a href="modifiers.html">modifiers</a>
             <a href="composition.html">composition</a>
+            <a href="object.html">object</a>
             <a href="memory.html">memory</a>
         </nav>
         <br>
 
-        <pre><code class="language-corn">
+        <nav>
+            @ ->
+            <a href="metadata.html">metadata</a>
+            <a href="proposals.html">proposals</a>
+        </nav>
+        <br>
+        <hr>
 
+        <h3># Declaration</h3>
+        <p>A function declaration involves, defining return type, then name / tag / identifier of the function and it's
+            parameters. If there's no parameters, it can be left empty or pass void to that function to explicitly
+            specify that, this function doesn't accept any parameters.</p>
+
+        <p>A function that doesn't return anything and takes to parameter.</p>
+        <pre><code class="language-corn">
+void width() {
+    print("Hello, there");
+}
+        </code></pre>
+
+        <p>A function that returns <code>int</code> and takes no parameter.</p>
+        <pre><code class="language-corn">
+int width(void) {
+    return 50;
+}
+        </code></pre>
+
+        <p>This is identical to above:</p>
+        <pre><code class="language-corn">
+int width() {
+    return 50;
+}
+        </code></pre>
+
+        <br>
+        <h3># Function Parameters</h3>
+        <p>In this example, we define a simple function <code>square</code> that takes an integer <code>num</code> as a
+            parameter and returns its square. The function is called with the value <code>5</code>, and the result is
+            printed, showing <code>25</code>.
+        </p>
+
+        <p>In <code>corn</code> parameters are pass-by-value by default.</p>
+
+        <pre><code class="language-corn">
+int square(int num) {
+    return num * num;
+}
+
+int num = 5;
+int sqr = square(num);
+
+print(sqr); # prints 25
+        </code></pre>
+
+        <br>
+        <h3># Default Arguments</h3>
+        <p>In <code>corn</code>, you can define default arguments for functions, allowing you to call the function
+            without specifying all the parameters. If a parameter is not provided, the default value is used.
+        </p>
+        <pre><code class="language-corn">
+float add(float a, int b = 5.3) {
+    return a + b;
+}
+
+float res = add(2.3);
+
+print(res); # prints 7.6
+        </code></pre>
+        <p>In this example, the function <code>add</code> is called with one argument <code>(2.3)</code>, and the default value <code>5.3</code> is used for <code>b</code>.
+        </p>
+
+        <p>Overriding default argument:</p>
+        <pre><code class="language-corn">
+float add(float a, int b = 5.3) {
+    return a + b;
+}
+
+float res = add(2.3, 1.2);
+
+print(res); # prints 3.4
+            </code></pre>
+            <p>Here, the default value of <code>b</code> is overridden by the provided argument <code>1.2</code>.</p>
+
+        <br>
+        <h3># Pass by Reference</h3>
+        <p>In <code>corn</code>, parameters are passed by value by default, meaning that a copy of the argument is used
+            within the function. To pass a parameter by reference, the (<code>@</code>) symbol is used. This allows the
+            function to modify the original argument.
+        </p>
+
+        <p>Default behavior:</p>
+        <pre><code class="language-corn">
+void increment(int num) {
+    num++; # temporary copy gets incremented
+}
+
+int amount = 5;
+
+print(amount); # prints 5
+
+increment(amount);
+
+print(amount); # prints 5
+        </code></pre>
+        <p>In this example, the value of <code>amount</code> remains unchanged because the <code>increment</code>
+            function works on a copy of the argument.
+        </p>
+
+        <p>When passed by reference:</p>
+        <pre><code class="language-corn">
+void increment(int @num) {
+    num++; # original value gets incremented
+}
+
+int amount = 5;
+
+print(amount); # prints 5
+
+increment(amount);
+
+print(amount); # prints 6
+        </code></pre>
+        <p>By using the (<code>@</code>) symbol, the <code>increment</code> function modifies the original
+            <code>amount</code> variable, and the value is updated accordingly.
+        </p>
+
+        <br>
+        <h3># Return by Reference</h3>
+        <p></p>
+        <pre><code class="language-corn">
+int @increment(int @num) {
+    num++; # original value gets incremented
+
+    return num; # return reference to 'num'
+}
+
+int amount = 5;
+
+print(amount); # prints 5
+
+int @res = increment(amount); # 'res' gets the modified value of 'amount' (6)
+
+print(res); # prints 6
+
+res++; # increment the value of 'res'
+
+print(amount); # prints 7, as 'res' is a reference to 'amount'
+        </code></pre>
+
+        <br>
+        <h3># Function Pointer</h3>
+        <p>A function pointer allows you to store the address of a function and call it dynamically. In
+            <code>corn</code>, functions are passed by reference by default, so there is no need to use the (@) symbol
+            to get their address.
+        </p>
+        <pre><code class="language-corn">
+int(*fn)(int, int); # function pointer
+
+int callback(fn, int x, int y) {
+    return fn(x, y);
+}
+
+int add(int a, int b) {
+    return a + b;
+}
+
+int cb = callback(add, 3, 2);
+
+print(cb); # prints 5
+        </code></pre>
+        <p>In this example, the function add is passed to callback using a function pointer. The callback dynamically
+            calls the add function, returning the result.
+        </p>
+
+        <br>
+        <h3># Forward Declaration</h3>
+        <p>A forward declaration allows you to declare a function prototype before its usage. It specifies the
+            function's return type, name, and parameter list without providing the implementation. This is useful when a
+            function is used before being defined.
+        </p>
+        <pre><code class="language-corn">
+int add(int a, int b); # with parameter names
+# or
+int add(int, int);     # without parameter names
+        </code></pre>
+        <p>Forward declarations ensure the compiler knows about the function's signature ahead of time, enabling better
+            modular code organization.
+        </p>
+
+        <br>
+        <h3># Inline Functions</h3>
+        <p>An inline function is a hint to the compiler to replace the function call with the actual code of the
+            function to reduce overhead. This can improve performance for small, frequently called functions.
+        </p>
+        <pre><code class="language-corn">
+int(*fn)(int); # function pointer
+
+int callback(fn, int x, int y) {
+    return fn(x, y);
+}
+
+int cb = callback(square, 3, 2);
+
+print(cb); # prints 5
+
+# inlined function
+inline int square(int a) {
+    return a * a;
+}
+        </code></pre>
+        <p>Here, the <code>square</code> function is marked as <code>inline</code>. While the behavior of the program
+            remains the same, the compiler might optimize it by replacing the function call with its implementation,
+            potentially reducing execution time.
+        </p>
+
+        <br>
+        <h3># Function Overloading</h3>
+        <p>Function overloading allows multiple functions to have the same name but differ in the number or type of their parameters. The correct function is selected based on the argument types during the function call.</p>
+        <pre><code class="language-corn">
+int add(int a, int b) {
+    return a + b;
+}
+
+float add(float a, float b) {
+    return a + b;
+}
+
+int int_result = add(2, 3);          # calls int version, result is 5
+float float_result = add(2.5, 3.5);  # calls float version, result is 6.0
+        </code></pre>
+
+        <br>
+        <h3># Variadic Function</h3>
+        <p>A variadic function is a function that accepts a variable number of arguments. It allows you to pass any number of arguments of different types.</p>
+        <p>With single type:</p>
+        <pre><code class="language-corn">
+int sum(int args...) {         # variable name, only int type is allowed
+    vargs data = vainit(args);
+
+    int res = 0;
+
+    foreach (arg in data) {
+        print(arg);
+    }
+
+    # automatic cleanup any data existed
+
+    return res;
+}
+        </code></pre>
+
+        <p>Mixed numeric types:</p>
+        <pre><code class="language-corn">
+float sum(void args...) {      # variable name, any type is allowed
+    vargs data = vainit(args);
+
+    float res = 0;
+
+    foreach (arg in data) {
+        res += arg;            # other type has undefined behavior
+    }
+
+    # automatic cleanup any data existed
+
+    return res;
+}
+        </code></pre>
+
+        <p>Mixed types:</p>
+        <pre><code class="language-corn">
+void print(void args...) {      # variable name, any type is allowed
+
+    # process with extra data using same type 'vargs'
+    # for both 'vainit' and 'vaxinit' is possible due to polymorphism
+    vargs data = vaxinit(args);
+
+    foreach (arg in data) {
+        if (typeof arg = 5) {   # typeof returns type id
+            print("string");
+        }
+    }
+
+    # automatic cleanup any data existed
+}
+        </code></pre>
+
+        <br>
+        <h3># Function and <code>const</code> Keyword</h3>
+        <p>The <code>const</code> keyword can be used with function parameters to ensure that they cannot be modified within the function. This is typically used for parameters passed by reference.</p>
+        <pre><code class="language-corn">
+void render(const int @num) {
+    print(num);  # num cannot be modified
+}
+
+int value = 10;
+
+render(value);   # prints 10
+        </code></pre>
+
+        <br>
+        <h3># Error Handling</h3>
+        <p></p>
+        <pre><code class="language-corn">
         </code></pre>
     </div>
-
 </body>
 
 </html>

@@ -1,6 +1,5 @@
 const CORN_KEYWORDS = [
     'asm',
-    'auto',
     'break',
     'case',
     'const',
@@ -9,6 +8,7 @@ const CORN_KEYWORDS = [
     'do',
     'else',
     'for',
+    'foreach',
     'goto',
     'if',
     'inline',
@@ -17,14 +17,14 @@ const CORN_KEYWORDS = [
     'sizeof',
     'switch',
     'this',
-    'typeof',
     'type',
-    'union',
+    'typeof',
+    'typestr',
     'volatile',
     'while',
 
     // memory
-    'alloc',
+    'len',
     'delete',
     'new',
     'purge',
@@ -45,6 +45,8 @@ const CORN_KEYWORDS = [
 ];
 
 const CORN_TYPES = [
+    'auto',
+
     'char',
     'string',
     'utf8',
@@ -76,14 +78,19 @@ const CORN_TYPES = [
     'enum',
     'struct',
     'contract',
+    'union',
+    'lambda',
+    'vargs',
 ];
 
 const KEYWORDS = {
     keyword: CORN_KEYWORDS,
     type: CORN_TYPES,
-    literal: 'true false null',
-    built_in: 'std math '
-        + 'print printn alloc ',
+    literal: 'true false null ',
+    built_in: 'alloc realloc resize exit '
+        +'std math '
+        + 'print printn printf '
+        + 'vainit vaxinit ',
 };
 
 const decimalDigits = '[0-9](_?[0-9])*';

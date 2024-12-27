@@ -16,14 +16,18 @@
 <body>
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
-        <p>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</p>
+        <hr>
+        <p><em>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</em></p>
+        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <hr>
+        <br>
 
         <nav>
             @ ->
             <a href="intro.html">introduction</a>
             <a href="comments.html">comments</a>
             <a href="primitives.html">primitives</a>
-            <a href="variable.html">variable</a>
+            <a href="variable-and-constant.html">variable & constant</a>
             <a href="array.html">array</a>
             <a href="conditionals.html">conditionals</a>
             <a href="loops.html">loops</a>
@@ -43,40 +47,69 @@
         </nav>
         <br>
 
+        <nav>
+            @ ->
+            <a href="metadata.html">metadata</a>
+            <a href="proposals.html">proposals</a>
+        </nav>
+        <br>
+        <hr>
+
+        <p>
+            <code>corn</code> is a simple, efficient programming language designed for systems-level programming with a
+            focus on
+            manual memory management and minimalistic syntax. With <code>corn</code>, you have full control over system
+            resources, offering maximum performance and clarity, without the overhead of complex language
+            features. Whether you're developing performance-critical applications or need a low-level language
+            with modern features like contract-based design, <code>corn</code> is built to meet those needs.
+        </p>
+        <p>Explore the documentation and learn how <code>corn</code> can help you write clean, efficient, and
+            performance-driven
+            code.
+        </p>
+
         <pre><code class="language-corn">
 module main;
 
-import "std:math";
+import * from "std:io"; # import all
 
 contract action {
-   float area();
+    bool make();
 };
 
-internal struct point {
-    internal int x = 1;
-    internal int y = 2;
+struct kernel {
+    int time = 3; # time before it pops
 };
 
-struct circle : point {
-    float radius;
+struct popcorn : kernel {
+    float temp;
 } action;
 
-circle : circle(float radius) {
-    this->radius = radius;
+# constructor
+popcorn : popcorn(float temp, int time) {
+    this->time = time;
+    this->temp = temp;
 }
 
-circle : @circle() {}
+# destructor
+popcorn : %popcorn() {}
 
-circle : float area() {
-    return math:pi * radius ^ 2;
+# contract fulfillment
+popcorn : bool make() {
+    if (this->temp >= 180.0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
-circle *pcirc = new circle(10.0);
+popcorn *pcorn = new popcorn(200.0, 5);
+bool popped = pcorn->make();
 
-print(pcirc->radius);
-printn(pcirc->area());
+print(pcorn->temp);
+printn(popped);  # prints '1'
 
-purge pcirc;
+purge pcorn;
     </code></pre>
     </div>
 

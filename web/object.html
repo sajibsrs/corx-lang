@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>index</title>
+    <title>object</title>
 
     <link rel="stylesheet" href="./assets/highlight.min.css">
     <link rel="stylesheet" href="./assets/style.css">
@@ -16,11 +16,14 @@
 <body>
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
-        <p>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</p>
+        <hr>
+        <p><em>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</em></p>
+        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <hr>
+        <br>
 
         <nav>
-            @ <-
-            <a href="index.html">index</a>
+            @ <- <a href="index.html">index</a>
         </nav>
         <br>
 
@@ -29,7 +32,7 @@
             <a href="intro.html">introduction</a>
             <a href="comments.html">comments</a>
             <a href="primitives.html">primitives</a>
-            <a href="variable.html">variable</a>
+            <a href="variable-and-constant.html">variable & constant</a>
             <a href="array.html">array</a>
             <a href="conditionals.html">conditionals</a>
             <a href="loops.html">loops</a>
@@ -49,6 +52,14 @@
         </nav>
         <br>
 
+        <nav>
+            @ ->
+            <a href="metadata.html">metadata</a>
+            <a href="proposals.html">proposals</a>
+        </nav>
+        <br>
+        <hr>
+
         <pre><code class="language-corn">
 module main;
 
@@ -58,32 +69,32 @@ contract shape; # forward declaration
 
 # visitor contract
 contract visitor {
-    void visit(shape &s);
+    void visit(shape @s); # pass value by reference (value at)
 };
 
 # shape contract
 contract shape {
-    void accept(visitor &v);
+    void accept(visitor @v);
 };
 
-# circle struct implementing shape contract
+# circle implementing shape
 struct circle {
     float radius = 10.0;
     string name = "Circle";
 } shape;
 
-circle : void accept(visitor &v) {
+circle : void accept(visitor @v) {
     v.visit(this);
 }
 
-# rectangle struct implementing shape contract
+# rectangle implementing shape
 struct rectangle {
     float width = 20.0;
     float height = 15.0;
     string name = "Rectangle";
 } shape;
 
-rectangle : void accept(visitor &v) {
+rectangle : void accept(visitor @v) {
     v.visit(this);
 }
 
@@ -95,24 +106,26 @@ struct square : rectangle {
 };
 
 # method override
-square : void accept(visitor &v) {
-    this.width, this.height = 10.0; # multiple assignment
+square : void accept(visitor @v) {
+    this.width = 10.0;
+    this.height = 10.0;
+
     v.visit(this);
 };
 
-# draw_visitor struct implementing visitor contract
+# draw_visitor implementing visitor
 struct draw_visitor {
 } visitor;
 
-draw_visitor : void visit(shape &s) {
+draw_visitor : void visit(shape @s) {
     printn("Drawing a " + s.name);
 }
 
 # main function
 int main(void) {
 
-    shape *shapes[] = new *shape[3]; # dynamic array of shape pointers
-    shapes[0] = new circle();
+    shape **shapes = new *shape[3];  # dynamically allocates an array of 3 pointers
+    shapes[0] = new circle();        # allocates on the heap
     shapes[1] = new rectangle();
     shapes[2] = new square();
 
@@ -123,7 +136,7 @@ int main(void) {
     }
 
     # clean up
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
         purge shapes[i];
     }
 
@@ -132,6 +145,7 @@ int main(void) {
     return 0;
 }
     </code></pre>
+
     </div>
 
 </body>

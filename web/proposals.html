@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>proposals</title>
+
+    <link rel="stylesheet" href="./assets/highlight.min.css">
+    <link rel="stylesheet" href="./assets/style.css">
+
+    <script src="./assets/highlight.min.js"></script>
+    <script src="./assets/script.js"></script>
+</head>
+
+<body>
+    <div class="code-wrapper">
+        <h1>🌽 corn</h1>
+        <hr>
+        <p><em>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</em></p>
+        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <hr>
+        <br>
+
+        <nav>
+            @ <- <a href="index.html">index</a>
+        </nav>
+        <br>
+
+        <nav>
+            @ ->
+            <a href="intro.html">introduction</a>
+            <a href="comments.html">comments</a>
+            <a href="primitives.html">primitives</a>
+            <a href="variable-and-constant.html">variable & constant</a>
+            <a href="array.html">array</a>
+            <a href="conditionals.html">conditionals</a>
+            <a href="loops.html">loops</a>
+            <a href="function.html">function</a>
+        </nav>
+        <br>
+
+        <nav>
+            @ ->
+            <a href="module.html">module</a>
+            <a href="struct.html">struct</a>
+            <a href="contract.html">contract</a>
+            <a href="modifiers.html">modifiers</a>
+            <a href="composition.html">composition</a>
+            <a href="object.html">object</a>
+            <a href="memory.html">memory</a>
+        </nav>
+        <br>
+
+        <nav>
+            @ ->
+            <a href="metadata.html">metadata</a>
+            <a href="proposals.html">proposals</a>
+        </nav>
+        <br>
+        <hr>
+
+        <h3># <code>typeof</code> Operator</h3>
+        <p>Purpose: Allows determining the type of a value or variable at compile time or runtime.</p>
+
+        <p>Metadata Needed:
+        <ul>
+            <li>The actual type of the variable or value (e.g., <code>int, float, string</code>).</li>
+            <li>Whether the variable is a pointer, reference, or array.</li>
+        </ul>
+        </p>
+
+        <p>Overhead: Minimal if handled at compile time, but runtime type determination may require embedding type
+            information in variables or objects.
+        </p>
+        <br>
+
+        <h3># <code>len</code> Operator</h3>
+        <p>Purpose: Retrieves the size of arrays (both static and dynamic).</p>
+
+        <p>Metadata Needed:
+        <ul>
+            <li>For static arrays: Size is known at compile time (e.g., from <code>int arr[10]</code>).</li>
+            <li>For dynamic arrays: Size must be stored alongside the allocated memory.
+                <ul>
+                    <li>Example: Allocating extra bytes before the array to store the size.</li>
+                    <li>Metadata format: <code>[size | array elements...]</code>.</li>
+                </ul>
+            </li>
+        </ul>
+        </p>
+
+        <p>Overhead: A small fixed cost for storing size metadata for dynamic arrays.</p>
+        <br>
+
+        <h3># Variadic Functions</h3>
+        <p>Purpose: Support mixed or same-type arguments with safety and ease.</p>
+
+        <p>Metadata Needed:
+        <ul>
+            <li>Length: Number of variadic arguments passed.</li>
+            <li>Types: For mixed-type variadic arguments, the type of each argument must be stored.
+                <ul>
+                    <li>Example: <code>render(2, 42, "Hello")</code> would require storing <code>[int, string]</code> as type metadata.</li>
+                </ul>
+            </li>
+        </ul>
+        </p>
+
+        <p>Overhead:
+        <ul>
+            <li>Storing the length of arguments: Fixed size, negligible cost.</li>
+            <li>Storing types for each argument: Small additional cost, proportional to the number of arguments.</li>
+            <li>If arguments are passed as pointers, type metadata could reference these directly without duplicating.
+            </li>
+        </ul>
+        </p>
+        <br>
+
+        <pre><code class="language-corn">
+        </code></pre>
+    </div>
+</body>
+
+</html>

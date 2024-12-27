@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>variable</title>
+    <title>variable & constant</title>
 
     <link rel="stylesheet" href="./assets/highlight.min.css">
     <link rel="stylesheet" href="./assets/style.css">
@@ -16,7 +16,11 @@
 <body>
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
-        <p>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</p>
+        <hr>
+        <p><em>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</em></p>
+        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <hr>
+        <br>
 
         <nav>
             @ <- <a href="index.html">index</a>
@@ -28,7 +32,7 @@
             <a href="intro.html">introduction</a>
             <a href="comments.html">comments</a>
             <a href="primitives.html">primitives</a>
-            <a href="variable.html">variable</a>
+            <a href="variable-and-constant.html">variable & constant</a>
             <a href="array.html">array</a>
             <a href="conditionals.html">conditionals</a>
             <a href="loops.html">loops</a>
@@ -48,10 +52,18 @@
         </nav>
         <br>
 
+        <nav>
+            @ ->
+            <a href="metadata.html">metadata</a>
+            <a href="proposals.html">proposals</a>
+        </nav>
+        <br>
+        <hr>
+
         <h3># Declaration</h3>
         <p>A variable can be declared without a value. If no value is assigned, it contains a garbage value (data
-        previously present in the memory location). Always assign a value before using a variable to avoid undefined
-        behavior.</p>
+            previously present in the memory location). Always assign a value before using a variable to avoid undefined
+            behavior.</p>
         <pre><code class="language-corn">
 int num;     # num contains garbage value
 float speed; # speed contains garbage value
@@ -61,7 +73,7 @@ string name; # name contains garbage value
         <br>
         <h3># Multiple declaration</h3>
         <p>Variables of the same type can be declared together. Each variable will have its own garbage value until
-        explicitly initialized.</p>
+            explicitly initialized.</p>
         <pre><code class="language-corn">
 int num, count;      # num, count contains garbage value
 float speed, height; # speed, height contains garbage value
@@ -96,6 +108,20 @@ string name = "John Coffee"; # name is initialized with a string
         <pre><code class="language-corn">
 int width = 20, height = 10; # width and height are initialized to 20 and 10, respectively
         </code></pre>
+
+        <br>
+        <h3># Constant</h3>
+        <p>A constant is a value that cannot be changed once it is assigned. In <code>corn</code>, constants are
+            declared using the const keyword.
+        </p>
+        <p>Constants are useful for representing values that should remain constant throughout the program, such as
+            mathematical constants or fixed configuration values. Any attempt to modify a constant will result in a
+            compile-time error.
+        </p>
+        <pre><code class="language-corn">
+const pi = 3.1416; # can not be changed once declared
+        </code></pre>
+        <p>A constant cannot be declared without initialization. In other words, it cannot be created without a value.</p>
     </div>
 </body>
 

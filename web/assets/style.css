@@ -16,6 +16,11 @@ h4 {
     letter-spacing: 0.6px;
 }
 
+hr {
+    color: transparent;
+    border-top: 1px dashed #5c6071;
+}
+
 nav a {
     color: #bbbfc8;
 }
@@ -57,17 +62,15 @@ pre code.hljs {
     color: #ff6d6d;
 }
 
-.hljs-type {
+.hljs-type,
+.hljs-literal,
+.hljs-operator {
     color: #ff6d6d;
 }
 
 .hljs-keyword {
     color: #5ad9fc;
     font-weight: unset;
-}
-
-.hljs-string {
-    color: #a2e981;
 }
 
 .hljs-number {
@@ -78,9 +81,14 @@ pre code.hljs {
 .hljs-built_in,
 .hljs-bullet,
 .hljs-code,
-.hljs-function {
+.hljs-function,
+.hljs-string {
     color: #a2e981;
 }
+
+/* .hljs-operator {
+    color: #ff6d6d;
+} */
 
 .hljs-doctag {
     color: #5ac5b1;
