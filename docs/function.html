@@ -17,7 +17,8 @@
     <div class="code-wrapper">
         <h1>🌽 corn</h1>
         <hr>
-        <p><em>A strictly typed, general-purpose programming language, crafted for simplicity and performance.</em></p>
+        <p><em>A statically typed, general-purpose programming language, crafted for simplicity and performance.</em>
+        </p>
         <p><em>"Trust the programmer"</em> - <code>corn</code></p>
         <hr>
         <br>
@@ -120,7 +121,8 @@ float res = add(2.3);
 
 print(res); # prints 7.6
         </code></pre>
-        <p>In this example, the function <code>add</code> is called with one argument <code>(2.3)</code>, and the default value <code>5.3</code> is used for <code>b</code>.
+        <p>In this example, the function <code>add</code> is called with one argument <code>(2.3)</code>, and the
+            default value <code>5.3</code> is used for <code>b</code>.
         </p>
 
         <p>Overriding default argument:</p>
@@ -133,7 +135,7 @@ float res = add(2.3, 1.2);
 
 print(res); # prints 3.4
             </code></pre>
-            <p>Here, the default value of <code>b</code> is overridden by the provided argument <code>1.2</code>.</p>
+        <p>Here, the default value of <code>b</code> is overridden by the provided argument <code>1.2</code>.</p>
 
         <br>
         <h3># Pass by Reference</h3>
@@ -269,7 +271,8 @@ inline int square(int a) {
 
         <br>
         <h3># Function Overloading</h3>
-        <p>Function overloading allows multiple functions to have the same name but differ in the number or type of their parameters. The correct function is selected based on the argument types during the function call.</p>
+        <p>Function overloading allows multiple functions to have the same name but differ in the number or type of
+            their parameters. The correct function is selected based on the argument types during the function call.</p>
         <pre><code class="language-corn">
 int add(int a, int b) {
     return a + b;
@@ -285,7 +288,8 @@ float float_result = add(2.5, 3.5);  # calls float version, result is 6.0
 
         <br>
         <h3># Variadic Function</h3>
-        <p>A variadic function is a function that accepts a variable number of arguments. It allows you to pass any number of arguments of different types.</p>
+        <p>A variadic function is a function that accepts a variable number of arguments. It allows you to pass any
+            number of arguments of different types.</p>
         <p>With single type:</p>
         <pre><code class="language-corn">
 int sum(int args...) {         # variable name, only int type is allowed
@@ -340,7 +344,8 @@ void print(void args...) {      # variable name, any type is allowed
 
         <br>
         <h3># Function and <code>const</code> Keyword</h3>
-        <p>The <code>const</code> keyword can be used with function parameters to ensure that they cannot be modified within the function. This is typically used for parameters passed by reference.</p>
+        <p>The <code>const</code> keyword can be used with function parameters to ensure that they cannot be modified
+            within the function. This is typically used for parameters passed by reference.</p>
         <pre><code class="language-corn">
 void render(const int @num) {
     print(num);  # num cannot be modified

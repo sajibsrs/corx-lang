@@ -1,5 +1,5 @@
 # 🌽 `corn`
-*A strictly typed, general-purpose programming language, crafted for simplicity and performance.*
+*A statically typed, general-purpose programming language, crafted for simplicity and performance.*
 
 "Trust the programmer" - `corn`
 
