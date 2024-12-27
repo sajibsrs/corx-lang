@@ -163,4 +163,4 @@ hljs.registerLanguage('corn', function (hljs) {
     };
 });
 
-hljs.initHighlightingOnLoad();
+hljs.highlightAll();
