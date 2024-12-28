@@ -15,11 +15,11 @@
 
 <body>
     <div class="code-wrapper">
-        <h1>🌽 corn</h1>
+        <h1>corx</h1>
         <hr>
         <p><em>A statically typed, general-purpose programming language, crafted for simplicity and performance.</em>
         </p>
-        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <p><em>"Trust the programmer"</em> - <code>corx</code></p>
         <hr>
         <br>
 
@@ -67,21 +67,21 @@
             specify that, this function doesn't accept any parameters.</p>
 
         <p>A function that doesn't return anything and takes to parameter.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 void width() {
     print("Hello, there");
 }
         </code></pre>
 
         <p>A function that returns <code>int</code> and takes no parameter.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int width(void) {
     return 50;
 }
         </code></pre>
 
         <p>This is identical to above:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int width() {
     return 50;
 }
@@ -94,9 +94,9 @@ int width() {
             printed, showing <code>25</code>.
         </p>
 
-        <p>In <code>corn</code> parameters are pass-by-value by default.</p>
+        <p>In <code>corx</code> parameters are pass-by-value by default.</p>
 
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int square(int num) {
     return num * num;
 }
@@ -109,10 +109,10 @@ print(sqr); # prints 25
 
         <br>
         <h3># Default Arguments</h3>
-        <p>In <code>corn</code>, you can define default arguments for functions, allowing you to call the function
+        <p>In <code>corx</code>, you can define default arguments for functions, allowing you to call the function
             without specifying all the parameters. If a parameter is not provided, the default value is used.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 float add(float a, int b = 5.3) {
     return a + b;
 }
@@ -126,7 +126,7 @@ print(res); # prints 7.6
         </p>
 
         <p>Overriding default argument:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 float add(float a, int b = 5.3) {
     return a + b;
 }
@@ -139,13 +139,13 @@ print(res); # prints 3.4
 
         <br>
         <h3># Pass by Reference</h3>
-        <p>In <code>corn</code>, parameters are passed by value by default, meaning that a copy of the argument is used
+        <p>In <code>corx</code>, parameters are passed by value by default, meaning that a copy of the argument is used
             within the function. To pass a parameter by reference, the (<code>@</code>) symbol is used. This allows the
             function to modify the original argument.
         </p>
 
         <p>Default behavior:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 void increment(int num) {
     num++; # temporary copy gets incremented
 }
@@ -163,7 +163,7 @@ print(amount); # prints 5
         </p>
 
         <p>When passed by reference:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 void increment(int @num) {
     num++; # original value gets incremented
 }
@@ -183,7 +183,7 @@ print(amount); # prints 6
         <br>
         <h3># Return by Reference</h3>
         <p></p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int @increment(int @num) {
     num++; # original value gets incremented
 
@@ -206,10 +206,10 @@ print(amount); # prints 7, as 'res' is a reference to 'amount'
         <br>
         <h3># Function Pointer</h3>
         <p>A function pointer allows you to store the address of a function and call it dynamically. In
-            <code>corn</code>, functions are passed by reference by default, so there is no need to use the (@) symbol
+            <code>corx</code>, functions are passed by reference by default, so there is no need to use the (@) symbol
             to get their address.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int(*fn)(int, int); # function pointer
 
 int callback(fn, int x, int y) {
@@ -234,7 +234,7 @@ print(cb); # prints 5
             function's return type, name, and parameter list without providing the implementation. This is useful when a
             function is used before being defined.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int add(int a, int b); # with parameter names
 # or
 int add(int, int);     # without parameter names
@@ -248,7 +248,7 @@ int add(int, int);     # without parameter names
         <p>An inline function is a hint to the compiler to replace the function call with the actual code of the
             function to reduce overhead. This can improve performance for small, frequently called functions.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int(*fn)(int); # function pointer
 
 int callback(fn, int x, int y) {
@@ -273,7 +273,7 @@ inline int square(int a) {
         <h3># Function Overloading</h3>
         <p>Function overloading allows multiple functions to have the same name but differ in the number or type of
             their parameters. The correct function is selected based on the argument types during the function call.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int add(int a, int b) {
     return a + b;
 }
@@ -291,7 +291,7 @@ float float_result = add(2.5, 3.5);  # calls float version, result is 6.0
         <p>A variadic function is a function that accepts a variable number of arguments. It allows you to pass any
             number of arguments of different types.</p>
         <p>With single type:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int sum(int args...) {         # variable name, only int type is allowed
     vargs data = vainit(args);
 
@@ -308,7 +308,7 @@ int sum(int args...) {         # variable name, only int type is allowed
         </code></pre>
 
         <p>Mixed numeric types:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 float sum(void args...) {      # variable name, any type is allowed
     vargs data = vainit(args);
 
@@ -325,7 +325,7 @@ float sum(void args...) {      # variable name, any type is allowed
         </code></pre>
 
         <p>Mixed types:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 void print(void args...) {      # variable name, any type is allowed
 
     # process with extra data using same type 'vargs'
@@ -346,7 +346,7 @@ void print(void args...) {      # variable name, any type is allowed
         <h3># Function and <code>const</code> Keyword</h3>
         <p>The <code>const</code> keyword can be used with function parameters to ensure that they cannot be modified
             within the function. This is typically used for parameters passed by reference.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 void render(const int @num) {
     print(num);  # num cannot be modified
 }
@@ -359,7 +359,7 @@ render(value);   # prints 10
         <br>
         <h3># Error Handling</h3>
         <p></p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
         </code></pre>
     </div>
 </body>

@@ -15,11 +15,11 @@
 
 <body>
     <div class="code-wrapper">
-        <h1>🌽 corn</h1>
+        <h1>corx</h1>
         <hr>
         <p><em>A statically typed, general-purpose programming language, crafted for simplicity and performance.</em>
         </p>
-        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <p><em>"Trust the programmer"</em> - <code>corx</code></p>
         <hr>
         <br>
 
@@ -65,7 +65,7 @@
         <p>A variable can be declared without a value. If no value is assigned, it contains a garbage value (data
             previously present in the memory location). Always assign a value before using a variable to avoid undefined
             behavior.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int num;     # num contains garbage value
 float speed; # speed contains garbage value
 string name; # name contains garbage value
@@ -75,7 +75,7 @@ string name; # name contains garbage value
         <h3># Multiple declaration</h3>
         <p>Variables of the same type can be declared together. Each variable will have its own garbage value until
             explicitly initialized.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int num, count;      # num, count contains garbage value
 float speed, height; # speed, height contains garbage value
 string name, email;  # name, email contains garbage value
@@ -84,7 +84,7 @@ string name, email;  # name, email contains garbage value
         <br>
         <h3># Declaration then initialization</h3>
         <p>Variables can be declared first and initialized later.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int num;
 float speed;
 string name;
@@ -97,7 +97,7 @@ name = "John Coffee"; # name is now initialized
         <br>
         <h3># Declaration and initialization</h3>
         <p>Variables can be declared and initialized in one statement.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int num = 5;                 # num is initialized to 5
 float speed = 20.0;          # speed is initialized to 20.0
 string name = "John Coffee"; # name is initialized with a string
@@ -106,20 +106,20 @@ string name = "John Coffee"; # name is initialized with a string
         <br>
         <h3># Multiple declaration and initialization</h3>
         <p>Variables of the same type can be declared together, each with its own initial value.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int width = 20, height = 10; # width and height are initialized to 20 and 10, respectively
         </code></pre>
 
         <br>
         <h3># Constant</h3>
-        <p>A constant is a value that cannot be changed once it is assigned. In <code>corn</code>, constants are
+        <p>A constant is a value that cannot be changed once it is assigned. In <code>corx</code>, constants are
             declared using the const keyword.
         </p>
         <p>Constants are useful for representing values that should remain constant throughout the program, such as
             mathematical constants or fixed configuration values. Any attempt to modify a constant will result in a
             compile-time error.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 const pi = 3.1416; # can not be changed once declared
         </code></pre>
         <p>A constant cannot be declared without initialization. In other words, it cannot be created without a value.

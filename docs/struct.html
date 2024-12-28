@@ -17,11 +17,11 @@
 
 <body>
     <div class="code-wrapper">
-        <h1>🌽 corn</h1>
+        <h1>corx</h1>
         <hr>
         <p><em>A statically typed, general-purpose programming language, crafted for simplicity and performance.</em>
         </p>
-        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <p><em>"Trust the programmer"</em> - <code>corx</code></p>
         <hr>
         <br>
 
@@ -65,7 +65,7 @@
 
         <h3># Declaration and definition</h3>
         <p>Defines the structure of a struct, including its fields and optional default values.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 struct point {
     int x;      # Declaration only
     int y = 2;  # Declaration with default value
@@ -77,7 +77,7 @@ struct point {
         <p>Specifies visibility levels (external, internal, restrict) for fields in a struct, controlling their
             accessibility across inheritance. Visibility of type e.g. <code>struct</code> and <code>contract</code> is
             module level.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 internal struct point {  # Module level access modifier
     external int x = 1;  # Accessible publicly. Type level access modifier
     internal int y = 2;  # Accessible within inheritance
@@ -92,7 +92,7 @@ internal struct point {  # Module level access modifier
             has <code>restrict</code> visibility, it won't be available in the child <code>struct</code>. Every
             declaration has <code>external</code> or public visibility by default.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 struct point {
     int x = 1;
     int y = 2;
@@ -108,7 +108,7 @@ struct circle : point {
         <br>
         <h3># Multiple inheritance</h3>
         <p>Supports inheritance from multiple structs, combining their fields into a single derived struct.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 struct point {
     int x = 1;
     int y = 2;
@@ -129,7 +129,7 @@ struct circle : point, element {
         <h3># Contracts implementation</h3>
         <p>Implements behavior defined in contracts, enabling a struct to provide concrete functionality for declared
             methods.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 contract action {
     void move();   # declaration
 };
@@ -144,7 +144,7 @@ struct point {
         <h3># Multiple contracts implementation</h3>
         <p>Allows a struct to implement multiple contracts, combining behaviors and ensuring adherence to multiple
             interfaces.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 contract action {
     void move();
 };
@@ -163,7 +163,7 @@ struct point {
         <h3># Composition with contract implementation</h3>
         <p>Combines inheritance with contract implementation, allowing a struct to inherit fields and implement specific
             behaviors.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 contract action {
     void move();
 };
@@ -182,7 +182,7 @@ struct circle : point {
         <h3># Type definition</h3>
         <p>Introduces type aliases for structs or their combinations with contracts, enabling semantic clarity and
             reusability in code.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 contract action {
     void move();
 };
@@ -199,7 +199,7 @@ type struct circle : point {
 
         or
 
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 struct circle {
     float radius;
 };
@@ -209,7 +209,7 @@ type circle shape;        # 'shape' is a type alias for this struct
 
         or
 
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 type struct circle {
     float radius;
 } : shape;                 # 'shape' is a type alias for this struct

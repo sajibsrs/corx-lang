@@ -1,4 +1,4 @@
-const CORN_KEYWORDS = [
+const CORX_KEYWORDS = [
     'asm',
     'break',
     'case',
@@ -44,7 +44,7 @@ const CORN_KEYWORDS = [
     'module',
 ];
 
-const CORN_TYPES = [
+const CORX_TYPES = [
     'auto',
 
     'char',
@@ -84,8 +84,8 @@ const CORN_TYPES = [
 ];
 
 const KEYWORDS = {
-    keyword: CORN_KEYWORDS,
-    type: CORN_TYPES,
+    keyword: CORX_KEYWORDS,
+    type: CORX_TYPES,
     literal: 'true false null ',
     built_in: 'alloc realloc resize exit '
         +'std math '
@@ -97,7 +97,7 @@ const decimalDigits = '[0-9](_?[0-9])*';
 const frac = `\\.(${decimalDigits})`;
 const decimalInteger = `0|[1-9](_?[0-9])*|0[0-7]*[89][0-9]*`;
 
-hljs.registerLanguage('corn', function (hljs) {
+hljs.registerLanguage('corx', function (hljs) {
     return {
         case_insensitive: true, // language is case-insensitive
         keywords: KEYWORDS,

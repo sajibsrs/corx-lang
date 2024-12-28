@@ -15,11 +15,11 @@
 
 <body>
     <div class="code-wrapper">
-        <h1>🌽 corn</h1>
+        <h1>corx</h1>
         <hr>
         <p><em>A statically typed, general-purpose programming language, crafted for simplicity and performance.</em>
         </p>
-        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <p><em>"Trust the programmer"</em> - <code>corx</code></p>
         <hr>
         <br>
 
@@ -70,7 +70,7 @@
             (<code>*</code>) symbol, which indicates that it is a special variable designed to hold memory addresses.
         </p>
 
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int *ptr;    # Declares a pointer to an integer
 float *fptr; # Declares a pointer to a float
         </code></pre>
@@ -83,7 +83,7 @@ float *fptr; # Declares a pointer to a float
         <p>The address-of operator is used to obtain the memory address of a variable. It is represented by the
             ampersand (<code>&</code>) symbol. The operator retrieves the location in memory where the value of the
             variable is stored.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int count = 42;
 int *ptr = &count; # The pointer 'ptr' now holds the address of 'count'
 
@@ -95,7 +95,7 @@ print(ptr); # prints the address of 'count' (e.g. 0x7ffeefbff5b0)
         <p>Dereferencing a pointer returns the value stored in the address, the pointer pointing at (Notice the
             (<code>*</code>) on the right side.).
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int count = 42;
 int *ptr = &count;
 
@@ -110,7 +110,7 @@ print(ptr*); # print the value stored in 'count' (42)
         </p>
         <p>This example demonstrates using a pointer to a pointer and how to dereference it to access values or
             addresses.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int count = 42;
 int *ptr = &count;  # 'ptr' contains address of 'count'
 int *pptr = &ptr;   # 'pptr' contains address of 'ptr'
@@ -121,8 +121,8 @@ print(ptr**); # prints the address of 'count' via double dereference
 
         <br>
         <h3># Working with Dynamic Memory</h3>
-        <p>By default <code>corn</code> variables uses static memory. So, so far in this page we only worked with static
-            memory. In <code>corn</code> we have two ways to allocate dynamic memory, <code>new</code> keyword and
+        <p>By default <code>corx</code> variables uses static memory. So, so far in this page we only worked with static
+            memory. In <code>corx</code> we have two ways to allocate dynamic memory, <code>new</code> keyword and
             <code>alloc</code> function.
         </p>
 
@@ -131,7 +131,7 @@ print(ptr**); # prints the address of 'count' via double dereference
             <code>new</code>, the address of newly allocated memory is returned on success and <code>null</code> on
             failure.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 struct rect {
     int width = 20;
     int height = 10;
@@ -147,7 +147,7 @@ if (prect == null) {
         <br>
         <h4># Allocation with <code>alloc</code> function</h4>
         <p></p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 struct rect {
     int width = 20;
     int height = 10;
@@ -161,7 +161,7 @@ if (prect == null) {
         </code></pre>
 
         <p>Without casting:</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 struct rect {
     int width = 20;
     int height = 10;
@@ -177,13 +177,13 @@ if (prect == null) {
         <br>
         <h3>Reallocation with <code>realloc</code></h3>
         <p></p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
         </code></pre>
 
         <br>
         <h3>Reallocation / Resizing with <code>resize</code></h3>
         <p></p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
         </code></pre>
     </div>
 

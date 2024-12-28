@@ -15,12 +15,12 @@
 
 <body>
     <div class="code-wrapper">
-        <h1>🌽 corn</h1>
+        <h1>corx</h1>
         <hr>
         <p><em>A statically typed, general-purpose programming language, crafted for simplicity and
                 performance.</em>
         </p>
-        <p><em>"Trust the programmer"</em> - <code>corn</code></p>
+        <p><em>"Trust the programmer"</em> - <code>corx</code></p>
         <hr>
         <br>
 
@@ -67,7 +67,7 @@
         <h3># Fixed Size Allocation</h3>
         <p>Declares fixed-size arrays for integers and pointers to integers. The size must be known at compile
             time.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int arr[3];   # allocate memory for 3 int
 int *parr[3]; # allocate memory for 3 int pointers
         </code></pre>
@@ -76,7 +76,7 @@ int *parr[3]; # allocate memory for 3 int pointers
         <h3># Initialization During Declaration</h3>
         <p>Arrays can be initialized with values during declaration. The compiler infers the size if omitted.
         </p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int cols[3] = {1, 2, 3};
 int rows[]  = {4, 5, 6}; # number of elements can be omitted
         </code></pre>
@@ -84,7 +84,7 @@ int rows[]  = {4, 5, 6}; # number of elements can be omitted
         <br>
         <h3># Manual Initialization</h3>
         <p>Values are manually assigned to array elements after declaration.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int nums[3];
 
 nums[0] = 1;
@@ -99,7 +99,7 @@ nums[2] = 3;
         <p>Dynamically allocate memory for arrays using new. These arrays can be resized later but require
             manual
             management.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int *arr = new int[3];    # allocate memory for 3 int
 int **parr = new *int[3]; # allocate memory for 3 int pointers
         </code></pre>
@@ -107,7 +107,7 @@ int **parr = new *int[3]; # allocate memory for 3 int pointers
         <br>
         <h3># Initialization with Static Values</h3>
         <p>Dynamically allocate and initialize arrays in a single statement.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int a = 1;
 int b = 2;
 int c = 3;
@@ -119,7 +119,7 @@ int **parr = new *int[3] {&a, &b, &c}; # allocate and initialize 3 int pointer
         <br>
         <h3># Initialization with Dynamic Values</h3>
         <p>Combines dynamic memory allocation and initialization for both integers and pointers.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int *a = new int(1);
 int *b = new int(1);
 int *c = new int(1);
@@ -133,14 +133,14 @@ int **parr = new *int[3] {a, b, c}; # allocate and initialize 3 int pointer
 
         <h3># Static 2D Arrays</h3>
         <p>Fixed-size multidimensional arrays with memory allocated during compile time.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int grid[3][3]; # allocate a 3x3 grid of integers
         </code></pre>
 
         <br>
         <h3># Static 2D Arrays with Initialization</h3>
         <p>Multidimensional arrays initialized with nested values.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int grid[2][3] = {
     {1, 2, 3},
     {4, 5, 6}
@@ -150,7 +150,7 @@ int grid[2][3] = {
         <br>
         <h3># Manual Initialization</h3>
         <p>Assign values manually to elements in a multidimensional array.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int grid[2][3];
 
 grid[0][0] = 1;
@@ -164,7 +164,7 @@ grid[1][2] = 6;
         <br>
         <h3># Dynamic 2D Arrays</h3>
         <p>Dynamically allocate memory for each row of a 2D array.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int **grid = new *int[3]; # create an array of 3 int pointers
 
 for (int i = 0; i < 3; i++) {
@@ -175,7 +175,7 @@ for (int i = 0; i < 3; i++) {
         <br>
         <h3># Accessing and initializing values</h3>
         <p>Access and assign values to individual elements in a dynamic 2D array.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 grid[0][0] = 1;
 grid[0][1] = 2;
 grid[0][2] = 3;
@@ -188,7 +188,7 @@ grid[1][2] = 6;
         <br>
         <h3># Cleanup of Dynamic Arrays</h3>
         <p>Deallocate memory to avoid memory leaks. Each row is freed before freeing the array of pointers.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 for (int i = 0; i < 3; i++) {
     purge grid[i]; # free each row
 }
@@ -199,7 +199,7 @@ purge grid; # free the array of pointers
         <br>
         <h3># Mixed Dimensionality</h3>
         <p>A combination of fixed and dynamically allocated arrays to achieve mixed dimensionality.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int *grid[3]; # fixed array of 3 pointers
 
 for (int i = 0; i < 3; i++) {
@@ -210,7 +210,7 @@ for (int i = 0; i < 3; i++) {
         <br>
         <h3># Static Array Length with <code>sizeof</code></h3>
         <p>Manually calculate the number of elements in a static array using <code>sizeof</code>.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int arr[] = {10, 20, 30, 40, 50};
 int length = sizeof(arr) / sizeof(arr[0]); # or sizeof(int)
 
@@ -220,7 +220,7 @@ int length = sizeof(arr) / sizeof(arr[0]); # or sizeof(int)
         <br>
         <h3># Dynamic Array Length with <code>alloc</code> (Manual Tracking)</h3>
         <p>Dynamically track and manage the size of allocated memory manually.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int length = 5; # manual size tracking
 int *arr = alloc(length * sizeof(int)); # memory allocation using 'alloc'
 
@@ -232,7 +232,7 @@ for (int i = 0; i < length; i++) {
         <br>
         <h3># Dynamic Array Length with <code>new</code> (Manual Tracking)</h3>
         <p>Allocate and initialize a dynamic array while manually keeping track of its size.</p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
 int length = 5; # manual size tracking
 int *arr = new int[length];
 
@@ -244,7 +244,7 @@ for (int i = 0; i < length; i++) {
         <br>
         <h3>#</h3>
         <p></p>
-        <pre><code class="language-corn">
+        <pre><code class="language-corx">
         </code></pre>
     </div>
 
