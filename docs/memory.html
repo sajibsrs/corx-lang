@@ -140,7 +140,7 @@ struct rect {
 rect *prect = new rect();
 
 if (prect == null) {
-    exit("Allocation with new failed for rectangle.", 1); # message and error code
+    exit(1, "Allocation with new failed for rectangle."); # error code and message
 }
         </code></pre>
 
@@ -156,7 +156,7 @@ struct rect {
 rect *prect = (rect *) alloc(sizeof rect); # cast is optional here
 
 if (prect == null) {
-    exit("Allocation with alloc failed for rectangle.", 1); # message and error code
+    exit(1, "Allocation with alloc failed for rectangle."); # error code and message
 }
         </code></pre>
 
@@ -170,7 +170,7 @@ struct rect {
 rect *prect = alloc(sizeof rect);
 
 if (prect == null) {
-    exit("Allocation with alloc failed for rectangle.", 1); # message and error code
+    exit(1, "Allocation with alloc failed for rectangle."); # error code and message
 }
         </code></pre>
 
