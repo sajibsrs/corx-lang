@@ -67,8 +67,8 @@
         <p>Defines the structure of a struct, including its fields and optional default values.</p>
         <pre><code class="language-corx">
 struct point {
-    int x;      # Declaration only
-    int y = 2;  # Declaration with default value
+    int x;      # declaration only
+    int y = 2;  # declaration with default value
 };
         </code></pre>
 
@@ -78,10 +78,10 @@ struct point {
             accessibility across inheritance. Visibility of type e.g. <code>struct</code> and <code>contract</code> is
             module level.</p>
         <pre><code class="language-corx">
-internal struct point {  # Module level access modifier
-    external int x = 1;  # Accessible publicly. Type level access modifier
-    internal int y = 2;  # Accessible within inheritance
-    restrict int z = 3;  # Accessible only within the struct
+internal struct point {  # module level access modifier
+    external int x = 1;  # accessible publicly. Type level access modifier
+    internal int y = 2;  # accessible within inheritance
+    restrict int z = 3;  # accessible only within the struct
 };
         </code></pre>
 
