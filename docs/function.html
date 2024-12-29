@@ -204,29 +204,98 @@ print(amount); # prints 7, as 'res' is a reference to 'amount'
         </code></pre>
 
         <br>
-        <h3># Function Pointer</h3>
-        <p>A function pointer allows you to store the address of a function and call it dynamically. In
-            <code>corx</code>, functions are passed by reference by default, so there is no need to use the (@) symbol
-            to get their address.
+        <h3># Function Type</h3>
+        <p>The following examples demonstrate a mechanism to replace function pointers using named types and type-safe
+            function selection. This approach emphasizes clarity, simplicity, and alignment with <code>corx</code>'s philosophy.
         </p>
+
+        <p>Basic use of function types to swap functions based on context.</p>
         <pre><code class="language-corx">
-int(*fn)(int, int); # function pointer
+# define operation type for functions that take two ints and return an int
+type int operation(int, int);
 
-int callback(fn, int x, int y) {
-    return fn(x, y);
-}
-
-int add(int a, int b) {
+# addition function
+int addition(int a, int b) {
     return a + b;
 }
 
-int cb = callback(add, 3, 2);
+# multiplication function
+int multiply(int a, int b) {
+    return a * b;
+}
 
-print(cb); # prints 5
+# calculate applies the given operation to two numbers
+int calculate(int a, int b, operation op) {
+    return op(a, b);
+}
+
+# example usage
+int add = calculate(5, 6, addition);  # 11
+int mul = calculate(5, 6, multiply);  # 30
         </code></pre>
-        <p>In this example, the function add is passed to callback using a function pointer. The callback dynamically
-            calls the add function, returning the result.
-        </p>
+
+        <p>Example of swapping functions using a selector with callback functionality.</p>
+        <pre><code class="language-corx">
+# selector for choosing operation based on opcode
+type int operation(int, int);
+
+int addition(int a, int b) {
+    return a + b;
+}
+
+int multiply(int a, int b) {
+    return a * b;
+}
+
+# select operation based on opcode
+operation select(int opcode) {
+    switch(opcode) {
+        case 1:
+            return addition;  # add
+        case 2:
+            return multiply;  # multiply
+        default:
+            return null;      # invalid
+    }
+}
+
+# usage of select function
+operation op = select(1);  # select addition
+int res = op(2, 3);
+
+print(res);  # 5
+        </code></pre>
+
+        <p>Demonstrates context-driven function swapping using a calculation function.</p>
+        <pre><code class="language-corx">
+# define operation and calculate types
+type int operation(int, int);
+type int calculate(int, int, operation);
+
+int addition(int a, int b) {
+    return a + b;
+}
+
+int multiply(int a, int b) {
+    return a * b;
+}
+
+# calculate applies operation to numbers
+int calculate(int a, int b, operation op) {
+    return op(a, b);
+}
+
+# render calls calculate with different operations
+void render(int a, int b, calculate calc) {
+    int add = calc(a, b, addition);  # add
+    print("addition: ", add);
+
+    int mul = calc(a, b, multiply);  # multiply
+    print("multiplication: ", mul);
+}
+
+render(3, 4, calculate);  # addition: 7 multiplication: 12
+        </code></pre>
 
         <br>
         <h3># Forward Declaration</h3>
@@ -249,20 +318,22 @@ int add(int, int);     # without parameter names
             function to reduce overhead. This can improve performance for small, frequently called functions.
         </p>
         <pre><code class="language-corx">
-int(*fn)(int); # function pointer
+type int fnt(int); # function type
 
-int callback(fn, int x, int y) {
-    return fn(x, y);
-}
-
-int cb = callback(square, 3, 2);
-
-print(cb); # prints 5
-
-# inlined function
+# inlined square function
 inline int square(int a) {
     return a * a;
 }
+
+# function to use the callback
+int usecb(fnt fn, int x) {
+    return fn(x);
+}
+
+# using callback with the square function
+int cb = usecb(square, 3);  # 9
+
+print(cb);  # prints 9
         </code></pre>
         <p>Here, the <code>square</code> function is marked as <code>inline</code>. While the behavior of the program
             remains the same, the compiler might optimize it by replacing the function call with its implementation,
