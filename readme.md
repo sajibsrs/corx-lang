@@ -10,3 +10,6 @@
 
 Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how `corx` can help you write clean, efficient, and performance-driven code.
 
+---
+`corx` is currently under development. Its syntax and grammar are being finalized. The language design is still in progress, and a compiler has not yet been implemented.
+
