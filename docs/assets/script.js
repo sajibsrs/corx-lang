@@ -1,6 +1,7 @@
 const CORX_KEYWORDS = [
     'asm',
     'break',
+    'catch',
     'case',
     'const',
     'continue',
@@ -17,6 +18,7 @@ const CORX_KEYWORDS = [
     'sizeof',
     'switch',
     'this',
+    'throw',
     'type',
     'typeof',
     'typestr',
@@ -81,6 +83,17 @@ const CORX_TYPES = [
     'union',
     'lambda',
     'vargs',
+
+    // errors
+    'except',
+    'error',
+    'vainit',
+    'vaxinit',
+
+    // async
+    'async',
+    'wait',
+    'fetch',
 ];
 
 const KEYWORDS = {
@@ -88,9 +101,8 @@ const KEYWORDS = {
     type: CORX_TYPES,
     literal: 'true false null ',
     built_in: 'alloc realloc resize exit '
-        +'std math '
+        + 'std math '
         + 'print printn printf '
-        + 'vainit vaxinit ',
 };
 
 const decimalDigits = '[0-9](_?[0-9])*';
