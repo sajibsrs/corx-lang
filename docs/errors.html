@@ -62,9 +62,79 @@
         <br>
         <hr>
 
-        <h3>#</h3>
-        <p></p>
+        <h3># Print and Return</h3>
+        <p>This is one of the most basic error handling approaches. It handles division by zero by printing an error
+            message ("division by zero") and returning a default value (-0.1). However, this method has limitations.
+            Specifically, if you need to capture both the output and the error together, it won't suffice, as the error
+            is only printed and not passed back as part of the return value.
+        </p>
         <pre><code class="language-corx">
+float divide(int x, int y) {
+    if (y == 0) {
+        print("division by zero");
+
+        return -0.1;
+    }
+
+    return x / y;
+}
+        </code></pre>
+
+        <h3># <code>exit</code> Function</h3>
+        <p>The <code>exit</code> function can be useful in certain contexts, but it might not always be the desired
+            behavior. It triggers the program to exit, which may not be appropriate in every situation.</p>
+        <pre><code class="language-corx">
+float divide(int x, int y) {
+    if (y == 0) exit("division by zero.");
+
+    return x / y;
+}
+        </code></pre>
+        <p>Note: <code>exit</code> function causes stack unwinding and prints the full stack trace.</p>
+
+        <p><code>exit</code> function variations:</p>
+        <pre><code class="language-corx">
+exit(int);         # error number
+exit(error);       # error object
+exit(string);      # error string
+exit(int, string); # error number, error string
+        </code></pre>
+
+        <h3># <code>throw</code> and <code>catch</code></h3>
+        <p>A structured built-in error handling mechanism. Errors are raised using
+            <code>throw error(num,str)</code> and caught with <code>catch</code>, where the <code>error</code> object
+            provides detailed context for handling the issue.
+        </p>
+
+        <p>This mechanism operates within the current context. A <code>throw</code> and its corresponding
+            <code>catch</code> must be separated by no more than one level of the call stack. Errors must be caught and
+            handled within the immediate calling context. Each calling context can independently define its own
+            <code>throw</code> and <code>catch</code>. If multiple errors are thrown within the same scope, only the
+            most recent error will be caught.
+        </p>
+
+        <p>The example below demonstrates a single context:</p>
+        <pre><code class="language-corx">
+float divide(int x, int y) {
+    if (y == 0) throw error(1, "division by zero");
+
+    return x / y;
+}
+
+float res = divide(6, 0) catch {   # catches context based last exception
+    print(error->num, error->str); # error object available within context
+}
+        </code></pre>
+
+        <h3># <code>throw</code>, <code>catch</code> with <code>async</code>, <code>wait</code></h3>
+        <p>The <code>async</code> keyword initiates an operation, and
+            <code>wait</code> pauses execution until it completes. Errors are caught within the same scope
+            <code>catch</code>, ensuring consistent handling of both sync and async errors.
+        </p>
+        <pre><code class="language-corx">
+wait float rem = async fetch("resource") catch {
+    exit(error); # passed error object
+}
         </code></pre>
     </div>
 </body>
