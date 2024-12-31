@@ -103,7 +103,7 @@ struct circle : point {
     # int y = 2;
     float radius;
 };
-            </code></pre>
+        </code></pre>
 
         <br>
         <h3># Multiple inheritance</h3>
@@ -123,7 +123,7 @@ struct element {
 struct circle : point, element {
     float radius;
 };
-            </code></pre>
+        </code></pre>
 
         <br>
         <h3># Contracts implementation</h3>
@@ -138,7 +138,7 @@ struct point {
     int x = 1;
     int y = 2;
 } action;
-            </code></pre>
+        </code></pre>
 
         <br>
         <h3># Multiple contracts implementation</h3>
@@ -157,7 +157,7 @@ struct point {
     int x = 1;
     int y = 2;
 } action, visual;
-            </code></pre>
+        </code></pre>
 
         <br>
         <h3># Composition with contract implementation</h3>
@@ -176,45 +176,20 @@ struct point {
 struct circle : point {
     float radius;
 } action;                # 'circle' implements the 'action' contract
-            </code></pre>
+        </code></pre>
 
         <br>
         <h3># Type definition</h3>
         <p>Introduces type aliases for structs or their combinations with contracts, enabling semantic clarity and
             reusability in code.</p>
         <pre><code class="language-corx">
-contract action {
-    void move();
-};
-
-struct point {
-    int x = 1;
-    int y = 2;
-};
-
-type struct circle : point {
-    float radius;
-} action : shape;         # 'shape' is a type alias for this struct
-            </code></pre>
-
-        or
-
-        <pre><code class="language-corx">
 struct circle {
     float radius;
 };
 
 type circle shape;        # 'shape' is a type alias for this struct
-            </code></pre>
-
-        or
-
-        <pre><code class="language-corx">
-type struct circle {
-    float radius;
-} : shape;                 # 'shape' is a type alias for this struct
-            </code></pre>
-
+        </code></pre>
+    </div>
 </body>
 
 </html>
