@@ -1,0 +1,16 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "clang",
+            "displayName": "Clang 16.0.0 arm64-apple-darwin24.2.0",
+            "description": "Using compilers: C = /usr/bin/clang, CXX = /usr/bin/clang++",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ]
+}

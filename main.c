@@ -1,41 +1,19 @@
-module main;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-import * from "std:io"; # import all
+#include "src/lexer.h"
 
-contract action {
-    bool make();
-};
+int main() {
+    input = "if x = 10; else return;";
 
-internal struct kernel {
-    internal int time = 3; # time before it pops
-};
+    Token token;
 
-struct popcorn : kernel {
-    float temp;
-} action;
+    // Iterate and print tokens until EOF is reached
+    do {
+        token = get_next_token();
+        printf("Token: Type = %d, Value = '%s'\n", token.type, token.value);
+    } while (token.type != TOK_EOF);
 
-# constructor
-popcorn : popcorn(float temp, int time) {
-    this->time = time;
-    this->temp = temp;
+    return 0;
 }
-
-# destructor
-popcorn : %popcorn() {}
-
-# contract fulfillment
-popcorn : bool make() {
-    if (this->temp >= 180.0) {
-        return true;     # popped successfully
-    } else {
-        return false;    # not popped yet
-    }
-}
-
-popcorn *pcorn = new popcorn(200.0, 5);
-bool completed = pcorn->make();
-
-print(pcorn->temp);
-printn(completed);  # prints if popped (true/false)
-
-purge pcorn;
