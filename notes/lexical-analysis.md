@@ -21,3 +21,8 @@ Example:
 - `KEYWORD`: Matches words like `int`, `float`, `return`, etc.
 - `IDENTIFIER`: Matches a sequence of letters and digits starting with a letter (e.g., `[a-zA-Z][a-zA-Z0-9]*`).
 - `NUMBER`: Matches a sequence of digits (e.g., `[0-9]+`).
+
+## Methods
+### Table-Driven Scanners
+### Direct-Coded Scanners
+### Hand-Coded Scanners
