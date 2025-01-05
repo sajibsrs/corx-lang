@@ -8,21 +8,40 @@ const char *input; // input string
 int position = 0;  // current position in the input
 
 const char *keywords[] = {
+    // abstract types
     "type",     // type declaration (aliasing)
     "enum",     // enum (enumeration)
     "struct",   // struct (structure)
     "contract", // contract (interface)
-    "int",      // integer
-    "float",    // floating point number
-    "external", // visibility (public)
-    "internal", // visibility (protected)
-    "restrict", // visibility (private)
-    "if",       // if condition
-    "else",     // else condition
-    "while",    // while loop
-    "return",   // return
-    "null",     // null
-    NULL        // mark end of array
+
+    // primitive types
+    "bool",   // booleans
+    "char",   // character
+    "float",  // floating point number
+    "int",    // integer
+    "null",   // represents absence of a value for memory location
+    "string", // array of characters
+
+    // visibility keywords
+    "external", // (public)
+    "internal", // (protected)
+    "restrict", // (private)
+
+    // conditionals
+    "if",   // if
+    "else", // else
+
+    // loops
+    "do"       //
+    "for",     //
+    "foreach", //
+    "in",      //
+    "while",   // while
+
+    // functions
+    "return", // return
+    "void",   // represents absence of a value
+    NULL      // mark end of array
 };
 
 /**
