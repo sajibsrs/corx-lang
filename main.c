@@ -9,11 +9,11 @@ int main() {
 
     Token token;
 
-    // iterate and print tokens until EOF is reached
     do {
-        token = get_next_token();
-        printf("Token: Type = %d, Value = '%s'\n", token.type, token.value);
+        token = get_next_token(); // Fetch the next token
+        token_print(token);       // print formatted token
     } while (token.type != TOK_EOF);
+    return 0;
 
     free((char *)input);
 
