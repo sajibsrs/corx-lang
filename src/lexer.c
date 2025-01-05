@@ -43,7 +43,7 @@ const char *keywords[] = {
     "struct",   // struct (structure)
     "contract", // contract (interface)
 
-    // modifiers
+    // modifiers & specifiers
     "const",
 
     "external", // (public)
