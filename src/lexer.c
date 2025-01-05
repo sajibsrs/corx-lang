@@ -90,6 +90,68 @@ const char *keywords[] = {
 };
 
 /**
+ * @brief Returns token name string.
+ * @param type Token type.
+ * @return
+ */
+char *tokenstr(const TokenType type) {
+    switch (type) {
+    case TOK_KEYWORD:    return "TOK_KEYWORD";
+    case TOK_IDENT:      return "TOK_IDENT";
+    case TOK_NUMBER:     return "TOK_NUMBER";
+    case TOK_ASSIGN:     return "TOK_ASSIGN";
+    case TOK_PLUS:       return "TOK_PLUS";
+    case TOK_MINUS:      return "TOK_MINUS";
+    case TOK_STAR:       return "TOK_STAR";
+    case TOK_AMPERSAND:  return "TOK_AMPERSAND";
+    case TOK_AT:         return "TOK_AT";
+    case TOK_HASH:       return "TOK_HASH";
+    case TOK_FSLASH:     return "TOK_FSLASH";
+    case TOK_BSLASH:     return "TOK_BSLASH";
+    case TOK_DOT:        return "TOK_DOT";
+    case TOK_COLON:      return "TOK_COLON";
+    case TOK_SEMICOLON:  return "TOK_SEMICOLON";
+    case TOK_LT:         return "TOK_LT";
+    case TOK_GT:         return "TOK_GT";
+    case TOK_ARROW:      return "TOK_ARROW";
+    case TOK_EQ:         return "TOK_EQ";
+    case TOK_NEQ:        return "TOK_NEQ";
+    case TOK_GEQ:        return "TOK_GEQ";
+    case TOK_LEQ:        return "TOK_LEQ";
+    case TOK_ADD_ASSIGN: return "TOK_ADD_ASSIGN";
+    case TOK_SUB_ASSIGN: return "TOK_SUB_ASSIGN";
+    case TOK_DIV_ASSIGN: return "TOK_DIV_ASSIGN";
+    case TOK_MUL_ASSIGN: return "TOK_MUL_ASSIGN";
+    case TOK_POW:        return "TOK_POW";
+    case TOK_INCREMENT:  return "TOK_INCREMENT";
+    case TOK_DECREMENT:  return "TOK_DECREMENT";
+    case TOK_LPAREN:     return "TOK_LPAREN";
+    case TOK_RPAREN:     return "TOK_RPAREN";
+    case TOK_LBRACE:     return "TOK_LBRACE";
+    case TOK_RBRACE:     return "TOK_RBRACE";
+    case TOK_LBRACKET:   return "TOK_LBRACKET";
+    case TOK_RBRACKET:   return "TOK_RBRACKET";
+    case TOK_LANGLE:     return "TOK_LANGLE";
+    case TOK_RANGLE:     return "TOK_RANGLE";
+    case TOK_COMMA:      return "TOK_COMMA";
+    case TOK_UNKNOWN:    return "TOK_UNKNOWN";
+    case TOK_EOF:        return "TOK_EOF";
+    default:             return "Unknown token";
+    }
+}
+
+/**
+ * @brief Print formatted token to the terminal.
+ * @param token
+ */
+void token_print(Token token) {
+    printf(
+        "token: ud = %-4d type = %-15s value = '%s'\n", token.type, tokenstr(token.type),
+        token.value
+    );
+}
+
+/**
  * @brief Load source from a file.
  * @param fname File name.
  */

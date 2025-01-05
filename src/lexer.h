@@ -61,6 +61,19 @@ extern int position;      // current position in the input
 void loadfile(const char *fname);
 
 /**
+ * @brief Returns token name string.
+ * @param type Token type.
+ * @return
+ */
+char *tokenstr(const TokenType type);
+
+/**
+ * @brief Print formatted token to the terminal.
+ * @param token
+ */
+void token_print(Token token);
+
+/**
  * @brief Returns current input character.
  * @return
  */
