@@ -260,11 +260,27 @@ Token get_identifier() {
     char cc    = current_char();
     int i      = 0;
 
-    while (is_letter(cc)) {
+    // ensure the first character is a letter or underscore
+    if (is_letter(cc) || cc == '_') {
+        token.value[i++] = cc;
+        advance(1);
+        cc = current_char();
+    } else {
+        // ff it doesn't start with a valid character,
+        // return an error token
+        token.type     = TOK_UNKNOWN;
+        token.value[0] = '\0'; // empty value
+        return token;
+    }
+
+    // continue allowing letters, digits,
+    // or underscores for the rest of the identifier
+    while (is_letter(cc) || is_digit(cc) || cc == '_') {
         token.value[i++] = cc;
         advance(1);
         cc = current_char();
     }
+
     token.value[i] = '\0'; // null-terminate string
 
     // check if this identifier is a keyword
