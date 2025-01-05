@@ -8,40 +8,85 @@ const char *input; // input string
 int position = 0;  // current position in the input
 
 const char *keywords[] = {
+    // primitive types
+    "auto", // auto detect type
+    "bool", // boolean
+
+    "char",   //
+    "string", //
+    "utf8",   //
+    "utf16",  //
+    "utf32",  //
+
+    "float",   //
+    "float16", //
+    "float32", //
+    "float64", //
+
+    "int",    //
+    "uint",   //
+    "int8",   //
+    "uint8",  //
+    "int16",  //
+    "uint16", //
+    "int32",  //
+    "uint32", //
+    "int64",  //
+    "uint64", //
+
+    "complex",   //
+    "imaginary", //
+
     // abstract types
     "type",     // type declaration (aliasing)
     "enum",     // enum (enumeration)
     "struct",   // struct (structure)
     "contract", // contract (interface)
 
-    // primitive types
-    "bool",   // booleans
-    "char",   // character
-    "float",  // floating point number
-    "int",    // integer
-    "null",   // represents absence of a value for memory location
-    "string", // array of characters
+    // modifiers
+    "const",
 
-    // visibility keywords
     "external", // (public)
     "internal", // (protected)
     "restrict", // (private)
 
     // conditionals
-    "if",   // if
-    "else", // else
+    "if",      // if
+    "else",    // else
+    "switch",  //
+    "case",    //
+    "default", //
 
     // loops
-    "do"       //
-    "for",     //
-    "foreach", //
-    "in",      //
-    "while",   // while
+    "continue", //
+    "do",       //
+    "for",      //
+    "foreach",  //
+    "in",       //
+    "while",    // while
 
     // functions
     "return", // return
     "void",   // represents absence of a value
-    NULL      // mark end of array
+
+    // memory
+    "new",   // allocates memory
+    "null",  // represents absence of a value for memory location
+    "purge", // releases memory
+    "this",  //
+
+    // errors
+    "error", //
+
+    // module
+    "import", //
+    "module", //
+
+    // async
+    "async", //
+    "wait",  //
+
+    NULL // mark end of array
 };
 
 /**
