@@ -146,7 +146,7 @@ char *tokenstr(const TokenType type) {
  */
 void token_print(Token token) {
     printf(
-        "token: ud = %-4d type = %-15s value = '%s'\n", token.type, tokenstr(token.type),
+        "token: id = %-4d type = %-15s value = '%s'\n", token.type, tokenstr(token.type),
         token.value
     );
 }
