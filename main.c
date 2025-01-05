@@ -5,7 +5,7 @@
 #include "src/lexer.h"
 
 int main() {
-    loadfile("../../source.cx"); // load source file
+    loadfile("../../source.crx"); // load source file
 
     Token token;
 
