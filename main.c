@@ -5,7 +5,7 @@
 #include "src/lexer.h"
 
 int main() {
-    input = "if x = 10; else return;";
+    input = "if x = 10; else return; x == y; x != z;";
 
     Token token;
 
