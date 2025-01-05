@@ -15,14 +15,14 @@ char current_char() {
     return input[position];
 }
 
-void advance() {
-    position++;
+void advance(int n) {
+    position += n;
 }
 
 void skip_whitespace() {
     char cc = current_char();
     while (cc == ' ' || cc == '\t') {
-        advance();
+        advance(1);
         cc = current_char();
     }
 }
@@ -44,7 +44,7 @@ Token get_number() {
 
     while (is_digit(cc)) {
         token.value[i++] = cc;
-        advance();
+        advance(1);
         cc = current_char();
     }
     token.value[i] = '\0'; // null-terminate string
@@ -54,13 +54,13 @@ Token get_number() {
 Token get_identifier() {
     Token token;
 
-    token.type = TOK_IDENTIFIER; // default is identifier
+    token.type = TOK_IDENT; // default is identifier
     char cc    = current_char();
     int i      = 0;
 
     while (is_letter(cc)) {
         token.value[i++] = cc;
-        advance();
+        advance(1);
         cc = current_char();
     }
     token.value[i] = '\0'; // null-terminate string
@@ -89,33 +89,49 @@ Token get_next_token() {
         return get_number();
     }
 
+    // compound operators
+
+    // (==)
+    if (cc == '=' && input[position + 1] == '=') {
+        advance(2); // consume '=='
+        return (Token){TOK_EQ, "=="};
+    }
+
+    // (!=)
+    if (cc == '!' && input[position + 1] == '=') {
+        advance(2); // consume '!='
+        return (Token){TOK_NEQ, "!="};
+    }
+
+    // single-character operators
+
     if (cc == '=') {
-        advance();
+        advance(1);
         return (Token){TOK_ASSIGN, "="};
     }
 
     if (cc == '+') {
-        advance();
+        advance(1);
         return (Token){TOK_PLUS, "+"};
     }
 
     if (cc == '-') {
-        advance();
+        advance(1);
         return (Token){TOK_MINUS, "-"};
     }
 
     if (cc == '*') {
-        advance();
+        advance(1);
         return (Token){TOK_STAR, "*"};
     }
 
     if (cc == '/') {
-        advance();
+        advance(1);
         return (Token){TOK_FSLASH, "/"};
     }
 
     if (cc == ';') {
-        advance();
+        advance(1);
         return (Token){TOK_SEMICOLON, ";"};
     }
 
@@ -124,6 +140,6 @@ Token get_next_token() {
     }
 
     // Handle invalid characters (error handling)
-    fprintf(stderr, "Unexpected character: %cc\n", cc);
+    fprintf(stderr, "Unexpected character: %c\n", cc);
     exit(1);
 }
