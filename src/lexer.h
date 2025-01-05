@@ -19,6 +19,7 @@ typedef enum {
     TOK_DOT,        // '.'
     TOK_COLON,      // ':'
     TOK_SEMICOLON,  // ';'
+    TOK_UNDERSCORE, // '_'
     TOK_LT,         // '<'
     TOK_GT,         // '>'
     TOK_ARROW,      // '->'

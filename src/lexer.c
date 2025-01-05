@@ -111,6 +111,7 @@ char *tokenstr(const TokenType type) {
     case TOK_DOT:        return "TOK_DOT";
     case TOK_COLON:      return "TOK_COLON";
     case TOK_SEMICOLON:  return "TOK_SEMICOLON";
+    case TOK_UNDERSCORE: return "TOK_UNDERSCORE";
     case TOK_LT:         return "TOK_LT";
     case TOK_GT:         return "TOK_GT";
     case TOK_ARROW:      return "TOK_ARROW";
@@ -398,6 +399,11 @@ Token get_next_token() {
     if (cc == ';') {
         advance(1);
         return (Token){TOK_SEMICOLON, ";"};
+    }
+
+    if (cc == '_') {
+        advance(1);
+        return (Token){TOK_UNDERSCORE, "_"};
     }
 
     if (cc == '(') {
