@@ -266,7 +266,7 @@ Token get_identifier() {
         advance(1);
         cc = current_char();
     } else {
-        // ff it doesn't start with a valid character,
+        // if it doesn't start with a valid character,
         // return an error token
         token.type     = TOK_UNKNOWN;
         token.value[0] = '\0'; // empty value
