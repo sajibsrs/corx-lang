@@ -171,6 +171,30 @@ Token get_next_token() {
         return (Token){TOK_NEQ, "!="};
     }
 
+    // (<=)
+    if (cc == '<' && input[position + 1] == '=') {
+        advance(2); // consume '<='
+        return (Token){TOK_LEQ, "<="};
+    }
+
+        // (>=)
+    if (cc == '>' && input[position + 1] == '=') {
+        advance(2); // consume '>='
+        return (Token){TOK_GEQ, ">="};
+    }
+
+    // (++)
+    if (cc == '+' && input[position + 1] == '+') {
+        advance(2); // consume '++'
+        return (Token){TOK_INCREMENT, "++"};
+    }
+
+    // (--)
+    if (cc == '-' && input[position + 1] == '-') {
+        advance(2); // consume '--'
+        return (Token){TOK_DECREMENT, "--"};
+    }
+
     /*********************************************
      * single-character operators
      *********************************************/
