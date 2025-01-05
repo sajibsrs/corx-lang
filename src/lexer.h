@@ -4,23 +4,46 @@
 #include <stdbool.h>
 
 typedef enum {
-    TOK_IDENTIFIER, // variable name
+    TOK_KEYWORD,    // keywords like if, else, etc.
+    TOK_IDENT,      // variable name
     TOK_NUMBER,     // numbers
     TOK_ASSIGN,     // '='
     TOK_PLUS,       // '+'
     TOK_MINUS,      // '-'
     TOK_STAR,       // '*'
+    TOK_AMPERSAND,  // '&'
+    TOK_AT,         // '@'
+    TOK_HASH,       // '#'
     TOK_FSLASH,     // '/'
-    TOK_BSLASH,     // '\'
+    TOK_BSLASH,     // '\\'
     TOK_DOT,        // '.'
+    TOK_COLON,      // ':'
     TOK_SEMICOLON,  // ';'
-    TOK_KEYWORD,    // keywords like if, else etc.
+    TOK_EQ,         // '=='
+    TOK_NEQ,        // '!='
+    TOK_GEQ,        // '>='
+    TOK_LEQ,        // '<='
+    TOK_ADD_ASSIGN, // '+='
+    TOK_SUB_ASSIGN, // '-='
+    TOK_DIV_ASSIGN, // '/='
+    TOK_MUL_ASSIGN, // '*='
+    TOK_POW,        // '**'
+    TOK_INCREMENT,  // '++'
+    TOK_DECREMENT,  // '--'
+    TOK_LPAREN,     // '('
+    TOK_RPAREN,     // ')'
+    TOK_LBRACE,     // '{'
+    TOK_RBRACE,     // '}'
+    TOK_LBRACKET,   // '['
+    TOK_RBRACKET,   // ']'
+    TOK_COMMA,      // ','
+    TOK_UNKNOWN,    // invalid or unknown token
     TOK_EOF,        // end of file
 } TokenType;
 
 typedef struct {
     TokenType type;
-    char value[32]; // for storing identifier or numbers
+    char value[64]; // for storing identifier or numbers
 } Token;
 
 extern const char *input; // input string
@@ -33,9 +56,10 @@ extern int position;      // current position in the input
 char current_char();
 
 /**
- * @brief Move to the next input character.
+ * @brief Move to a certain position in input character.
+ * @param n Characters to skip from current position.
  */
-void advance();
+void advance(int n);
 
 /**
  * @brief Skip whitespace character and moves to next.
