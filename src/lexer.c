@@ -7,9 +7,23 @@
 const char *input; // input string
 int position = 0;  // current position in the input
 
-const char *keywords[] = {"type",  "enum",     "struct",   "contract", "int",
-                          "float", "external", "internal", "restrict", "if",
-                          "else",  "while",    "return",   "null",     NULL};
+const char *keywords[] = {
+    "type",     // type declaration (aliasing)
+    "enum",     // enum (enumeration)
+    "struct",   // struct (structure)
+    "contract", // contract (interface)
+    "int",      // integer
+    "float",    // floating point number
+    "external", // visibility (public)
+    "internal", // visibility (protected)
+    "restrict", // visibility (private)
+    "if",       // if condition
+    "else",     // else condition
+    "while",    // while loop
+    "return",   // return
+    "null",     // null
+    NULL        // mark end of array
+};
 
 /**
  * @brief Load source from a file.
@@ -177,7 +191,7 @@ Token get_next_token() {
         return (Token){TOK_LEQ, "<="};
     }
 
-        // (>=)
+    // (>=)
     if (cc == '>' && input[position + 1] == '=') {
         advance(2); // consume '>='
         return (Token){TOK_GEQ, ">="};
