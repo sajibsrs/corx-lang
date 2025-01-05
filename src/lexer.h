@@ -15,10 +15,13 @@ typedef enum {
     TOK_AT,         // '@'
     TOK_HASH,       // '#'
     TOK_FSLASH,     // '/'
-    TOK_BSLASH,     // '\\'
+    TOK_BSLASH,     // '\'
     TOK_DOT,        // '.'
     TOK_COLON,      // ':'
     TOK_SEMICOLON,  // ';'
+    TOK_LT,         // '<'
+    TOK_GT,         // '>'
+    TOK_ARROW,      // '->'
     TOK_EQ,         // '=='
     TOK_NEQ,        // '!='
     TOK_GEQ,        // '>='
@@ -36,6 +39,8 @@ typedef enum {
     TOK_RBRACE,     // '}'
     TOK_LBRACKET,   // '['
     TOK_RBRACKET,   // ']'
+    TOK_LANGLE,     // '<'
+    TOK_RANGLE,     // '>'
     TOK_COMMA,      // ','
     TOK_UNKNOWN,    // invalid or unknown token
     TOK_EOF,        // end of file
@@ -48,6 +53,12 @@ typedef struct {
 
 extern const char *input; // input string
 extern int position;      // current position in the input
+
+/**
+ * @brief Load source from a file.
+ * @param fname File name.
+ */
+void loadfile(const char *fname);
 
 /**
  * @brief Returns current input character.

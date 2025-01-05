@@ -11,30 +11,88 @@ const char *keywords[] = {"type",  "enum",     "struct",   "contract", "int",
                           "float", "external", "internal", "restrict", "if",
                           "else",  "while",    "return",   "null",     NULL};
 
+/**
+ * @brief Load source from a file.
+ * @param fname File name.
+ */
+void loadfile(const char *fname) {
+    FILE *file = fopen(fname, "r");
+    if (!file) {
+        perror("Error opening file");
+        exit(1);
+    }
+
+    // get length of the file
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    // allocate memory for the file
+    char *buffer = (char *)malloc(file_size + 1);
+    if (!buffer) {
+        perror("Memory allocation error");
+        exit(1);
+    }
+
+    // read the file into buffer
+    fread(buffer, 1, file_size, file);
+    buffer[file_size] = '\0';
+
+    // close file
+    fclose(file);
+    input = buffer;
+}
+
+/**
+ * @brief Returns current input character.
+ * @return
+ */
 char current_char() {
     return input[position];
 }
 
+/**
+ * @brief Move to a certain position in input character.
+ * @param n Characters to skip from current position.
+ */
 void advance(int n) {
     position += n;
 }
 
+/**
+ * @brief Skip whitespace character and moves to next.
+ * It keeps doing so until a non-whitespace character is found.
+ */
 void skip_whitespace() {
     char cc = current_char();
-    while (cc == ' ' || cc == '\t') {
+    while (cc == ' ' || cc == '\t' || cc == '\n' || cc == '\r') {
         advance(1);
         cc = current_char();
     }
 }
 
+/**
+ * @brief Returns true if it's a digit false otherwise.
+ * @param c Input character.
+ * @return
+ */
 bool is_digit(char c) {
     return c >= '0' && c <= '9';
 }
 
+/**
+ * @brief Returns true if it's a letter false otherwise.
+ * @param c Input character.
+ * @return
+ */
 bool is_letter(char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
+/**
+ * @brief Recognise the number, tokenize return it.
+ * @return
+ */
 Token get_number() {
     Token token;
 
@@ -51,6 +109,10 @@ Token get_number() {
     return token;
 }
 
+/**
+ * @brief Recognise the identifier, tokenize and return it.
+ * @return
+ */
 Token get_identifier() {
     Token token;
 
@@ -76,6 +138,10 @@ Token get_identifier() {
     return token;
 }
 
+/**
+ * @brief Recognise next token, tokenize and return it.
+ * @return
+ */
 Token get_next_token() {
     skip_whitespace();
 
@@ -89,7 +155,9 @@ Token get_next_token() {
         return get_number();
     }
 
-    // compound operators
+    /*********************************************
+     * compound operators
+     *********************************************/
 
     // (==)
     if (cc == '=' && input[position + 1] == '=') {
@@ -103,7 +171,24 @@ Token get_next_token() {
         return (Token){TOK_NEQ, "!="};
     }
 
-    // single-character operators
+    /*********************************************
+     * single-character operators
+     *********************************************/
+
+    if (cc == '<') {
+        advance(1);
+        return (Token){TOK_LT, "<"};
+    }
+
+    if (cc == '>') {
+        advance(1);
+        return (Token){TOK_GT, ">"};
+    }
+
+    if (cc == '>') {
+        advance(1);
+        return (Token){TOK_LT, "<"};
+    }
 
     if (cc == '=') {
         advance(1);
@@ -133,6 +218,36 @@ Token get_next_token() {
     if (cc == ';') {
         advance(1);
         return (Token){TOK_SEMICOLON, ";"};
+    }
+
+    if (cc == '(') {
+        advance(1);
+        return (Token){TOK_LPAREN, "("};
+    }
+
+    if (cc == ')') {
+        advance(1);
+        return (Token){TOK_RPAREN, ")"};
+    }
+
+    if (cc == '{') {
+        advance(1);
+        return (Token){TOK_LBRACE, "{"};
+    }
+
+    if (cc == '}') {
+        advance(1);
+        return (Token){TOK_RBRACE, "}"};
+    }
+
+    if (cc == '[') {
+        advance(1);
+        return (Token){TOK_LBRACKET, "["};
+    }
+
+    if (cc == ']') {
+        advance(1);
+        return (Token){TOK_RBRACKET, "]"};
     }
 
     if (cc == '\0') {
