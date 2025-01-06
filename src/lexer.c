@@ -103,17 +103,17 @@ char *tokenstr(const TokenType type) {
     case TOK_PLUS:       return "TOK_PLUS";
     case TOK_MINUS:      return "TOK_MINUS";
     case TOK_STAR:       return "TOK_STAR";
-    case TOK_AMPERSAND:  return "TOK_AMPERSAND";
+    case TOK_AMP:        return "TOK_AMP";
     case TOK_AT:         return "TOK_AT";
     case TOK_HASH:       return "TOK_HASH";
     case TOK_FSLASH:     return "TOK_FSLASH";
     case TOK_BSLASH:     return "TOK_BSLASH";
     case TOK_DOT:        return "TOK_DOT";
     case TOK_COLON:      return "TOK_COLON";
-    case TOK_SEMICOLON:  return "TOK_SEMICOLON";
-    case TOK_UNDERSCORE: return "TOK_UNDERSCORE";
+    case TOK_SEMI:       return "TOK_SEMI";
     case TOK_LT:         return "TOK_LT";
     case TOK_GT:         return "TOK_GT";
+    case TOK_MOD:        return "TOK_MOD";
     case TOK_ARROW:      return "TOK_ARROW";
     case TOK_EQ:         return "TOK_EQ";
     case TOK_NEQ:        return "TOK_NEQ";
@@ -123,9 +123,10 @@ char *tokenstr(const TokenType type) {
     case TOK_SUB_ASSIGN: return "TOK_SUB_ASSIGN";
     case TOK_DIV_ASSIGN: return "TOK_DIV_ASSIGN";
     case TOK_MUL_ASSIGN: return "TOK_MUL_ASSIGN";
+    case TOK_MOD_ASSIGN: return "TOK_MOD_ASSIGN";
     case TOK_POW:        return "TOK_POW";
-    case TOK_INCREMENT:  return "TOK_INCREMENT";
-    case TOK_DECREMENT:  return "TOK_DECREMENT";
+    case TOK_INCR:       return "TOK_INCR";
+    case TOK_DECR:       return "TOK_DECR";
     case TOK_LPAREN:     return "TOK_LPAREN";
     case TOK_RPAREN:     return "TOK_RPAREN";
     case TOK_LBRACE:     return "TOK_LBRACE";
@@ -304,10 +305,9 @@ Token get_next_token() {
 
     char cc = current_char();
 
-    if (is_letter(cc)) {
+    if (is_letter(cc) || cc == '_') {
         return get_identifier();
     }
-
     if (is_digit(cc)) {
         return get_number();
     }
@@ -318,7 +318,7 @@ Token get_next_token() {
 
     // (==)
     if (cc == '=' && input[position + 1] == '=') {
-        advance(2); // consume '=='
+        advance(2);
         return (Token){TOK_EQ, "=="};
     }
 
@@ -343,13 +343,49 @@ Token get_next_token() {
     // (++)
     if (cc == '+' && input[position + 1] == '+') {
         advance(2); // consume '++'
-        return (Token){TOK_INCREMENT, "++"};
+        return (Token){TOK_INCR, "++"};
     }
 
     // (--)
     if (cc == '-' && input[position + 1] == '-') {
         advance(2); // consume '--'
-        return (Token){TOK_DECREMENT, "--"};
+        return (Token){TOK_DECR, "--"};
+    }
+
+    // (+=)
+    if (cc == '+' && input[position + 1] == '=') {
+        advance(2);
+        return (Token){TOK_ADD_ASSIGN, "+="};
+    }
+
+    // (-=)
+    if (cc == '-' && input[position + 1] == '=') {
+        advance(2);
+        return (Token){TOK_SUB_ASSIGN, "-="};
+    }
+
+    // (*=)
+    if (cc == '*' && input[position + 1] == '=') {
+        advance(2);
+        return (Token){TOK_MUL_ASSIGN, "*="};
+    }
+
+    // (/=)
+    if (cc == '/' && input[position + 1] == '=') {
+        advance(2);
+        return (Token){TOK_DIV_ASSIGN, "/="};
+    }
+
+    // (**)
+    if (cc == '*' && input[position + 1] == '*') {
+        advance(2);
+        return (Token){TOK_POW, "**"};
+    }
+
+    // (%=)
+    if (cc == '%' && input[position + 1] == '=') {
+        advance(2);
+        return (Token){TOK_MOD_ASSIGN, "%="};
     }
 
     /*********************************************
@@ -364,11 +400,6 @@ Token get_next_token() {
     if (cc == '>') {
         advance(1);
         return (Token){TOK_GT, ">"};
-    }
-
-    if (cc == '>') {
-        advance(1);
-        return (Token){TOK_LT, "<"};
     }
 
     if (cc == '=') {
@@ -398,12 +429,7 @@ Token get_next_token() {
 
     if (cc == ';') {
         advance(1);
-        return (Token){TOK_SEMICOLON, ";"};
-    }
-
-    if (cc == '_') {
-        advance(1);
-        return (Token){TOK_UNDERSCORE, "_"};
+        return (Token){TOK_SEMI, ";"};
     }
 
     if (cc == '(') {
@@ -436,11 +462,20 @@ Token get_next_token() {
         return (Token){TOK_RBRACKET, "]"};
     }
 
+    if (cc == '%') {
+        advance(1);
+        return (Token){TOK_MOD, "%"};
+    }
+
     if (cc == '\0') {
         return (Token){TOK_EOF, ""};
     }
 
-    // Handle invalid characters (error handling)
-    fprintf(stderr, "Unexpected character: %c\n", cc);
-    exit(1);
+    // Handle invalid characters (return TOK_UNKNOWN)
+    Token token    = {TOK_UNKNOWN, ""};
+    token.value[0] = cc;
+    token.value[1] = '\0';
+    advance(1);
+
+    return token;
 }
