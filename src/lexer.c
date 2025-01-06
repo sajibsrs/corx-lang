@@ -99,6 +99,8 @@ char *tokenstr(const TokenType type) {
     case TOK_KEYWORD:    return "TOK_KEYWORD";
     case TOK_IDENT:      return "TOK_IDENT";
     case TOK_NUMBER:     return "TOK_NUMBER";
+    case TOK_STRING:     return "TOK_STRING";
+    case TOK_CHAR:       return "TOK_CHAR";
     case TOK_ASSIGN:     return "TOK_ASSIGN";
     case TOK_PLUS:       return "TOK_PLUS";
     case TOK_MINUS:      return "TOK_MINUS";
@@ -297,6 +299,71 @@ Token get_identifier() {
 }
 
 /**
+ * @brief Handle string literal.
+ * @return
+ */
+Token get_string_literal() {
+    Token token;
+
+    token.type = TOK_STRING;
+    char cc    = current_char();
+    int i      = 0;
+
+    advance(1); // skip opening quote
+    cc = current_char();
+
+    while (cc != '"' && cc != '\0') { // end of string or EOF
+        token.value[i++] = cc;
+        advance(1);
+        cc = current_char();
+    }
+
+    if (cc == '"') {
+        token.value[i] = '\0'; // null-terminate string
+        advance(1);            // consume closing quote
+    } else {
+        token.type     = TOK_UNKNOWN;
+        token.value[0] = '\0'; // empty value
+    }
+
+    return token;
+}
+
+/**
+ * @brief Handle character literal.
+ * @return
+ */
+Token get_char_literal() {
+    Token token;
+
+    token.type = TOK_CHAR;
+    char cc    = current_char();
+
+    advance(1); // skip the opening quote
+    cc = current_char();
+
+    if (cc != '\'') {
+        token.value[0] = cc; // store the character
+        advance(1);          // move past the character
+        cc = current_char();
+
+        if (cc == '\'') { // check for the closing quote
+            advance(1);   // consume the closing quote
+        } else {
+            // if there's no closing quote, mark it as unknown
+            token.type     = TOK_UNKNOWN;
+            token.value[0] = '\0'; // empty value
+        }
+    } else {
+        // if it's just an empty quote, mark as unknown
+        token.type     = TOK_UNKNOWN;
+        token.value[0] = '\0'; // empty value
+    }
+
+    return token;
+}
+
+/**
  * @brief Recognise next token, tokenize and return it.
  * @return
  */
@@ -310,6 +377,13 @@ Token get_next_token() {
     }
     if (is_digit(cc)) {
         return get_number();
+    }
+
+    if (cc == '"') {
+        return get_string_literal(); // Handle string literals
+    }
+    if (cc == '\'') {
+        return get_char_literal(); // Handle character literals
     }
 
     /*********************************************

@@ -7,6 +7,8 @@ typedef enum {
     TOK_KEYWORD,    // keywords like if, else, etc.
     TOK_IDENT,      // variable name
     TOK_NUMBER,     // numbers
+    TOK_STRING,     // string literal
+    TOK_CHAR,       // character literal
     TOK_ASSIGN,     // '='
     TOK_PLUS,       // '+'
     TOK_MINUS,      // '-'
