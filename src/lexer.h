@@ -52,79 +52,42 @@ typedef enum {
 
 typedef struct {
     TokenType type;
-    char value[64]; // for storing identifier or numbers
+    char lexeme[64];
+    int line;
+    int col;
 } Token;
 
-extern const char *input; // input string
-extern int position;      // current position in the input
+typedef struct {
+    char *buffer;
+    int pos;
+    int line;
+    int col;
+} Lexer;
 
 /**
- * @brief Load source from a file.
- * @param fname File name.
- */
-void loadfile(const char *fname);
-
-/**
- * @brief Returns token name string.
- * @param type Token type.
+ * @brief Creates lexer and store source code to it's `buffer`.
+ * @param fname File name with path.
  * @return
  */
-char *tokenstr(const TokenType type);
+Lexer *create_lexer(const char *fname);
+
+/**
+ * @brief Cleanup resources allocated for lexer and it's `buffer`.
+ * @param lexer
+ */
+void remove_lexer(Lexer *lexer);
+
+/**
+ * @brief Fetch the next token.
+ * @param lexer
+ * @return
+ */
+Token get_next_token(Lexer *lexer);
 
 /**
  * @brief Print formatted token to the terminal.
  * @param token
  */
-void token_print(Token token);
-
-/**
- * @brief Returns current input character.
- * @return
- */
-char current_char();
-
-/**
- * @brief Move to a certain position in input character.
- * @param n Characters to skip from current position.
- */
-void advance(int n);
-
-/**
- * @brief Skip whitespace character and moves to next.
- * It keeps doing so until a non-whitespace character is found.
- */
-void skip_whitespace();
-
-/**
- * @brief Returns true if it's a digit false otherwise.
- * @param c Input character.
- * @return
- */
-bool is_digit(char c);
-
-/**
- * @brief Returns true if it's a letter false otherwise.
- * @param c Input character.
- * @return
- */
-bool is_letter(char c);
-
-/**
- * @brief Recognise the number, tokenize return it.
- * @return
- */
-Token get_number();
-
-/**
- * @brief Recognise the identifier, tokenize and return it.
- * @return
- */
-Token get_identifier();
-
-/**
- * @brief Recognise next token, tokenize and return it.
- * @return
- */
-Token get_next_token();
+void print_token(Token token);
 
 #endif

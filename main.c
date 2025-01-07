@@ -5,17 +5,16 @@
 #include "src/lexer.h"
 
 int main() {
-    loadfile("../../source.crx"); // load source file
-
+    Lexer *lexer = create_lexer("../../source.crx");
     Token token;
 
     do {
-        token = get_next_token(); // Fetch the next token
-        token_print(token);       // print formatted token
+        token = get_next_token(lexer); // fetch the next token
+        print_token(token);            // print formatted token
     } while (token.type != TOK_EOF);
-    return 0;
 
-    free((char *)input);
+    remove_lexer(lexer);
+    printf("info # Lexer and lexer buffer cleaned up successfully.\n");
 
     return 0;
 }

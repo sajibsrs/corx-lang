@@ -4,9 +4,6 @@
 
 #include "lexer.h"
 
-const char *input; // input string
-int position = 0;  // current position in the input
-
 const char *keywords[] = {
     // primitive types
     "auto", // auto detect type
@@ -67,11 +64,11 @@ const char *keywords[] = {
 
     // functions
     "return", // return
-    "void",   // represents absence of a value
+    "void",   // represents absence of a lexeme
 
     // memory
     "new",   // allocates memory
-    "null",  // represents absence of a value for memory location
+    "null",  // represents absence of a lexeme for memory location
     "purge", // releases memory
     "this",  //
 
@@ -94,7 +91,7 @@ const char *keywords[] = {
  * @param type Token type.
  * @return
  */
-char *tokenstr(const TokenType type) {
+char *token_str(const TokenType type) {
     switch (type) {
     case TOK_KEYWORD:    return "TOK_KEYWORD";
     case TOK_IDENT:      return "TOK_IDENT";
@@ -148,18 +145,29 @@ char *tokenstr(const TokenType type) {
  * @brief Print formatted token to the terminal.
  * @param token
  */
-void token_print(Token token) {
+void print_token(Token token) {
     printf(
-        "token: id = %-4d type = %-15s value = '%s'\n", token.type, tokenstr(token.type),
-        token.value
+        "token: id %-4d type %-16s lexeme %-8s line %-4d col %d\n", token.type,
+        token_str(token.type), token.lexeme, token.line, token.col
     );
 }
 
 /**
- * @brief Load source from a file.
- * @param fname File name.
+ * @brief Creates lexer and store source code to it's `buffer`.
+ * @param fname File name with path.
+ * @return
  */
-void loadfile(const char *fname) {
+Lexer *create_lexer(const char *fname) {
+    Lexer *lexer = malloc(sizeof(Lexer));
+    if (!lexer) {
+        perror("Memory allocation error");
+        exit(1);
+    }
+
+    lexer->pos  = 0;
+    lexer->line = 1;
+    lexer->col  = 0;
+
     FILE *file = fopen(fname, "r");
     if (!file) {
         perror("Error opening file");
@@ -168,50 +176,67 @@ void loadfile(const char *fname) {
 
     // get length of the file
     fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
+    long fsize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     // allocate memory for the file
-    char *buffer = (char *)malloc(file_size + 1);
-    if (!buffer) {
+    lexer->buffer = malloc(fsize + 1);
+    if (!lexer->buffer) {
         perror("Memory allocation error");
         exit(1);
     }
 
     // read the file into buffer
-    fread(buffer, 1, file_size, file);
-    buffer[file_size] = '\0';
+    fread(lexer->buffer, 1, fsize, file);
+    lexer->buffer[fsize] = '\0';
 
     // close file
     fclose(file);
-    input = buffer;
+
+    return lexer;
+}
+
+/**
+ * @brief Cleanup resources allocated for lexer and it's `buffer`.
+ * @param lexer
+ */
+void remove_lexer(Lexer *lexer) {
+    if (!lexer) return;
+
+    free(lexer->buffer);
+    free(lexer);
 }
 
 /**
  * @brief Returns current input character.
+ * @param lexer
  * @return
  */
-char current_char() {
-    return input[position];
+char curr_input(Lexer *lexer) {
+    return lexer->buffer[lexer->pos];
 }
 
 /**
  * @brief Move to a certain position in input character.
+ * @param lexer
  * @param n Characters to skip from current position.
+ * @param movecol Should `lexer` column update or not.
  */
-void advance(int n) {
-    position += n;
+void advance(Lexer *lexer, int n, bool movecol) {
+    lexer->pos += n;
+    if (movecol) lexer->col += n;
 }
 
 /**
  * @brief Skip whitespace character and moves to next.
  * It keeps doing so until a non-whitespace character is found.
+ * @param lexer
  */
-void skip_whitespace() {
-    char cc = current_char();
-    while (cc == ' ' || cc == '\t' || cc == '\n' || cc == '\r') {
-        advance(1);
-        cc = current_char();
+void skip_space(Lexer *lexer) {
+    char input = curr_input(lexer);
+    while (input == ' ' || input == '\t') {
+        advance(lexer, 1, true);
+        input = curr_input(lexer);
     }
 }
 
@@ -235,61 +260,70 @@ bool is_letter(char c) {
 
 /**
  * @brief Recognise the number, tokenize return it.
+ * @param lexer
  * @return
  */
-Token get_number() {
+Token get_number(Lexer *lexer) {
     Token token;
-
     token.type = TOK_NUMBER;
-    char cc    = current_char();
+
+    char input = curr_input(lexer);
     int i      = 0;
 
-    while (is_digit(cc)) {
-        token.value[i++] = cc;
-        advance(1);
-        cc = current_char();
+    while (is_digit(input)) {
+        token.lexeme[i++] = input;
+        advance(lexer, 1, true);
+        input = curr_input(lexer);
     }
-    token.value[i] = '\0'; // null-terminate string
+    token.lexeme[i] = '\0'; // null-terminate string
+
+    token.line = lexer->line;
+    token.col  = lexer->col;
+
     return token;
 }
 
 /**
  * @brief Recognise the identifier, tokenize and return it.
+ * @param lexer
  * @return
  */
-Token get_identifier() {
+Token get_ident(Lexer *lexer) {
     Token token;
-
     token.type = TOK_IDENT; // default is identifier
-    char cc    = current_char();
+
+    char input = curr_input(lexer);
     int i      = 0;
 
     // ensure the first character is a letter or underscore
-    if (is_letter(cc) || cc == '_') {
-        token.value[i++] = cc;
-        advance(1);
-        cc = current_char();
+    if (is_letter(input) || input == '_') {
+        token.lexeme[i++] = input;
+        advance(lexer, 1, true);
+        input = curr_input(lexer);
     } else {
         // if it doesn't start with a valid character,
         // return an error token
-        token.type     = TOK_UNKNOWN;
-        token.value[0] = '\0'; // empty value
+        token.type      = TOK_UNKNOWN;
+        token.lexeme[0] = '\0'; // empty lexeme
         return token;
     }
 
+    token.line = lexer->line;
+    token.col  = lexer->col;
+
     // continue allowing letters, digits,
     // or underscores for the rest of the identifier
-    while (is_letter(cc) || is_digit(cc) || cc == '_') {
-        token.value[i++] = cc;
-        advance(1);
-        cc = current_char();
+    while (is_letter(input) || is_digit(input) || input == '_') {
+        token.lexeme[i++] = input;
+        advance(lexer, 1, true);
+        input = curr_input(lexer);
     }
 
-    token.value[i] = '\0'; // null-terminate string
+    token.lexeme[i] = '\0'; // null-terminate string
 
     // check if this identifier is a keyword
     for (int j = 0; keywords[j] != NULL; j++) {
-        if (strcmp(token.value, keywords[j]) == 0) {
+        if (strcmp(token.lexeme, keywords[j]) == 0) {
             token.type = TOK_KEYWORD; // it's a keyword
             break;
         }
@@ -300,90 +334,108 @@ Token get_identifier() {
 
 /**
  * @brief Handle string literal.
+ * @param lexer
  * @return
  */
-Token get_string_literal() {
+Token get_string_literal(Lexer *lexer) {
     Token token;
-
     token.type = TOK_STRING;
-    char cc    = current_char();
+
+    char input = curr_input(lexer);
     int i      = 0;
 
-    advance(1); // skip opening quote
-    cc = current_char();
+    advance(lexer, 1, true); // skip opening quote
+    input = curr_input(lexer);
 
-    while (cc != '"' && cc != '\0') { // end of string or EOF
-        token.value[i++] = cc;
-        advance(1);
-        cc = current_char();
+    while (input != '"' && input != '\0') { // end of string or EOF
+        token.lexeme[i++] = input;
+        advance(lexer, 1, true);
+        input = curr_input(lexer);
     }
 
-    if (cc == '"') {
-        token.value[i] = '\0'; // null-terminate string
-        advance(1);            // consume closing quote
+    if (input == '"') {
+        token.lexeme[i] = '\0';  // null-terminate string
+        advance(lexer, 1, true); // consume closing quote
     } else {
-        token.type     = TOK_UNKNOWN;
-        token.value[0] = '\0'; // empty value
+        token.type      = TOK_UNKNOWN;
+        token.lexeme[0] = '\0'; // empty lexeme
     }
+
+    token.line = lexer->line;
+    token.col  = lexer->col;
 
     return token;
 }
 
 /**
  * @brief Handle character literal.
+ * @param lexer
  * @return
  */
-Token get_char_literal() {
+Token get_char_literal(Lexer *lexer) {
     Token token;
-
     token.type = TOK_CHAR;
-    char cc    = current_char();
 
-    advance(1); // skip the opening quote
-    cc = current_char();
+    char input = curr_input(lexer);
 
-    if (cc != '\'') {
-        token.value[0] = cc; // store the character
-        advance(1);          // move past the character
-        cc = current_char();
+    advance(lexer, 1, true); // skip the opening quote
+    input = curr_input(lexer);
 
-        if (cc == '\'') { // check for the closing quote
-            advance(1);   // consume the closing quote
+    if (input != '\'') {
+        token.lexeme[0] = input; // store the character
+        advance(lexer, 1, true); // move past the character
+        input = curr_input(lexer);
+
+        if (input == '\'') {         // check for the closing quote
+            advance(lexer, 1, true); // consume the closing quote
         } else {
             // if there's no closing quote, mark it as unknown
-            token.type     = TOK_UNKNOWN;
-            token.value[0] = '\0'; // empty value
+            token.type      = TOK_UNKNOWN;
+            token.lexeme[0] = '\0'; // empty lexeme
         }
     } else {
         // if it's just an empty quote, mark as unknown
-        token.type     = TOK_UNKNOWN;
-        token.value[0] = '\0'; // empty value
+        token.type      = TOK_UNKNOWN;
+        token.lexeme[0] = '\0'; // empty lexeme
     }
+
+    token.line = lexer->line;
+    token.col  = lexer->col;
 
     return token;
 }
 
 /**
- * @brief Recognise next token, tokenize and return it.
+ * @brief Fetch the next token.
+ * @param lexer
  * @return
  */
-Token get_next_token() {
-    skip_whitespace();
+Token get_next_token(Lexer *lexer) {
 
-    char cc = current_char();
+    skip_space(lexer);
 
-    if (is_letter(cc) || cc == '_') {
-        return get_identifier();
-    }
-    if (is_digit(cc)) {
-        return get_number();
+    char input = curr_input(lexer);
+
+    if (input == '\n' || input == '\r') {
+        lexer->line++;
+        lexer->col = 0; // reset for new line
+        advance(lexer, 1, false);
+        return get_next_token(lexer); // recursively get the next token
     }
 
-    if (cc == '"') {
-        return get_string_literal(); // Handle string literals
+    if (is_letter(input) || input == '_') {
+        return get_ident(lexer);
     }
-    if (cc == '\'') {
-        return get_char_literal(); // Handle character literals
+
+    if (is_digit(input)) {
+        return get_number(lexer);
+    }
+
+    if (input == '"') {
+        return get_string_literal(lexer);
+    }
+    if (input == '\'') {
+        return get_char_literal(lexer);
     }
 
     /*********************************************
@@ -391,165 +443,167 @@ Token get_next_token() {
      *********************************************/
 
     // (==)
-    if (cc == '=' && input[position + 1] == '=') {
-        advance(2);
-        return (Token){TOK_EQ, "=="};
+    if (input == '=' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_EQ, "==", lexer->line, lexer->col};
     }
 
     // (!=)
-    if (cc == '!' && input[position + 1] == '=') {
-        advance(2); // consume '!='
-        return (Token){TOK_NEQ, "!="};
+    if (input == '!' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true); // consume '!='
+        return (Token){TOK_NEQ, "!=", lexer->line, lexer->col};
     }
 
     // (<=)
-    if (cc == '<' && input[position + 1] == '=') {
-        advance(2); // consume '<='
-        return (Token){TOK_LEQ, "<="};
+    if (input == '<' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true); // consume '<='
+        return (Token){TOK_LEQ, "<=", lexer->line, lexer->col};
     }
 
     // (>=)
-    if (cc == '>' && input[position + 1] == '=') {
-        advance(2); // consume '>='
-        return (Token){TOK_GEQ, ">="};
+    if (input == '>' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true); // consume '>='
+        return (Token){TOK_GEQ, ">=", lexer->line, lexer->col};
     }
 
     // (++)
-    if (cc == '+' && input[position + 1] == '+') {
-        advance(2); // consume '++'
-        return (Token){TOK_INCR, "++"};
+    if (input == '+' && lexer->buffer[lexer->pos + 1] == '+') {
+        advance(lexer, 2, true); // consume '++'
+        return (Token){TOK_INCR, "++", lexer->line, lexer->col};
     }
 
     // (--)
-    if (cc == '-' && input[position + 1] == '-') {
-        advance(2); // consume '--'
-        return (Token){TOK_DECR, "--"};
+    if (input == '-' && lexer->buffer[lexer->pos + 1] == '-') {
+        advance(lexer, 2, true); // consume '--'
+        return (Token){TOK_DECR, "--", lexer->line, lexer->col};
     }
 
     // (+=)
-    if (cc == '+' && input[position + 1] == '=') {
-        advance(2);
-        return (Token){TOK_ADD_ASSIGN, "+="};
+    if (input == '+' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->col};
     }
 
     // (-=)
-    if (cc == '-' && input[position + 1] == '=') {
-        advance(2);
-        return (Token){TOK_SUB_ASSIGN, "-="};
+    if (input == '-' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->col};
     }
 
     // (*=)
-    if (cc == '*' && input[position + 1] == '=') {
-        advance(2);
-        return (Token){TOK_MUL_ASSIGN, "*="};
+    if (input == '*' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->col};
     }
 
     // (/=)
-    if (cc == '/' && input[position + 1] == '=') {
-        advance(2);
-        return (Token){TOK_DIV_ASSIGN, "/="};
+    if (input == '/' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->col};
     }
 
     // (**)
-    if (cc == '*' && input[position + 1] == '*') {
-        advance(2);
-        return (Token){TOK_POW, "**"};
+    if (input == '*' && lexer->buffer[lexer->pos + 1] == '*') {
+        advance(lexer, 2, true);
+        return (Token){TOK_POW, "**", lexer->line, lexer->col};
     }
 
     // (%=)
-    if (cc == '%' && input[position + 1] == '=') {
-        advance(2);
-        return (Token){TOK_MOD_ASSIGN, "%="};
+    if (input == '%' && lexer->buffer[lexer->pos + 1] == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->col};
     }
 
     /*********************************************
      * single-character operators
      *********************************************/
 
-    if (cc == '<') {
-        advance(1);
-        return (Token){TOK_LT, "<"};
+    if (input == '<') {
+        advance(lexer, 1, true);
+        return (Token){TOK_LT, "<", lexer->line, lexer->col};
     }
 
-    if (cc == '>') {
-        advance(1);
-        return (Token){TOK_GT, ">"};
+    if (input == '>') {
+        advance(lexer, 1, true);
+        return (Token){TOK_GT, ">", lexer->line, lexer->col};
     }
 
-    if (cc == '=') {
-        advance(1);
-        return (Token){TOK_ASSIGN, "="};
+    if (input == '=') {
+        advance(lexer, 1, true);
+        return (Token){TOK_ASSIGN, "=", lexer->line, lexer->col};
     }
 
-    if (cc == '+') {
-        advance(1);
-        return (Token){TOK_PLUS, "+"};
+    if (input == '+') {
+        advance(lexer, 1, true);
+        return (Token){TOK_PLUS, "+", lexer->line, lexer->col};
     }
 
-    if (cc == '-') {
-        advance(1);
-        return (Token){TOK_MINUS, "-"};
+    if (input == '-') {
+        advance(lexer, 1, true);
+        return (Token){TOK_MINUS, "-", lexer->line, lexer->col};
     }
 
-    if (cc == '*') {
-        advance(1);
-        return (Token){TOK_STAR, "*"};
+    if (input == '*') {
+        advance(lexer, 1, true);
+        return (Token){TOK_STAR, "*", lexer->line, lexer->col};
     }
 
-    if (cc == '/') {
-        advance(1);
-        return (Token){TOK_FSLASH, "/"};
+    if (input == '/') {
+        advance(lexer, 1, true);
+        return (Token){TOK_FSLASH, "/", lexer->line, lexer->col};
     }
 
-    if (cc == ';') {
-        advance(1);
-        return (Token){TOK_SEMI, ";"};
+    if (input == ';') {
+        advance(lexer, 1, true);
+        return (Token){TOK_SEMI, ";", lexer->line, lexer->col};
     }
 
-    if (cc == '(') {
-        advance(1);
-        return (Token){TOK_LPAREN, "("};
+    if (input == '(') {
+        advance(lexer, 1, true);
+        return (Token){TOK_LPAREN, "(", lexer->line, lexer->col};
     }
 
-    if (cc == ')') {
-        advance(1);
-        return (Token){TOK_RPAREN, ")"};
+    if (input == ')') {
+        advance(lexer, 1, true);
+        return (Token){TOK_RPAREN, ")", lexer->line, lexer->col};
     }
 
-    if (cc == '{') {
-        advance(1);
-        return (Token){TOK_LBRACE, "{"};
+    if (input == '{') {
+        advance(lexer, 1, true);
+        return (Token){TOK_LBRACE, "{", lexer->line, lexer->col};
     }
 
-    if (cc == '}') {
-        advance(1);
-        return (Token){TOK_RBRACE, "}"};
+    if (input == '}') {
+        advance(lexer, 1, true);
+        return (Token){TOK_RBRACE, "}", lexer->line, lexer->col};
     }
 
-    if (cc == '[') {
-        advance(1);
-        return (Token){TOK_LBRACKET, "["};
+    if (input == '[') {
+        advance(lexer, 1, true);
+        return (Token){TOK_LBRACKET, "[", lexer->line, lexer->col};
     }
 
-    if (cc == ']') {
-        advance(1);
-        return (Token){TOK_RBRACKET, "]"};
+    if (input == ']') {
+        advance(lexer, 1, true);
+        return (Token){TOK_RBRACKET, "]", lexer->line, lexer->col};
     }
 
-    if (cc == '%') {
-        advance(1);
-        return (Token){TOK_MOD, "%"};
+    if (input == '%') {
+        advance(lexer, 1, true);
+        return (Token){TOK_MOD, "%", lexer->line, lexer->col};
     }
 
-    if (cc == '\0') {
-        return (Token){TOK_EOF, ""};
+    if (input == '\0') {
+        advance(lexer, 1, true);
+        return (Token){TOK_EOF, "EOF", lexer->line, lexer->col};
     }
 
-    // Handle invalid characters (return TOK_UNKNOWN)
-    Token token    = {TOK_UNKNOWN, ""};
-    token.value[0] = cc;
-    token.value[1] = '\0';
-    advance(1);
+    advance(lexer, 1, true);
+
+    // handle unknown token
+    Token token     = {TOK_UNKNOWN, "", lexer->line, lexer->col};
+    token.lexeme[0] = input;
+    token.lexeme[1] = '\0';
 
     return token;
 }
