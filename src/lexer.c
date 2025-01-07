@@ -415,12 +415,48 @@ char peek_next_input(Lexer *lexer) {
 }
 
 /**
+ * @brief Skip single and multi-line comments.
+ * @param lexer
+ */
+void skip_comments(Lexer *lexer) {
+    char input = curr_input(lexer);
+    char peek  = peek_next_input(lexer);
+    int buffsz = strlen(lexer->buffer);
+
+    if (input == '/' && peek == '*') { // multi-line comment
+        advance(lexer, 2, true);       // skip '/*'
+        while (lexer->pos < buffsz) {
+            if (curr_input(lexer) == '*' && peek_next_input(lexer) == '/') {
+                advance(lexer, 2, true); // skip '*/'
+                return;
+            }
+            if (curr_input(lexer) == '\n') {
+                lexer->line++;
+                lexer->col = 1;
+                advance(lexer, 1, false);
+            } else {
+                advance(lexer, 1, true);
+            }
+        }
+    } else if (input == '/' && peek == '/') { // single-line comment
+        advance(lexer, 2, true);              // skip '//'
+        while (lexer->pos < buffsz && curr_input(lexer) != '\n') {
+            advance(lexer, 1, true);
+        }
+    } else if (input == '#') {   // hash-style comment
+        advance(lexer, 1, true); // skip '#'
+        while (lexer->pos < buffsz && curr_input(lexer) != '\n') {
+            advance(lexer, 1, true);
+        }
+    }
+}
+
+/**
  * @brief Fetch the next token.
  * @param lexer
  * @return
  */
 Token get_next_token(Lexer *lexer) {
-
     skip_space(lexer);
 
     char input = curr_input(lexer);
@@ -430,6 +466,13 @@ Token get_next_token(Lexer *lexer) {
         lexer->col = 0; // reset for new line
         advance(lexer, 1, false);
         return get_next_token(lexer); // recursively get the next token
+    }
+
+    // handle comments
+    if ((input == '/' && (peek_next_input(lexer) == '*' || peek_next_input(lexer) == '/')) ||
+        input == '#') {
+        skip_comments(lexer);         // skip the comment
+        return get_next_token(lexer); // recursively get the next token after the comment
     }
 
     if (is_letter(input) || input == '_') {
