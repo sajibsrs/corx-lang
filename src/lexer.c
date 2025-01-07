@@ -406,6 +406,15 @@ Token get_char_literal(Lexer *lexer) {
 }
 
 /**
+ * @brief Peek next input from lexer buffer.
+ * @param lexer
+ * @return
+ */
+char peek_next_input(Lexer *lexer) {
+    return lexer->buffer[lexer->pos + 1];
+}
+
+/**
  * @brief Fetch the next token.
  * @param lexer
  * @return
@@ -443,73 +452,73 @@ Token get_next_token(Lexer *lexer) {
      *********************************************/
 
     // (==)
-    if (input == '=' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '=' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_EQ, "==", lexer->line, lexer->col};
     }
 
     // (!=)
-    if (input == '!' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '!' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true); // consume '!='
         return (Token){TOK_NEQ, "!=", lexer->line, lexer->col};
     }
 
     // (<=)
-    if (input == '<' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '<' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true); // consume '<='
         return (Token){TOK_LEQ, "<=", lexer->line, lexer->col};
     }
 
     // (>=)
-    if (input == '>' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '>' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true); // consume '>='
         return (Token){TOK_GEQ, ">=", lexer->line, lexer->col};
     }
 
     // (++)
-    if (input == '+' && lexer->buffer[lexer->pos + 1] == '+') {
+    if (input == '+' && peek_next_input(lexer) == '+') {
         advance(lexer, 2, true); // consume '++'
         return (Token){TOK_INCR, "++", lexer->line, lexer->col};
     }
 
     // (--)
-    if (input == '-' && lexer->buffer[lexer->pos + 1] == '-') {
+    if (input == '-' && peek_next_input(lexer) == '-') {
         advance(lexer, 2, true); // consume '--'
         return (Token){TOK_DECR, "--", lexer->line, lexer->col};
     }
 
     // (+=)
-    if (input == '+' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '+' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->col};
     }
 
     // (-=)
-    if (input == '-' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '-' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->col};
     }
 
     // (*=)
-    if (input == '*' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '*' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->col};
     }
 
     // (/=)
-    if (input == '/' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '/' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->col};
     }
 
     // (**)
-    if (input == '*' && lexer->buffer[lexer->pos + 1] == '*') {
+    if (input == '*' && peek_next_input(lexer) == '*') {
         advance(lexer, 2, true);
         return (Token){TOK_POW, "**", lexer->line, lexer->col};
     }
 
     // (%=)
-    if (input == '%' && lexer->buffer[lexer->pos + 1] == '=') {
+    if (input == '%' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->col};
     }
