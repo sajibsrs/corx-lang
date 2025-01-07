@@ -1,3 +1,11 @@
+// a single line comment
+# another single line comment
+
+/**
+ * multi-line comments
+ * another line here
+ */
+
 int x = 5;
 int y = 4;
 
