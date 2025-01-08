@@ -8,7 +8,10 @@ A production rule defines how a non-terminal symbol can be expanded into other s
 ```ebnf
 <non-terminal> = <expression> ;
 ```
-- **Example:** `identifier = letter , { letter | digit | "_" } ;`
+- **Example:**
+```ebnf
+identifier = letter , { letter | digit | "_" } ;
+```
 
 ## 2. **Terminals**
 Terminals are literal values (tokens) in the language, enclosed in quotes.
@@ -75,15 +78,27 @@ rule = "example" ; // Inline comment
 
 ## 10. **Special Symbols**
 Some EBNF variants use `::=` instead of `=` for definitions.
-- **Example:** `identifier ::= letter , { letter | digit | "_" } ;`
+- **Example:**
+```ebnf
+identifier ::= letter , { letter | digit | "_" } ;
+```
 
 ## 11. **Repetition Modifiers (Some Variants)**
 - `?`: Zero or one occurrence.
-  **Example:** `optional_term = term ? ;`
+  **Example:**
+```ebnf
+optional_term = term ? ;
+```
 - `*`: Zero or more occurrences.
-  **Example:** `repeated_term = term * ;`
+  **Example:**
+```ebnf
+repeated_term = term * ;
+```
 - `+`: One or more occurrences.
-  **Example:** `non_empty_repeated_term = term + ;`
+  **Example:**
+```ebnf
+non_empty_repeated_term = term + ;
+```
 
 ## 12. **Escape Sequences**
 Special characters can be escaped in terminal definitions to prevent misinterpretation.
