@@ -10,6 +10,25 @@
 
 Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how `corx` can help you write clean, efficient, and performance-driven code.
 
+## Status:
+### 1. Lexer
+- Create initial lexer - (completed)
+- Recognize different tokens - (completed)
+- Track line and column for every token - (completed)
+- Handle different comment types - (completed)
+- Handle undefined tokens - (completed)
+- Add proper error reporting - (todo)
+
+### 2. Parser
+- Create initial parser - (todo)
+- REPL (Read-Eval-Print Loop) - (todo)
+
+### 3. Intermediate Representation (IR)
+### 4. Semantic Analysis
+### 5. Code Generation
+### 6. Optimization
+### 7. Documentation
+
 ---
-`corx` is currently under development. Its syntax and grammar are being finalized. The language design is still in progress, and a compiler has not yet been implemented.
+**Note:** `corx` is currently under development. Its syntax and grammar are being finalized. The language design is still in progress, and a compiler has not yet been implemented.
 
