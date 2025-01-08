@@ -5,23 +5,31 @@
 
 ![corx programming language](./corx-lang.png)
 
-## About `corx`
+## # About `corx`
  `corx` is a simple, efficient programming language designed for systems-level programming with a focus on manual memory management and minimalistic syntax. With `corx`, you have full control over system resources, offering maximum performance and clarity, without the overhead of complex language features. Whether you're developing performance-critical applications or need a low-level language with modern features like contract-based design, `corx` is built to meet those needs.
 
 Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how `corx` can help you write clean, efficient, and performance-driven code.
 
-## Status:
+## # Status
 ### 1. Lexer
-- Create initial lexer - (completed)
-- Recognize different tokens - (completed)
-- Track line and column for every token - (completed)
-- Handle different comment types - (completed)
-- Handle undefined tokens - (completed)
-- Add proper error reporting - (todo)
+- [x] Create initial lexer
+- [x] Recognize different tokens
+- [x] Track line and column for every token
+- [x] Handle different comment types
+- [x] Handle undefined tokens
+- [ ] Error reporting
+- [x] Testing
 
 ### 2. Parser
-- Create initial parser - (todo)
-- REPL (Read-Eval-Print Loop) - (todo)
+- Create initial parser
+    - [ ] Context-free grammar (CFG), EBNF (Extended Backus-Naur Form)
+    - [ ] Implement recursive parsing
+    - [ ] Eliminate left-recursion
+    - [ ] Abstract Syntax Tree (AST)
+    - [ ] Error handling
+    - [ ] Error reporting
+    - [ ] Testing
+- [ ] REPL (Read-Eval-Print Loop)
 
 ### 3. Intermediate Representation (IR)
 ### 4. Semantic Analysis
