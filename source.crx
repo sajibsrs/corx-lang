@@ -1,5 +1,5 @@
-// a single line comment
-# another single line comment
+// a single-line comment
+# another single-line comment
 
 /**
  * multi-line comments
