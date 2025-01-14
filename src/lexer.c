@@ -4,10 +4,8 @@
 
 #include "lexer.h"
 
-const char *keywords[] = {
-    // primitive types
-    "auto", // auto detect type
-    "bool", // boolean
+const char *type_specifiers[] = {
+    "bool", //
 
     "char",   //
     "string", //
@@ -31,55 +29,88 @@ const char *keywords[] = {
     "int64",  //
     "uint64", //
 
-    "complex",   //
-    "imaginary", //
-
-    // abstract types
-    "type",     // type declaration (aliasing)
     "enum",     // enum (enumeration)
     "struct",   // struct (structure)
     "contract", // contract (interface)
 
-    // modifiers & specifiers
-    "const",
+    "void", //
 
+    NULL // marks end of array
+};
+
+const char *type_modifiers[] = {
+    "type", // type declaration (aliasing)
+
+    NULL // marks end of array
+};
+
+const char *type_qualifiers[] = {
+    "const",  //
+    "atomic", //
+
+    NULL // marks end of array
+};
+
+const char *access_specifiers[] = {
     "external", // (public)
     "internal", // (protected)
     "restrict", // (private)
 
-    // conditionals
+    NULL // marks end of array
+};
+
+const char *conditionals[] = {
     "if",      // if
     "else",    // else
     "switch",  //
     "case",    //
     "default", //
 
-    // loops
+    NULL // marks end of array
+};
+
+const char *loops[] = {
+    "do",      //
+    "for",     //
+    "foreach", //
+    "in",      //
+    "while",   //
+    "break",
     "continue", //
-    "do",       //
-    "for",      //
-    "foreach",  //
-    "in",       //
-    "while",    // while
 
-    // functions
-    "return", // return
-    "void",   // represents absence of a lexeme
+    NULL // marks end of array
+};
 
-    // memory
-    "new",   // allocates memory
-    "null",  // represents absence of a lexeme for memory location
-    "purge", // releases memory
-    "this",  //
+const char *functions[] = {
+    "return", //
 
-    // errors
+    NULL // marks end of array
+};
+
+const char *memory[] = {
+    "new",    // allocates memory
+    "null",   // represents absence of a lexeme for memory location
+    "purge",  // releases memory
+    "sizeof", //
+    "this",   //
+
+    NULL // marks end of array
+};
+
+const char *errors[] = {
     "error", //
 
-    // module
+    NULL // marks end of array
+};
+
+const char *module[] = {
     "import", //
     "module", //
 
-    // async
+    NULL // marks end of array
+};
+
+const char *async[] = {
     "async", //
     "wait",  //
 
@@ -93,51 +124,61 @@ const char *keywords[] = {
  */
 char *token_str(const TokenType type) {
     switch (type) {
-    case TOK_KEYWORD:    return "TOK_KEYWORD";
-    case TOK_IDENT:      return "TOK_IDENT";
-    case TOK_NUMBER:     return "TOK_NUMBER";
-    case TOK_STRING:     return "TOK_STRING";
-    case TOK_CHAR:       return "TOK_CHAR";
-    case TOK_ASSIGN:     return "TOK_ASSIGN";
-    case TOK_PLUS:       return "TOK_PLUS";
-    case TOK_MINUS:      return "TOK_MINUS";
-    case TOK_STAR:       return "TOK_STAR";
-    case TOK_AMP:        return "TOK_AMP";
-    case TOK_AT:         return "TOK_AT";
-    case TOK_HASH:       return "TOK_HASH";
-    case TOK_FSLASH:     return "TOK_FSLASH";
-    case TOK_BSLASH:     return "TOK_BSLASH";
-    case TOK_DOT:        return "TOK_DOT";
-    case TOK_COLON:      return "TOK_COLON";
-    case TOK_SEMI:       return "TOK_SEMI";
-    case TOK_LT:         return "TOK_LT";
-    case TOK_GT:         return "TOK_GT";
-    case TOK_MOD:        return "TOK_MOD";
-    case TOK_ARROW:      return "TOK_ARROW";
-    case TOK_EQ:         return "TOK_EQ";
-    case TOK_NEQ:        return "TOK_NEQ";
-    case TOK_GEQ:        return "TOK_GEQ";
-    case TOK_LEQ:        return "TOK_LEQ";
-    case TOK_ADD_ASSIGN: return "TOK_ADD_ASSIGN";
-    case TOK_SUB_ASSIGN: return "TOK_SUB_ASSIGN";
-    case TOK_DIV_ASSIGN: return "TOK_DIV_ASSIGN";
-    case TOK_MUL_ASSIGN: return "TOK_MUL_ASSIGN";
-    case TOK_MOD_ASSIGN: return "TOK_MOD_ASSIGN";
-    case TOK_POW:        return "TOK_POW";
-    case TOK_INCR:       return "TOK_INCR";
-    case TOK_DECR:       return "TOK_DECR";
-    case TOK_LPAREN:     return "TOK_LPAREN";
-    case TOK_RPAREN:     return "TOK_RPAREN";
-    case TOK_LBRACE:     return "TOK_LBRACE";
-    case TOK_RBRACE:     return "TOK_RBRACE";
-    case TOK_LBRACKET:   return "TOK_LBRACKET";
-    case TOK_RBRACKET:   return "TOK_RBRACKET";
-    case TOK_LANGLE:     return "TOK_LANGLE";
-    case TOK_RANGLE:     return "TOK_RANGLE";
-    case TOK_COMMA:      return "TOK_COMMA";
-    case TOK_UNKNOWN:    return "TOK_UNKNOWN";
-    case TOK_EOF:        return "TOK_EOF";
-    default:             return "Unknown token";
+    case TOK_TYPE_SPEC: return "TOK_TYPE_SPEC";
+    case TOK_TYPE_MOD:  return "TOK_TYPE_MOD";
+    case TOK_TYPE_QF:   return "TOK_TYPE_QF";
+    case TOK_ACC_SPEC:  return "TOK_ACC_SPEC";
+    case TOK_FUNC:      return "TOK_FUNC";
+    case TOK_COND:      return "TOK_COND";
+    case TOK_LOOPS:     return "TOK_LOOPS";
+    case TOK_MEM:       return "TOK_MEM";
+    case TOK_ERROR:     return "TOK_ERROR";
+    case TOK_MODULE:    return "TOK_MODULE";
+    case TOK_ASYNC:     return "TOK_ASYNC";
+    case TOK_IDENT:     return "TOK_IDENT";
+    case TOK_NUMBER:    return "TOK_NUMBER";
+    case TOK_STRING:    return "TOK_STRING";
+    case TOK_CHAR:      return "TOK_CHAR";
+    case TOK_ASSIGN:    return "TOK_ASSIGN";
+    case TOK_PLUS:      return "TOK_PLUS";
+    case TOK_MINUS:     return "TOK_MINUS";
+    case TOK_STAR:      return "TOK_STAR";
+    case TOK_AMP:       return "TOK_AMP";
+    case TOK_AT:        return "TOK_AT";
+    case TOK_HASH:      return "TOK_HASH";
+    case TOK_FSLASH:    return "TOK_FSLASH";
+    case TOK_BSLASH:    return "TOK_BSLASH";
+    case TOK_DOT:       return "TOK_DOT";
+    case TOK_COLON:     return "TOK_COLON";
+    case TOK_SEMI:      return "TOK_SEMI";
+    case TOK_LT:        return "TOK_LT";
+    case TOK_GT:        return "TOK_GT";
+    case TOK_MOD:       return "TOK_MOD";
+    case TOK_ARROW:     return "TOK_ARROW";
+    case TOK_EQ:        return "TOK_EQ";
+    case TOK_NEQ:       return "TOK_NEQ";
+    case TOK_GEQ:       return "TOK_GEQ";
+    case TOK_LEQ:       return "TOK_LEQ";
+    case TOK_ADD_ASN:   return "TOK_ADD_ASN";
+    case TOK_SUB_ASN:   return "TOK_SUB_ASN";
+    case TOK_DIV_ASN:   return "TOK_DIV_ASN";
+    case TOK_MUL_ASN:   return "TOK_MUL_ASN";
+    case TOK_MOD_ASN:   return "TOK_MOD_ASN";
+    case TOK_POW:       return "TOK_POW";
+    case TOK_INCR:      return "TOK_INCR";
+    case TOK_DECR:      return "TOK_DECR";
+    case TOK_LPAREN:    return "TOK_LPAREN";
+    case TOK_RPAREN:    return "TOK_RPAREN";
+    case TOK_LBRACE:    return "TOK_LBRACE";
+    case TOK_RBRACE:    return "TOK_RBRACE";
+    case TOK_LBRACKET:  return "TOK_LBRACKET";
+    case TOK_RBRACKET:  return "TOK_RBRACKET";
+    case TOK_LANGLE:    return "TOK_LANGLE";
+    case TOK_RANGLE:    return "TOK_RANGLE";
+    case TOK_COMMA:     return "TOK_COMMA";
+    case TOK_UNKNOWN:   return "TOK_UNKNOWN";
+    case TOK_EOF:       return "TOK_EOF";
+    default:            return "Unknown token";
     }
 }
 
@@ -145,10 +186,10 @@ char *token_str(const TokenType type) {
  * @brief Print formatted token to the terminal.
  * @param token
  */
-void print_token(Token token) {
+void render_token(Token token) {
     printf(
-        "token: id %-4d type %-16s lexeme %-8s line %-4d col %d\n", token.type,
-        token_str(token.type), token.lexeme, token.line, token.col
+        "token: id %-4d type %-16s value %-8s line %-4d col %d\n", token.type,
+        token_str(token.type), token.value, token.line, token.col
     );
 }
 
@@ -157,7 +198,7 @@ void print_token(Token token) {
  * @param fname File name with path.
  * @return
  */
-Lexer *create_lexer(const char *fname) {
+Lexer *make_lexer(const char *fname) {
     Lexer *lexer = malloc(sizeof(Lexer));
     if (!lexer) {
         perror("Memory allocation error");
@@ -200,11 +241,22 @@ Lexer *create_lexer(const char *fname) {
  * @brief Cleanup resources allocated for lexer and it's `buffer`.
  * @param lexer
  */
-void remove_lexer(Lexer *lexer) {
+void purge_lexer(Lexer *lexer) {
     if (!lexer) return;
 
     free(lexer->buffer);
     free(lexer);
+}
+
+/**
+ * @brief Cleanup allocated memory from `tokens`.
+ * @param tokarr
+ */
+void purge_tokarr(TokenArr *tokarr) {
+    if (!tokarr) return;
+
+    free(tokarr->tokens);
+    free(tokarr);
 }
 
 /**
@@ -271,11 +323,11 @@ Token get_number(Lexer *lexer) {
     int i      = 0;
 
     while (is_digit(input)) {
-        token.lexeme[i++] = input;
+        token.value[i++] = input;
         advance(lexer, 1, true);
         input = curr_input(lexer);
     }
-    token.lexeme[i] = '\0'; // null-terminate string
+    token.value[i] = '\0'; // null-terminate string
 
     token.line = lexer->line;
     token.col  = lexer->col;
@@ -297,34 +349,112 @@ Token get_ident(Lexer *lexer) {
 
     // ensure the first character is a letter or underscore
     if (is_letter(input) || input == '_') {
-        token.lexeme[i++] = input;
+        token.value[i++] = input;
         advance(lexer, 1, true);
         input = curr_input(lexer);
     } else {
-        // if it doesn't start with a valid character,
-        // return an error token
-        token.type      = TOK_UNKNOWN;
-        token.lexeme[0] = '\0'; // empty lexeme
+        // return error token if doesn't start with a valid token
+        token.type     = TOK_UNKNOWN;
+        token.value[0] = '\0'; // empty value
         return token;
     }
 
     token.line = lexer->line;
     token.col  = lexer->col;
 
-    // continue allowing letters, digits,
-    // or underscores for the rest of the identifier
+    // continue allowing letters, digits and underscores
     while (is_letter(input) || is_digit(input) || input == '_') {
-        token.lexeme[i++] = input;
+        token.value[i++] = input;
         advance(lexer, 1, true);
         input = curr_input(lexer);
     }
 
-    token.lexeme[i] = '\0'; // null-terminate string
+    token.value[i] = '\0'; // null-terminate string
 
-    // check if this identifier is a keyword
-    for (int j = 0; keywords[j] != NULL; j++) {
-        if (strcmp(token.lexeme, keywords[j]) == 0) {
-            token.type = TOK_KEYWORD; // it's a keyword
+    // access specifiers
+    for (int j = 0; access_specifiers[j] != NULL; j++) {
+        if (strcmp(token.value, access_specifiers[j]) == 0) {
+            token.type = TOK_ACC_SPEC; // keyword
+            break;
+        }
+    }
+
+    // type specifiers
+    for (int j = 0; type_specifiers[j] != NULL; j++) {
+        if (strcmp(token.value, type_specifiers[j]) == 0) {
+            token.type = TOK_TYPE_SPEC; // keyword
+            break;
+        }
+    }
+
+    // type qualifiers
+    for (int j = 0; type_qualifiers[j] != NULL; j++) {
+        if (strcmp(token.value, type_qualifiers[j]) == 0) {
+            token.type = TOK_TYPE_QF; // keyword
+            break;
+        }
+    }
+
+    // type modifiers
+    for (int j = 0; type_modifiers[j] != NULL; j++) {
+        if (strcmp(token.value, type_modifiers[j]) == 0) {
+            token.type = TOK_TYPE_MOD; // keyword
+            break;
+        }
+    }
+
+    // module
+    for (int j = 0; module[j] != NULL; j++) {
+        if (strcmp(token.value, module[j]) == 0) {
+            token.type = TOK_MODULE; // keyword
+            break;
+        }
+    }
+
+    // memory
+    for (int j = 0; memory[j] != NULL; j++) {
+        if (strcmp(token.value, memory[j]) == 0) {
+            token.type = TOK_MEM; // keyword
+            break;
+        }
+    }
+
+    // errors
+    for (int j = 0; errors[j] != NULL; j++) {
+        if (strcmp(token.value, errors[j]) == 0) {
+            token.type = TOK_ERROR; // keyword
+            break;
+        }
+    }
+
+    // functions
+    for (int j = 0; functions[j] != NULL; j++) {
+        if (strcmp(token.value, functions[j]) == 0) {
+            token.type = TOK_FUNC; // keyword
+            break;
+        }
+    }
+
+    // conditionals
+    for (int j = 0; conditionals[j] != NULL; j++) {
+        if (strcmp(token.value, conditionals[j]) == 0) {
+            token.type = TOK_COND; // keyword
+            break;
+        }
+    }
+
+    // loops
+    for (int j = 0; loops[j] != NULL; j++) {
+        if (strcmp(token.value, loops[j]) == 0) {
+            token.type = TOK_LOOPS; // keyword
+            break;
+        }
+    }
+
+    // async
+    for (int j = 0; async[j] != NULL; j++) {
+        if (strcmp(token.value, async[j]) == 0) {
+            token.type = TOK_ASYNC; // keyword
             break;
         }
     }
@@ -348,17 +478,17 @@ Token get_string_literal(Lexer *lexer) {
     input = curr_input(lexer);
 
     while (input != '"' && input != '\0') { // end of string or EOF
-        token.lexeme[i++] = input;
+        token.value[i++] = input;
         advance(lexer, 1, true);
         input = curr_input(lexer);
     }
 
     if (input == '"') {
-        token.lexeme[i] = '\0';  // null-terminate string
+        token.value[i] = '\0';   // null-terminate string
         advance(lexer, 1, true); // consume closing quote
     } else {
-        token.type      = TOK_UNKNOWN;
-        token.lexeme[0] = '\0'; // empty lexeme
+        token.type     = TOK_UNKNOWN;
+        token.value[0] = '\0'; // empty value
     }
 
     token.line = lexer->line;
@@ -382,7 +512,7 @@ Token get_char_literal(Lexer *lexer) {
     input = curr_input(lexer);
 
     if (input != '\'') {
-        token.lexeme[0] = input; // store the character
+        token.value[0] = input;  // store the character
         advance(lexer, 1, true); // move past the character
         input = curr_input(lexer);
 
@@ -390,13 +520,13 @@ Token get_char_literal(Lexer *lexer) {
             advance(lexer, 1, true); // consume the closing quote
         } else {
             // if there's no closing quote, mark it as unknown
-            token.type      = TOK_UNKNOWN;
-            token.lexeme[0] = '\0'; // empty lexeme
+            token.type     = TOK_UNKNOWN;
+            token.value[0] = '\0'; // empty value
         }
     } else {
         // if it's just an empty quote, mark as unknown
-        token.type      = TOK_UNKNOWN;
-        token.lexeme[0] = '\0'; // empty lexeme
+        token.type     = TOK_UNKNOWN;
+        token.value[0] = '\0'; // empty value
     }
 
     token.line = lexer->line;
@@ -456,7 +586,7 @@ void skip_comments(Lexer *lexer) {
  * @param lexer
  * @return
  */
-Token get_next_token(Lexer *lexer) {
+Token next_token(Lexer *lexer) {
     skip_space(lexer);
 
     char input = curr_input(lexer);
@@ -465,14 +595,14 @@ Token get_next_token(Lexer *lexer) {
         lexer->line++;
         lexer->col = 0; // reset for new line
         advance(lexer, 1, false);
-        return get_next_token(lexer); // recursively get the next token
+        return next_token(lexer); // recursively get the next token
     }
 
     // handle comments
     if ((input == '/' && (peek_next_input(lexer) == '*' || peek_next_input(lexer) == '/')) ||
         input == '#') {
-        skip_comments(lexer);         // skip the comment
-        return get_next_token(lexer); // recursively get the next token after the comment
+        skip_comments(lexer);     // skip the comment
+        return next_token(lexer); // recursively get the next token after the comment
     }
 
     if (is_letter(input) || input == '_') {
@@ -533,25 +663,25 @@ Token get_next_token(Lexer *lexer) {
     // (+=)
     if (input == '+' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->col};
+        return (Token){TOK_ADD_ASN, "+=", lexer->line, lexer->col};
     }
 
     // (-=)
     if (input == '-' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->col};
+        return (Token){TOK_SUB_ASN, "-=", lexer->line, lexer->col};
     }
 
     // (*=)
     if (input == '*' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->col};
+        return (Token){TOK_MUL_ASN, "*=", lexer->line, lexer->col};
     }
 
     // (/=)
     if (input == '/' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->col};
+        return (Token){TOK_DIV_ASN, "/=", lexer->line, lexer->col};
     }
 
     // (**)
@@ -563,7 +693,7 @@ Token get_next_token(Lexer *lexer) {
     // (%=)
     if (input == '%' && peek_next_input(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->col};
+        return (Token){TOK_MOD_ASN, "%=", lexer->line, lexer->col};
     }
 
     /*********************************************
@@ -653,9 +783,68 @@ Token get_next_token(Lexer *lexer) {
     advance(lexer, 1, true);
 
     // handle unknown token
-    Token token     = {TOK_UNKNOWN, "", lexer->line, lexer->col};
-    token.lexeme[0] = input;
-    token.lexeme[1] = '\0';
+    Token token    = {TOK_UNKNOWN, "", lexer->line, lexer->col};
+    token.value[0] = input;
+    token.value[1] = '\0';
 
     return token;
+}
+
+/**
+ * @brief Scan the lexer and return the tokens array.
+ * @param lexer
+ * @return
+ */
+TokenArr *lexer_scan(Lexer *lexer) {
+    const int initsize = 64;       // initial array size
+    int cursize        = initsize; // current array size
+    int idx            = 0;
+
+    Token token;
+    Token *arr = malloc(initsize * sizeof(Token));
+    if (!arr) {
+        perror("Memory allocation erro");
+        exit(1);
+    }
+
+    do {
+        token      = next_token(lexer);
+        arr[idx++] = token;
+
+        if (idx >= cursize) {
+            cursize *= 2;
+            arr = realloc(arr, cursize * sizeof(Token));
+            if (!arr) {
+                perror("Memory allocation error");
+                exit(1);
+            }
+        }
+    } while (!token_end(token));
+
+    // shrink to fit exact amount of tokens
+    arr = realloc(arr, idx * sizeof(Token));
+    if (!arr) {
+        perror("Memory reallocation error");
+        exit(1);
+    }
+
+    TokenArr *tokarr = malloc(sizeof(TokenArr));
+    if (!tokarr) {
+        perror("Memory reallocation error");
+        exit(1);
+    }
+
+    tokarr->tokens = arr;
+    tokarr->size   = idx;
+
+    return tokarr;
+}
+
+/**
+ * @brief Checks if at the end of source file.
+ * @param token
+ * @return
+ */
+bool token_end(Token token) {
+    return token.type == TOK_EOF;
 }

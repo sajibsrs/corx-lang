@@ -5,16 +5,20 @@
 #include "src/lexer.h"
 
 int main() {
-    Lexer *lexer = create_lexer("../../source.crx");
-    Token token;
+    const char *src = "../../source.crx";
 
-    do {
-        token = get_next_token(lexer); // fetch the next token
-        print_token(token);            // print formatted token
-    } while (token.type != TOK_EOF);
+    Lexer *lexer     = make_lexer(src);
+    TokenArr *tokarr = lexer_scan(lexer);
 
-    remove_lexer(lexer);
-    printf("info # Lexer and lexer buffer cleaned up successfully.\n");
+    printf("Scanned %d tokens:\n", tokarr->size);
+
+    for (int i = 0; i < tokarr->size; i++) {
+        render_token(tokarr->tokens[i]);
+    }
+
+    // cleanup
+    purge_lexer(lexer);
+    purge_tokarr(tokarr);
 
     return 0;
 }
