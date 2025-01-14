@@ -7,18 +7,18 @@
 int main() {
     const char *src = "../../source.crx";
 
-    Lexer *lexer     = make_lexer(src);
-    TokenArr *tokarr = lexer_scan(lexer);
+    Lexer *lex  = make_lexer(src);
+    TokArr *arr = lexer_scan(lex);
 
-    printf("Scanned %d tokens:\n", tokarr->size);
+    printf("Scanned %d tokens:\n", arr->size);
 
-    for (int i = 0; i < tokarr->size; i++) {
-        render_token(tokarr->tokens[i]);
+    for (int i = 0; i < arr->size; i++) {
+        render_token(arr->tokens[i]);
     }
 
     // cleanup
-    purge_lexer(lexer);
-    purge_tokarr(tokarr);
+    purge_lexer(lex);
+    purge_tokarr(arr);
 
     return 0;
 }

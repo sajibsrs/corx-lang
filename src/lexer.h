@@ -70,7 +70,7 @@ typedef struct {
 typedef struct {
     Token *tokens;
     int size;
-} TokenArr;
+} TokArr;
 
 typedef struct {
     char *buffer;
@@ -91,26 +91,7 @@ Lexer *make_lexer(const char *fname);
  * @param lexer
  * @return
  */
-TokenArr *lexer_scan(Lexer *lexer);
-
-/**
- * @brief Cleanup allocated for lexer and it's `buffer`.
- * @param lexer
- */
-void purge_lexer(Lexer *lexer);
-
-/**
- * @brief Cleanup allocated memory from `tokens`.
- * @param tokarr
- */
-void purge_tokarr(TokenArr *tokarr);
-
-/**
- * @brief Fetch the next token.
- * @param lexer
- * @return
- */
-Token next_token(Lexer *lexer);
+TokArr *lexer_scan(Lexer *lexer);
 
 /**
  * @brief Print formatted token to the terminal.
@@ -123,6 +104,18 @@ void render_token(Token token);
  * @param token
  * @return
  */
-bool token_end(Token token);
+bool token_eof(Token token);
+
+/**
+ * @brief Cleanup allocated for lexer and it's `buffer`.
+ * @param lexer
+ */
+void purge_lexer(Lexer *lexer);
+
+/**
+ * @brief Cleanup allocated memory from `tokens`.
+ * @param tokarr
+ */
+void purge_tokarr(TokArr *tokarr);
 
 #endif
