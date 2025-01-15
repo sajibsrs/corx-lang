@@ -14,6 +14,7 @@ typedef enum {
     TOK_MEM,       //
     TOK_ERROR,     //
     TOK_MODULE,    //
+    TOK_IMPORT,    //
     TOK_ASYNC,     //
     TOK_IDENT,     // variable name
     TOK_NUMBER,    // numbers
@@ -22,8 +23,8 @@ typedef enum {
     TOK_ASSIGN,    // '='
     TOK_PLUS,      // '+'
     TOK_MINUS,     // '-'
-    TOK_STAR,      // '*'
-    TOK_AMP,       // '&'
+    TOK_ASTERISK,  // '*'
+    TOK_AMPERSAND, // '&'
     TOK_AT,        // '@'
     TOK_HASH,      // '#'
     TOK_FSLASH,    // '/'
@@ -70,7 +71,7 @@ typedef struct {
 typedef struct {
     Token *tokens;
     int size;
-} TokArr;
+} TokenList;
 
 typedef struct {
     char *buffer;
@@ -81,23 +82,23 @@ typedef struct {
 
 /**
  * @brief Creates lexer and store source code to it's `buffer`.
- * @param fname File name with path.
+ * @param path File name with path.
  * @return
  */
-Lexer *make_lexer(const char *fname);
+Lexer *make_lexer(const char *path);
 
 /**
- * @brief Scan the lexer and return the tokens array.
- * @param lexer
+ * @brief Scan the source and return the tokens array.
+ * @param src Sourcecode file path.
  * @return
  */
-TokArr *lexer_scan(Lexer *lexer);
+TokenList *scan(const char *src);
 
 /**
  * @brief Print formatted token to the terminal.
  * @param token
  */
-void render_token(Token token);
+void print_token(Token token);
 
 /**
  * @brief Checks if at the end of source file.
@@ -114,8 +115,8 @@ void purge_lexer(Lexer *lexer);
 
 /**
  * @brief Cleanup allocated memory from `tokens`.
- * @param tokarr
+ * @param list
  */
-void purge_tokarr(TokArr *tokarr);
+void purge_tokenlist(TokenList *list);
 
 #endif

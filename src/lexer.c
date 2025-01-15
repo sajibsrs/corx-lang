@@ -134,6 +134,7 @@ char *token_str(const TokenType type) {
     case TOK_MEM:       return "TOK_MEM";
     case TOK_ERROR:     return "TOK_ERROR";
     case TOK_MODULE:    return "TOK_MODULE";
+    case TOK_IMPORT:    return "TOK_IMPORT";
     case TOK_ASYNC:     return "TOK_ASYNC";
     case TOK_IDENT:     return "TOK_IDENT";
     case TOK_NUMBER:    return "TOK_NUMBER";
@@ -142,8 +143,8 @@ char *token_str(const TokenType type) {
     case TOK_ASSIGN:    return "TOK_ASSIGN";
     case TOK_PLUS:      return "TOK_PLUS";
     case TOK_MINUS:     return "TOK_MINUS";
-    case TOK_STAR:      return "TOK_STAR";
-    case TOK_AMP:       return "TOK_AMP";
+    case TOK_ASTERISK:  return "TOK_ASTERISK";
+    case TOK_AMPERSAND: return "TOK_AMPERSAND";
     case TOK_AT:        return "TOK_AT";
     case TOK_HASH:      return "TOK_HASH";
     case TOK_FSLASH:    return "TOK_FSLASH";
@@ -186,7 +187,7 @@ char *token_str(const TokenType type) {
  * @brief Print formatted token to the terminal.
  * @param token
  */
-void render_token(Token token) {
+void print_token(Token token) {
     printf(
         "token: id %-4d type %-16s value %-8s line %-4d col %d\n", token.type,
         token_str(token.type), token.value, token.line, token.col
@@ -195,10 +196,10 @@ void render_token(Token token) {
 
 /**
  * @brief Creates lexer and store source code to it's `buffer`.
- * @param fname File name with path.
+ * @param path File name with path.
  * @return
  */
-Lexer *make_lexer(const char *fname) {
+Lexer *make_lexer(const char *path) {
     Lexer *lexer = malloc(sizeof(Lexer));
     if (!lexer) {
         perror("Memory allocation error");
@@ -209,7 +210,7 @@ Lexer *make_lexer(const char *fname) {
     lexer->line = 1;
     lexer->col  = 0;
 
-    FILE *file = fopen(fname, "r");
+    FILE *file = fopen(path, "r");
     if (!file) {
         perror("Error opening file");
         exit(1);
@@ -242,7 +243,7 @@ Lexer *make_lexer(const char *fname) {
  * @param lexer
  * @return
  */
-static char curinput(Lexer *lexer) {
+static char current(Lexer *lexer) {
     return lexer->buffer[lexer->pos];
 }
 
@@ -262,11 +263,11 @@ static void advance(Lexer *lexer, int n, bool movecol) {
  * It keeps doing so until a non-whitespace character is found.
  * @param lexer
  */
-static void skip_space(Lexer *lexer) {
-    char input = curinput(lexer);
+static void space(Lexer *lexer) {
+    char input = current(lexer);
     while (input == ' ' || input == '\t') {
         advance(lexer, 1, true);
-        input = curinput(lexer);
+        input = current(lexer);
     }
 }
 
@@ -297,15 +298,15 @@ static Token number(Lexer *lexer) {
     Token token;
     token.type = TOK_NUMBER;
 
-    char input = curinput(lexer);
-    int i      = 0;
+    char cin = current(lexer);
+    int idx  = 0;
 
-    while (is_digit(input)) {
-        token.value[i++] = input;
+    while (is_digit(cin)) {
+        token.value[idx++] = cin;
         advance(lexer, 1, true);
-        input = curinput(lexer);
+        cin = current(lexer);
     }
-    token.value[i] = '\0'; // null-terminate string
+    token.value[idx] = '\0'; // null-terminate string
 
     token.line = lexer->line;
     token.col  = lexer->col;
@@ -322,14 +323,14 @@ static Token identifier(Lexer *lexer) {
     Token token;
     token.type = TOK_IDENT; // default is identifier
 
-    char input = curinput(lexer);
-    int i      = 0;
+    char cin = current(lexer);
+    int idx  = 0;
 
     // ensure the first character is a letter or underscore
-    if (is_letter(input) || input == '_') {
-        token.value[i++] = input;
+    if (is_letter(cin) || cin == '_') {
+        token.value[idx++] = cin;
         advance(lexer, 1, true);
-        input = curinput(lexer);
+        cin = current(lexer);
     } else {
         // return error token if doesn't start with a valid token
         token.type     = TOK_UNKNOWN;
@@ -341,13 +342,13 @@ static Token identifier(Lexer *lexer) {
     token.col  = lexer->col;
 
     // continue allowing letters, digits and underscores
-    while (is_letter(input) || is_digit(input) || input == '_') {
-        token.value[i++] = input;
+    while (is_letter(cin) || is_digit(cin) || cin == '_') {
+        token.value[idx++] = cin;
         advance(lexer, 1, true);
-        input = curinput(lexer);
+        cin = current(lexer);
     }
 
-    token.value[i] = '\0'; // null-terminate string
+    token.value[idx] = '\0'; // null-terminate string
 
     // access specifiers
     for (int j = 0; access_specifiers[j] != NULL; j++) {
@@ -445,20 +446,20 @@ static Token identifier(Lexer *lexer) {
  * @param lexer
  * @return
  */
-static Token string_literal(Lexer *lexer) {
+static Token string(Lexer *lexer) {
     Token token;
     token.type = TOK_STRING;
 
-    char input = curinput(lexer);
+    char input = current(lexer);
     int i      = 0;
 
     advance(lexer, 1, true); // skip opening quote
-    input = curinput(lexer);
+    input = current(lexer);
 
     while (input != '"' && input != '\0') { // end of string or EOF
         token.value[i++] = input;
         advance(lexer, 1, true);
-        input = curinput(lexer);
+        input = current(lexer);
     }
 
     if (input == '"') {
@@ -480,19 +481,19 @@ static Token string_literal(Lexer *lexer) {
  * @param lexer
  * @return
  */
-static Token char_literal(Lexer *lexer) {
+static Token character(Lexer *lexer) {
     Token token;
     token.type = TOK_CHAR;
 
-    char input = curinput(lexer);
+    char input = current(lexer);
 
     advance(lexer, 1, true); // skip the opening quote
-    input = curinput(lexer);
+    input = current(lexer);
 
     if (input != '\'') {
         token.value[0] = input;  // store the character
         advance(lexer, 1, true); // move past the character
-        input = curinput(lexer);
+        input = current(lexer);
 
         if (input == '\'') {         // check for the closing quote
             advance(lexer, 1, true); // consume the closing quote
@@ -518,7 +519,7 @@ static Token char_literal(Lexer *lexer) {
  * @param lexer
  * @return
  */
-static char peek_next(Lexer *lexer) {
+static char peek(Lexer *lexer) {
     return lexer->buffer[lexer->pos + 1];
 }
 
@@ -526,19 +527,19 @@ static char peek_next(Lexer *lexer) {
  * @brief Skip single and multi-line comments.
  * @param lexer
  */
-static void skip_comments(Lexer *lexer) {
-    char input = curinput(lexer);
-    char peek  = peek_next(lexer);
+static void comment(Lexer *lexer) {
+    char cin   = current(lexer);
+    char ptk   = peek(lexer);
     int buffsz = strlen(lexer->buffer);
 
-    if (input == '/' && peek == '*') { // multi-line comment
-        advance(lexer, 2, true);       // skip '/*'
+    if (cin == '/' && ptk == '*') { // multi-line comment
+        advance(lexer, 2, true);    // skip '/*'
         while (lexer->pos < buffsz) {
-            if (curinput(lexer) == '*' && peek_next(lexer) == '/') {
+            if (current(lexer) == '*' && peek(lexer) == '/') {
                 advance(lexer, 2, true); // skip '*/'
                 return;
             }
-            if (curinput(lexer) == '\n') {
+            if (current(lexer) == '\n') {
                 lexer->line++;
                 lexer->col = 1;
                 advance(lexer, 1, false);
@@ -546,14 +547,14 @@ static void skip_comments(Lexer *lexer) {
                 advance(lexer, 1, true);
             }
         }
-    } else if (input == '/' && peek == '/') { // single-line comment
-        advance(lexer, 2, true);              // skip '//'
-        while (lexer->pos < buffsz && curinput(lexer) != '\n') {
+    } else if (cin == '/' && ptk == '/') { // single-line comment
+        advance(lexer, 2, true);           // skip '//'
+        while (lexer->pos < buffsz && current(lexer) != '\n') {
             advance(lexer, 1, true);
         }
-    } else if (input == '#') {   // hash-style comment
+    } else if (cin == '#') {     // hash-style comment
         advance(lexer, 1, true); // skip '#'
-        while (lexer->pos < buffsz && curinput(lexer) != '\n') {
+        while (lexer->pos < buffsz && current(lexer) != '\n') {
             advance(lexer, 1, true);
         }
     }
@@ -564,37 +565,37 @@ static void skip_comments(Lexer *lexer) {
  * @param lexer
  * @return
  */
-static Token next_token(Lexer *lexer) {
-    skip_space(lexer);
+static Token next(Lexer *lexer) {
+    space(lexer);
 
-    char input = curinput(lexer);
+    char cin = current(lexer);
 
-    if (input == '\n' || input == '\r') {
+    if (cin == '\n' || cin == '\r') {
         lexer->line++;
         lexer->col = 0; // reset for new line
         advance(lexer, 1, false);
-        return next_token(lexer); // recursively get the next token
+        return next(lexer); // recursively get the next token
     }
 
     // handle comments
-    if ((input == '/' && (peek_next(lexer) == '*' || peek_next(lexer) == '/')) || input == '#') {
-        skip_comments(lexer);     // skip the comment
-        return next_token(lexer); // recursively get the next token after the comment
+    if ((cin == '/' && (peek(lexer) == '*' || peek(lexer) == '/')) || cin == '#') {
+        comment(lexer);     // skip the comment
+        return next(lexer); // recursively get the next token after the comment
     }
 
-    if (is_letter(input) || input == '_') {
+    if (is_letter(cin) || cin == '_') {
         return identifier(lexer);
     }
 
-    if (is_digit(input)) {
+    if (is_digit(cin)) {
         return number(lexer);
     }
 
-    if (input == '"') {
-        return string_literal(lexer);
+    if (cin == '"') {
+        return string(lexer);
     }
-    if (input == '\'') {
-        return char_literal(lexer);
+    if (cin == '\'') {
+        return character(lexer);
     }
 
     /*********************************************
@@ -602,73 +603,73 @@ static Token next_token(Lexer *lexer) {
      *********************************************/
 
     // (==)
-    if (input == '=' && peek_next(lexer) == '=') {
+    if (cin == '=' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_EQ, "==", lexer->line, lexer->col};
     }
 
     // (!=)
-    if (input == '!' && peek_next(lexer) == '=') {
+    if (cin == '!' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '!='
         return (Token){TOK_NEQ, "!=", lexer->line, lexer->col};
     }
 
     // (<=)
-    if (input == '<' && peek_next(lexer) == '=') {
+    if (cin == '<' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '<='
         return (Token){TOK_LEQ, "<=", lexer->line, lexer->col};
     }
 
     // (>=)
-    if (input == '>' && peek_next(lexer) == '=') {
+    if (cin == '>' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '>='
         return (Token){TOK_GEQ, ">=", lexer->line, lexer->col};
     }
 
     // (++)
-    if (input == '+' && peek_next(lexer) == '+') {
+    if (cin == '+' && peek(lexer) == '+') {
         advance(lexer, 2, true); // consume '++'
         return (Token){TOK_INCR, "++", lexer->line, lexer->col};
     }
 
     // (--)
-    if (input == '-' && peek_next(lexer) == '-') {
+    if (cin == '-' && peek(lexer) == '-') {
         advance(lexer, 2, true); // consume '--'
         return (Token){TOK_DECR, "--", lexer->line, lexer->col};
     }
 
     // (+=)
-    if (input == '+' && peek_next(lexer) == '=') {
+    if (cin == '+' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_ADD_ASN, "+=", lexer->line, lexer->col};
     }
 
     // (-=)
-    if (input == '-' && peek_next(lexer) == '=') {
+    if (cin == '-' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_SUB_ASN, "-=", lexer->line, lexer->col};
     }
 
     // (*=)
-    if (input == '*' && peek_next(lexer) == '=') {
+    if (cin == '*' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_MUL_ASN, "*=", lexer->line, lexer->col};
     }
 
     // (/=)
-    if (input == '/' && peek_next(lexer) == '=') {
+    if (cin == '/' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_DIV_ASN, "/=", lexer->line, lexer->col};
     }
 
     // (**)
-    if (input == '*' && peek_next(lexer) == '*') {
+    if (cin == '*' && peek(lexer) == '*') {
         advance(lexer, 2, true);
         return (Token){TOK_POW, "**", lexer->line, lexer->col};
     }
 
     // (%=)
-    if (input == '%' && peek_next(lexer) == '=') {
+    if (cin == '%' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_MOD_ASN, "%=", lexer->line, lexer->col};
     }
@@ -677,82 +678,82 @@ static Token next_token(Lexer *lexer) {
      * single-character operators
      *********************************************/
 
-    if (input == '<') {
+    if (cin == '<') {
         advance(lexer, 1, true);
         return (Token){TOK_LT, "<", lexer->line, lexer->col};
     }
 
-    if (input == '>') {
+    if (cin == '>') {
         advance(lexer, 1, true);
         return (Token){TOK_GT, ">", lexer->line, lexer->col};
     }
 
-    if (input == '=') {
+    if (cin == '=') {
         advance(lexer, 1, true);
         return (Token){TOK_ASSIGN, "=", lexer->line, lexer->col};
     }
 
-    if (input == '+') {
+    if (cin == '+') {
         advance(lexer, 1, true);
         return (Token){TOK_PLUS, "+", lexer->line, lexer->col};
     }
 
-    if (input == '-') {
+    if (cin == '-') {
         advance(lexer, 1, true);
         return (Token){TOK_MINUS, "-", lexer->line, lexer->col};
     }
 
-    if (input == '*') {
+    if (cin == '*') {
         advance(lexer, 1, true);
-        return (Token){TOK_STAR, "*", lexer->line, lexer->col};
+        return (Token){TOK_ASTERISK, "*", lexer->line, lexer->col};
     }
 
-    if (input == '/') {
+    if (cin == '/') {
         advance(lexer, 1, true);
         return (Token){TOK_FSLASH, "/", lexer->line, lexer->col};
     }
 
-    if (input == ';') {
+    if (cin == ';') {
         advance(lexer, 1, true);
         return (Token){TOK_SEMI, ";", lexer->line, lexer->col};
     }
 
-    if (input == '(') {
+    if (cin == '(') {
         advance(lexer, 1, true);
         return (Token){TOK_LPAREN, "(", lexer->line, lexer->col};
     }
 
-    if (input == ')') {
+    if (cin == ')') {
         advance(lexer, 1, true);
         return (Token){TOK_RPAREN, ")", lexer->line, lexer->col};
     }
 
-    if (input == '{') {
+    if (cin == '{') {
         advance(lexer, 1, true);
         return (Token){TOK_LBRACE, "{", lexer->line, lexer->col};
     }
 
-    if (input == '}') {
+    if (cin == '}') {
         advance(lexer, 1, true);
         return (Token){TOK_RBRACE, "}", lexer->line, lexer->col};
     }
 
-    if (input == '[') {
+    if (cin == '[') {
         advance(lexer, 1, true);
         return (Token){TOK_LBRACKET, "[", lexer->line, lexer->col};
     }
 
-    if (input == ']') {
+    if (cin == ']') {
         advance(lexer, 1, true);
         return (Token){TOK_RBRACKET, "]", lexer->line, lexer->col};
     }
 
-    if (input == '%') {
+    if (cin == '%') {
         advance(lexer, 1, true);
         return (Token){TOK_MOD, "%", lexer->line, lexer->col};
     }
 
-    if (input == '\0') {
+    if (cin == '\0') {
         advance(lexer, 1, true);
         return (Token){TOK_EOF, "EOF", lexer->line, lexer->col};
     }
@@ -761,7 +762,7 @@ static Token next_token(Lexer *lexer) {
 
     // handle unknown token
     Token token    = {TOK_UNKNOWN, "", lexer->line, lexer->col};
-    token.value[0] = input;
+    token.value[0] = cin;
     token.value[1] = '\0';
 
     return token;
@@ -769,34 +770,37 @@ static Token next_token(Lexer *lexer) {
 
 /**
  * @brief Scan the lexer and return the tokens array.
- * @param lexer
+ * @param lexers
  * @return
  */
-TokArr *lexer_scan(Lexer *lexer) {
-    const int initsize = 64;       // initial array size
-    int cursize        = initsize; // current array size
-    int idx            = 0;
+TokenList *scan(const char *src) {
+    Lexer *lexer    = make_lexer(src);
+    const int isize = 64;    // initial array size
+    int csize       = isize; // current array size
+    int idx         = 0;
 
     Token token;
-    Token *arr = malloc(initsize * sizeof(Token));
+    Token *arr = malloc(isize * sizeof(Token));
     if (!arr) {
-        perror("Memory allocation erro");
+        perror("Memory allocation error");
         exit(1);
     }
 
     do {
-        token      = next_token(lexer);
+        token      = next(lexer);
         arr[idx++] = token;
 
-        if (idx >= cursize) {
-            cursize *= 2;
-            arr = realloc(arr, cursize * sizeof(Token));
+        if (idx >= csize) {
+            csize *= 2;
+            arr = realloc(arr, csize * sizeof(Token));
             if (!arr) {
                 perror("Memory allocation error");
                 exit(1);
             }
         }
     } while (!token_eof(token));
+
+    purge_lexer(lexer);
 
     // shrink to fit exact amount of tokens
     arr = realloc(arr, idx * sizeof(Token));
@@ -805,16 +809,16 @@ TokArr *lexer_scan(Lexer *lexer) {
         exit(1);
     }
 
-    TokArr *tokarr = malloc(sizeof(TokArr));
-    if (!tokarr) {
+    TokenList *list = malloc(sizeof(TokenList));
+    if (!list) {
         perror("Memory reallocation error");
         exit(1);
     }
 
-    tokarr->tokens = arr;
-    tokarr->size   = idx;
+    list->tokens = arr;
+    list->size   = idx;
 
-    return tokarr;
+    return list;
 }
 
 /**
@@ -839,11 +843,11 @@ void purge_lexer(Lexer *lexer) {
 
 /**
  * @brief Cleanup allocated memory from `tokens`.
- * @param tokarr
+ * @param list
  */
-void purge_tokarr(TokArr *tokarr) {
-    if (!tokarr) return;
+void purge_tokenlist(TokenList *list) {
+    if (!list) return;
 
-    free(tokarr->tokens);
-    free(tokarr);
+    free(list->tokens);
+    free(list);
 }
