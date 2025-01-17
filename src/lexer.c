@@ -4,194 +4,147 @@
 
 #include "lexer.h"
 
-const char *type_specifiers[] = {
-    "bool", //
-
-    "char",   //
-    "string", //
-    "utf8",   //
-    "utf16",  //
-    "utf32",  //
-
-    "float",   //
-    "float16", //
-    "float32", //
-    "float64", //
-
-    "int",    //
-    "uint",   //
-    "int8",   //
-    "uint8",  //
-    "int16",  //
-    "uint16", //
-    "int32",  //
-    "uint32", //
-    "int64",  //
-    "uint64", //
-
-    "enum",     // enum (enumeration)
-    "struct",   // struct (structure)
-    "contract", // contract (interface)
-
-    "void", //
-
-    NULL // marks end of array
-};
-
-const char *type_modifiers[] = {
-    "type", // type declaration (aliasing)
-
-    NULL // marks end of array
-};
-
-const char *type_qualifiers[] = {
-    "const",  //
-    "atomic", //
-
-    NULL // marks end of array
-};
-
-const char *access_specifiers[] = {
-    "external", // (public)
-    "internal", // (protected)
-    "restrict", // (private)
-
-    NULL // marks end of array
-};
-
-const char *conditionals[] = {
-    "if",      // if
-    "else",    // else
-    "switch",  //
-    "case",    //
-    "default", //
-
-    NULL // marks end of array
-};
-
-const char *loops[] = {
-    "do",      //
-    "for",     //
-    "foreach", //
-    "in",      //
-    "while",   //
-    "break",
-    "continue", //
-
-    NULL // marks end of array
-};
-
-const char *functions[] = {
-    "return", //
-
-    NULL // marks end of array
-};
-
-const char *memory[] = {
-    "new",    // allocates memory
-    "null",   // represents absence of a lexeme for memory location
-    "purge",  // releases memory
-    "sizeof", //
-    "this",   //
-
-    NULL // marks end of array
-};
-
-const char *errors[] = {
-    "error", //
-
-    NULL // marks end of array
-};
-
-const char *module[] = {
-    "import", //
-    "module", //
-
-    NULL // marks end of array
-};
-
-const char *async[] = {
-    "async", //
-    "wait",  //
-
-    NULL // mark end of array
-};
+#define HASH_SIZE 256
 
 /**
- * @brief Returns token name string.
- * @param type Token type.
+ * @brief Returns hash for token string (Fowler–Noll–Vo hash).
+ * @param str Token string.
  * @return
  */
-char *token_str(const TokenType type) {
-    switch (type) {
-    case TOK_TYPE_SPEC: return "TOK_TYPE_SPEC";
-    case TOK_TYPE_MOD:  return "TOK_TYPE_MOD";
-    case TOK_TYPE_QF:   return "TOK_TYPE_QF";
-    case TOK_ACC_SPEC:  return "TOK_ACC_SPEC";
-    case TOK_FUNC:      return "TOK_FUNC";
-    case TOK_COND:      return "TOK_COND";
-    case TOK_LOOPS:     return "TOK_LOOPS";
-    case TOK_MEM:       return "TOK_MEM";
-    case TOK_ERROR:     return "TOK_ERROR";
-    case TOK_MODULE:    return "TOK_MODULE";
-    case TOK_IMPORT:    return "TOK_IMPORT";
-    case TOK_ASYNC:     return "TOK_ASYNC";
-    case TOK_IDENT:     return "TOK_IDENT";
-    case TOK_NUMBER:    return "TOK_NUMBER";
-    case TOK_STRING:    return "TOK_STRING";
-    case TOK_CHAR:      return "TOK_CHAR";
-    case TOK_ASSIGN:    return "TOK_ASSIGN";
-    case TOK_PLUS:      return "TOK_PLUS";
-    case TOK_MINUS:     return "TOK_MINUS";
-    case TOK_ASTERISK:  return "TOK_ASTERISK";
-    case TOK_AMPERSAND: return "TOK_AMPERSAND";
-    case TOK_AT:        return "TOK_AT";
-    case TOK_HASH:      return "TOK_HASH";
-    case TOK_FSLASH:    return "TOK_FSLASH";
-    case TOK_BSLASH:    return "TOK_BSLASH";
-    case TOK_DOT:       return "TOK_DOT";
-    case TOK_COLON:     return "TOK_COLON";
-    case TOK_SEMI:      return "TOK_SEMI";
-    case TOK_LT:        return "TOK_LT";
-    case TOK_GT:        return "TOK_GT";
-    case TOK_MOD:       return "TOK_MOD";
-    case TOK_ARROW:     return "TOK_ARROW";
-    case TOK_EQ:        return "TOK_EQ";
-    case TOK_NEQ:       return "TOK_NEQ";
-    case TOK_GEQ:       return "TOK_GEQ";
-    case TOK_LEQ:       return "TOK_LEQ";
-    case TOK_ADD_ASN:   return "TOK_ADD_ASN";
-    case TOK_SUB_ASN:   return "TOK_SUB_ASN";
-    case TOK_DIV_ASN:   return "TOK_DIV_ASN";
-    case TOK_MUL_ASN:   return "TOK_MUL_ASN";
-    case TOK_MOD_ASN:   return "TOK_MOD_ASN";
-    case TOK_POW:       return "TOK_POW";
-    case TOK_INCR:      return "TOK_INCR";
-    case TOK_DECR:      return "TOK_DECR";
-    case TOK_LPAREN:    return "TOK_LPAREN";
-    case TOK_RPAREN:    return "TOK_RPAREN";
-    case TOK_LBRACE:    return "TOK_LBRACE";
-    case TOK_RBRACE:    return "TOK_RBRACE";
-    case TOK_LBRACKET:  return "TOK_LBRACKET";
-    case TOK_RBRACKET:  return "TOK_RBRACKET";
-    case TOK_LANGLE:    return "TOK_LANGLE";
-    case TOK_RANGLE:    return "TOK_RANGLE";
-    case TOK_COMMA:     return "TOK_COMMA";
-    case TOK_UNKNOWN:   return "TOK_UNKNOWN";
-    case TOK_EOF:       return "TOK_EOF";
-    default:            return "Unknown token";
+unsigned int hashfnv(const char *str) {
+    unsigned int hash = 2166136261u; // FNV offset basis
+    while (*str) {
+        hash ^= (unsigned char)(*str); // XOR with byte
+        hash *= 16777619u;             // FNV prime
+        str++;
+    }
+    return hash % HASH_SIZE;
+}
+
+// Keyword mapper
+KWMap *kwmap[HASH_SIZE] = {NULL};
+
+void kwmap_add(TokenType type, const char *token);
+
+void init_keymap() {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        kwmap[i] = NULL; // make buckets empty
+    }
+
+    // type modifiers
+    kwmap_add(TOK_TYPE, "type");
+
+    // async
+    kwmap_add(TOK_ASYNC, "async");
+    kwmap_add(TOK_WAIT, "wait");
+
+    // type qualifiers
+    kwmap_add(TOK_CONST, "const");
+    kwmap_add(TOK_ATOMIC, "atomic");
+
+    // access specifier
+    kwmap_add(TOK_EXTERNAL, "external");
+    kwmap_add(TOK_INTERNAL, "internal");
+    kwmap_add(TOK_RESTRICT, "restrict");
+
+    // type specifiers
+    kwmap_add(TOK_BOOL, "bool");
+    kwmap_add(TOK_ENUM, "enum");
+    kwmap_add(TOK_STRUCT, "struct");
+    kwmap_add(TOK_CONTRACT, "contract");
+    kwmap_add(TOK_NUMBER, "number");
+    kwmap_add(TOK_STRING, "string");
+    kwmap_add(TOK_CHAR, "char");
+    kwmap_add(TOK_VOID, "void");
+
+    // conditions
+    kwmap_add(TOK_IF, "if");
+    kwmap_add(TOK_ELSE, "else");
+    kwmap_add(TOK_SWITCH, "switch");
+    kwmap_add(TOK_CASE, "case");
+    kwmap_add(TOK_DEFAULT, "default");
+    kwmap_add(TOK_CONTINUE, "continue");
+
+    // loops
+    kwmap_add(TOK_DO, "do");
+    kwmap_add(TOK_WHILE, "while");
+    kwmap_add(TOK_FOR, "for");
+    kwmap_add(TOK_FOREACH, "foreach");
+    kwmap_add(TOK_IN, "in");
+
+    // module
+    kwmap_add(TOK_MODULE, "module");
+    kwmap_add(TOK_IMPORT, "import");
+    kwmap_add(TOK_FROM, "from");
+
+    // function
+    kwmap_add(TOK_RETURN, "return");
+
+    // memory operations
+    kwmap_add(TOK_NEW, "new");
+    kwmap_add(TOK_NULL, "null");
+    kwmap_add(TOK_SIZEOF, "sizeof");
+    kwmap_add(TOK_THIS, "this");
+    kwmap_add(TOK_PURGE, "purge");
+
+    // others
+    kwmap_add(TOK_ERROR, "error");
+}
+
+void kwmap_add(TokenType type, const char *token) {
+    unsigned int idx = hashfnv(token);
+    KWMap *entry     = malloc(sizeof(KWMap));
+    if (!entry) {
+        perror("Memory allocation failed");
+        exit(1);
+    }
+
+    strncpy(entry->token, token, sizeof(entry->token) - 1);
+    entry->token[sizeof(entry->token) - 1] = '\0';
+
+    entry->type = type;
+
+    entry->next = kwmap[idx]; // move current head
+    kwmap[idx]  = entry;      // insert at head
+}
+
+KWMap *kwmap_find(const char *key) {
+    unsigned int idx = hashfnv(key);
+    KWMap *current   = kwmap[idx];
+
+    while (current) {
+        if (strcmp(current->token, key) == 0) {
+            return current;
+        }
+        current = current->next;
+    }
+    return NULL;
+}
+
+void print_kwmap() {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        KWMap *current = kwmap[i];
+        if (current) {
+            printf("Bucket %d:\n", i);
+            while (current) {
+                printf("  Token: %s, Type: %d\n", current->token, current->type);
+                current = current->next;
+            }
+        }
     }
 }
 
-/**
- * @brief Print formatted token to the terminal.
- * @param token
- */
-void print_token(Token token) {
-    printf(
-        "token: id %-4d type %-16s value %-8s line %-4d col %d\n", token.type,
-        token_str(token.type), token.value, token.line, token.col
-    );
+void purge_kwmap() {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        KWMap *current = kwmap[i];
+
+        while (current) {
+            KWMap *temp = current;
+            current     = current->next;
+            free(temp);
+        }
+        kwmap[i] = NULL;
+    }
 }
 
 /**
@@ -333,7 +286,7 @@ static Token identifier(Lexer *lexer) {
         cin = current(lexer);
     } else {
         // return error token if doesn't start with a valid token
-        token.type     = TOK_UNKNOWN;
+        token.type     = TOK_INVALID;
         token.value[0] = '\0'; // empty value
         return token;
     }
@@ -350,93 +303,8 @@ static Token identifier(Lexer *lexer) {
 
     token.value[idx] = '\0'; // null-terminate string
 
-    // access specifiers
-    for (int j = 0; access_specifiers[j] != NULL; j++) {
-        if (strcmp(token.value, access_specifiers[j]) == 0) {
-            token.type = TOK_ACC_SPEC; // keyword
-            break;
-        }
-    }
-
-    // type specifiers
-    for (int j = 0; type_specifiers[j] != NULL; j++) {
-        if (strcmp(token.value, type_specifiers[j]) == 0) {
-            token.type = TOK_TYPE_SPEC; // keyword
-            break;
-        }
-    }
-
-    // type qualifiers
-    for (int j = 0; type_qualifiers[j] != NULL; j++) {
-        if (strcmp(token.value, type_qualifiers[j]) == 0) {
-            token.type = TOK_TYPE_QF; // keyword
-            break;
-        }
-    }
-
-    // type modifiers
-    for (int j = 0; type_modifiers[j] != NULL; j++) {
-        if (strcmp(token.value, type_modifiers[j]) == 0) {
-            token.type = TOK_TYPE_MOD; // keyword
-            break;
-        }
-    }
-
-    // module
-    for (int j = 0; module[j] != NULL; j++) {
-        if (strcmp(token.value, module[j]) == 0) {
-            token.type = TOK_MODULE; // keyword
-            break;
-        }
-    }
-
-    // memory
-    for (int j = 0; memory[j] != NULL; j++) {
-        if (strcmp(token.value, memory[j]) == 0) {
-            token.type = TOK_MEM; // keyword
-            break;
-        }
-    }
-
-    // errors
-    for (int j = 0; errors[j] != NULL; j++) {
-        if (strcmp(token.value, errors[j]) == 0) {
-            token.type = TOK_ERROR; // keyword
-            break;
-        }
-    }
-
-    // functions
-    for (int j = 0; functions[j] != NULL; j++) {
-        if (strcmp(token.value, functions[j]) == 0) {
-            token.type = TOK_FUNC; // keyword
-            break;
-        }
-    }
-
-    // conditionals
-    for (int j = 0; conditionals[j] != NULL; j++) {
-        if (strcmp(token.value, conditionals[j]) == 0) {
-            token.type = TOK_COND; // keyword
-            break;
-        }
-    }
-
-    // loops
-    for (int j = 0; loops[j] != NULL; j++) {
-        if (strcmp(token.value, loops[j]) == 0) {
-            token.type = TOK_LOOPS; // keyword
-            break;
-        }
-    }
-
-    // async
-    for (int j = 0; async[j] != NULL; j++) {
-        if (strcmp(token.value, async[j]) == 0) {
-            token.type = TOK_ASYNC; // keyword
-            break;
-        }
-    }
+    KWMap *kw = kwmap_find(token.value);
+    if (kw) token.type = kw->type;
 
     return token;
 }
@@ -450,20 +318,20 @@ static Token string(Lexer *lexer) {
     Token token;
     token.type = TOK_STRING;
 
-    char input = current(lexer);
-    int i      = 0;
+    char cin = current(lexer);
+    int idx  = 0;
 
     advance(lexer, 1, true); // skip opening quote
-    input = current(lexer);
+    cin = current(lexer);
 
-    while (input != '"' && input != '\0') { // end of string or EOF
-        token.value[i++] = input;
+    while (cin != '"' && cin != '\0') { // end of string or EOF
+        token.value[idx++] = cin;
         advance(lexer, 1, true);
-        input = current(lexer);
+        cin = current(lexer);
     }
 
-    if (input == '"') {
-        token.value[i] = '\0';   // null-terminate string
+    if (cin == '"') {
+        token.value[idx] = '\0'; // null-terminate string
         advance(lexer, 1, true); // consume closing quote
     } else {
         token.type     = TOK_UNKNOWN;
@@ -641,25 +509,25 @@ static Token next(Lexer *lexer) {
     // (+=)
     if (cin == '+' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_ADD_ASN, "+=", lexer->line, lexer->col};
+        return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->col};
     }
 
     // (-=)
     if (cin == '-' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_SUB_ASN, "-=", lexer->line, lexer->col};
+        return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->col};
     }
 
     // (*=)
     if (cin == '*' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MUL_ASN, "*=", lexer->line, lexer->col};
+        return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->col};
     }
 
     // (/=)
     if (cin == '/' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_DIV_ASN, "/=", lexer->line, lexer->col};
+        return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->col};
     }
 
     // (**)
@@ -671,7 +539,7 @@ static Token next(Lexer *lexer) {
     // (%=)
     if (cin == '%' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MOD_ASN, "%=", lexer->line, lexer->col};
+        return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->col};
     }
 
     /*********************************************
@@ -816,7 +684,7 @@ TokenList *scan(const char *src) {
     }
 
     list->tokens = arr;
-    list->size   = idx;
+    list->count  = idx;
 
     return list;
 }
