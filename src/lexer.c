@@ -287,7 +287,7 @@ Lexer *make_lexer(const char *path) {
 
     lexer->pos    = 0;
     lexer->line   = 1;
-    lexer->column = 0;
+    lexer->column = 1;
 
     FILE *file = fopen(path, "r");
     if (!file) {
@@ -368,8 +368,9 @@ static Token number(Lexer *lexer) {
     Token token;
     token.type = TOK_NUMBER;
 
-    char cin = current(lexer);
-    int idx  = 0;
+    char cin  = current(lexer);
+    int idx   = 0;
+    int tscol = lexer->column; // token start column
 
     // Read digits
     while (isdigit(cin) || cin == '.' || cin == '_') {
@@ -381,7 +382,7 @@ static Token number(Lexer *lexer) {
     token.value[idx] = '\0';
 
     token.line   = lexer->line;
-    token.column = lexer->column;
+    token.column = tscol;
 
     return token;
 }
@@ -395,8 +396,9 @@ static Token identifier(Lexer *lexer) {
     Token token;
     token.type = TOK_IDENT; // default is identifier
 
-    char cin = current(lexer);
-    int idx  = 0;
+    char cin  = current(lexer);
+    int idx   = 0;
+    int tscol = lexer->column; // token start column
 
     // continue allowing letters, digits and underscores
     while (isalnum(cin) || cin == '_') {
@@ -414,7 +416,7 @@ static Token identifier(Lexer *lexer) {
     purge_kwmap();
 
     token.line   = lexer->line;
-    token.column = lexer->column;
+    token.column = tscol; // lexer->column;
 
     return token;
 }
@@ -428,8 +430,9 @@ static Token string(Lexer *lexer) {
     Token token;
     token.type = TOK_STRING;
 
-    char cin = current(lexer);
-    int idx  = 0;
+    char cin  = current(lexer);
+    int idx   = 0;
+    int tscol = lexer->column; // token start column
 
     advance(lexer, 1, true); // skip opening quote
     cin = current(lexer);
@@ -449,7 +452,7 @@ static Token string(Lexer *lexer) {
     }
 
     token.line   = lexer->line;
-    token.column = lexer->column;
+    token.column = tscol;
 
     return token;
 }
@@ -463,17 +466,17 @@ static Token character(Lexer *lexer) {
     Token token;
     token.type = TOK_CHAR;
 
-    char input = current(lexer);
+    char cin = current(lexer);
 
     advance(lexer, 1, true);
-    input = current(lexer);
+    cin = current(lexer);
 
-    if (input != '\'') {
-        token.value[0] = input;
+    if (cin != '\'') {
+        token.value[0] = cin;
         advance(lexer, 1, true);
-        input = current(lexer);
+        cin = current(lexer);
 
-        if (input == '\'') {
+        if (cin == '\'') {
             advance(lexer, 1, true);
         } else {
             // if there's no closing quote
@@ -487,7 +490,7 @@ static Token character(Lexer *lexer) {
     }
 
     token.line   = lexer->line;
-    token.column = lexer->column;
+    token.column = lexer->column - 1;
 
     return token;
 }
@@ -541,7 +544,7 @@ static Token next(Lexer *lexer) {
 
     if (cin == '\n' || cin == '\r') {
         lexer->line++;
-        lexer->column = 0; // reset for new line
+        lexer->column = 1; // reset for new line
         advance(lexer, 1, false);
         return next(lexer); // recursively get the next token
     }
@@ -574,73 +577,73 @@ static Token next(Lexer *lexer) {
     // (==)
     if (cin == '=' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_EQ, "==", lexer->line, lexer->column};
+        return (Token){TOK_EQ, "==", lexer->line, lexer->column - 2};
     }
 
     // (!=)
     if (cin == '!' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '!='
-        return (Token){TOK_NEQ, "!=", lexer->line, lexer->column};
+        return (Token){TOK_NEQ, "!=", lexer->line, lexer->column - 2};
     }
 
     // (<=)
     if (cin == '<' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '<='
-        return (Token){TOK_LEQ, "<=", lexer->line, lexer->column};
+        return (Token){TOK_LEQ, "<=", lexer->line, lexer->column - 2};
     }
 
     // (>=)
     if (cin == '>' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '>='
-        return (Token){TOK_GEQ, ">=", lexer->line, lexer->column};
+        return (Token){TOK_GEQ, ">=", lexer->line, lexer->column - 2};
     }
 
     // (++)
     if (cin == '+' && peek(lexer) == '+') {
         advance(lexer, 2, true); // consume '++'
-        return (Token){TOK_INCR, "++", lexer->line, lexer->column};
+        return (Token){TOK_INCR, "++", lexer->line, lexer->column - 2};
     }
 
     // (--)
     if (cin == '-' && peek(lexer) == '-') {
         advance(lexer, 2, true); // consume '--'
-        return (Token){TOK_DECR, "--", lexer->line, lexer->column};
+        return (Token){TOK_DECR, "--", lexer->line, lexer->column - 2};
     }
 
     // (+=)
     if (cin == '+' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->column};
+        return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->column - 2};
     }
 
     // (-=)
     if (cin == '-' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->column};
+        return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->column - 2};
     }
 
     // (*=)
     if (cin == '*' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->column};
+        return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->column - 2};
     }
 
     // (/=)
     if (cin == '/' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->column};
+        return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->column - 2};
     }
 
     // (**)
     if (cin == '*' && peek(lexer) == '*') {
         advance(lexer, 2, true);
-        return (Token){TOK_POW, "**", lexer->line, lexer->column};
+        return (Token){TOK_POW, "**", lexer->line, lexer->column - 2};
     }
 
     // (%=)
     if (cin == '%' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->column};
+        return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->column - 2};
     }
 
     /*********************************************
@@ -649,113 +652,113 @@ static Token next(Lexer *lexer) {
 
     if (cin == '<') {
         advance(lexer, 1, true);
-        return (Token){TOK_LT, "<", lexer->line, lexer->column};
+        return (Token){TOK_LT, "<", lexer->line, lexer->column - 1};
     }
 
     if (cin == '>') {
         advance(lexer, 1, true);
-        return (Token){TOK_GT, ">", lexer->line, lexer->column};
+        return (Token){TOK_GT, ">", lexer->line, lexer->column - 1};
     }
 
     if (cin == '=') {
         advance(lexer, 1, true);
-        return (Token){TOK_ASSIGN, "=", lexer->line, lexer->column};
+        return (Token){TOK_ASSIGN, "=", lexer->line, lexer->column - 1};
     }
 
     if (cin == '+') {
         advance(lexer, 1, true);
-        return (Token){TOK_PLUS, "+", lexer->line, lexer->column};
+        return (Token){TOK_PLUS, "+", lexer->line, lexer->column - 1};
     }
 
     if (cin == '-') {
         advance(lexer, 1, true);
-        return (Token){TOK_MINUS, "-", lexer->line, lexer->column};
+        return (Token){TOK_MINUS, "-", lexer->line, lexer->column - 1};
     }
 
     if (cin == '*') {
         advance(lexer, 1, true);
-        return (Token){TOK_ASTERISK, "*", lexer->line, lexer->column};
+        return (Token){TOK_ASTERISK, "*", lexer->line, lexer->column - 1};
     }
 
     if (cin == '/') {
         advance(lexer, 1, true);
-        return (Token){TOK_FSLASH, "/", lexer->line, lexer->column};
+        return (Token){TOK_FSLASH, "/", lexer->line, lexer->column - 1};
     }
 
     if (cin == ';') {
         advance(lexer, 1, true);
-        return (Token){TOK_SEMI, ";", lexer->line, lexer->column};
+        return (Token){TOK_SEMI, ";", lexer->line, lexer->column - 1};
     }
 
     if (cin == '(') {
         advance(lexer, 1, true);
-        return (Token){TOK_LPAREN, "(", lexer->line, lexer->column};
+        return (Token){TOK_LPAREN, "(", lexer->line, lexer->column - 1};
     }
 
     if (cin == ')') {
         advance(lexer, 1, true);
-        return (Token){TOK_RPAREN, ")", lexer->line, lexer->column};
+        return (Token){TOK_RPAREN, ")", lexer->line, lexer->column - 1};
     }
 
     if (cin == '{') {
         advance(lexer, 1, true);
-        return (Token){TOK_LBRACE, "{", lexer->line, lexer->column};
+        return (Token){TOK_LBRACE, "{", lexer->line, lexer->column - 1};
     }
 
     if (cin == '}') {
         advance(lexer, 1, true);
-        return (Token){TOK_RBRACE, "}", lexer->line, lexer->column};
+        return (Token){TOK_RBRACE, "}", lexer->line, lexer->column - 1};
     }
 
     if (cin == '[') {
         advance(lexer, 1, true);
-        return (Token){TOK_LBRACKET, "[", lexer->line, lexer->column};
+        return (Token){TOK_LBRACKET, "[", lexer->line, lexer->column - 1};
     }
 
     if (cin == ']') {
         advance(lexer, 1, true);
-        return (Token){TOK_RBRACKET, "]", lexer->line, lexer->column};
+        return (Token){TOK_RBRACKET, "]", lexer->line, lexer->column - 1};
     }
 
     if (cin == '%') {
         advance(lexer, 1, true);
-        return (Token){TOK_MOD, "%", lexer->line, lexer->column};
+        return (Token){TOK_MOD, "%", lexer->line, lexer->column - 1};
     }
 
     if (cin == '!') {
         advance(lexer, 1, true);
-        return (Token){TOK_BANG, "!", lexer->line, lexer->column};
+        return (Token){TOK_BANG, "!", lexer->line, lexer->column - 1};
     }
 
     if (cin == '@') {
         advance(lexer, 1, true);
-        return (Token){TOK_AT, "@", lexer->line, lexer->column};
+        return (Token){TOK_AT, "@", lexer->line, lexer->column - 1};
     }
 
     if (cin == '~') {
         advance(lexer, 1, true);
-        return (Token){TOK_TILDE, "~", lexer->line, lexer->column};
+        return (Token){TOK_TILDE, "~", lexer->line, lexer->column - 1};
     }
 
     if (cin == '.') {
         advance(lexer, 1, true);
-        return (Token){TOK_DOT, ".", lexer->line, lexer->column};
+        return (Token){TOK_DOT, ".", lexer->line, lexer->column - 1};
     }
 
     if (cin == ',') {
         advance(lexer, 1, true);
-        return (Token){TOK_COMMA, ",", lexer->line, lexer->column};
+        return (Token){TOK_COMMA, ",", lexer->line, lexer->column - 1};
     }
 
     if (cin == '\0') {
         advance(lexer, 1, true);
-        return (Token){TOK_EOF, "EOF", lexer->line, lexer->column};
+        return (Token){TOK_EOF, "EOF", lexer->line, lexer->column - 1};
     }
 
     advance(lexer, 1, true);
 
     // handle unknown token
-    Token token    = {TOK_UNKNOWN, "", lexer->line, lexer->column};
+    Token token    = {TOK_UNKNOWN, "", lexer->line, lexer->column - 1};
     token.value[0] = cin;
     token.value[1] = '\0';
 
