@@ -846,7 +846,7 @@ void print_tokenlist(const TokenList *list) {
     for (int i = 0; i < list->count; i++) {
         token = list->tokens[i];
         printf(
-            "%-16s %-10s typ:%d - lin:%d - col:%d\n", //
+            "%-16s %-10s typ:%-4d lin:%-4d col:%d\n", //
             ttypestr[token.type], token.value, token.type, token.line, token.column
         );
     }
