@@ -4,81 +4,165 @@
 #include <stdbool.h>
 
 typedef enum {
-    TOK_TYPE_SPEC, //
-    TOK_TYPE_MOD,  //
-    TOK_TYPE_QF,   //
-    TOK_ACC_SPEC,  //
-    TOK_FUNC,      //
-    TOK_COND,      //
-    TOK_LOOPS,     //
-    TOK_MEM,       //
-    TOK_ERROR,     //
-    TOK_MODULE,    //
-    TOK_IMPORT,    //
-    TOK_ASYNC,     //
-    TOK_IDENT,     // variable name
-    TOK_NUMBER,    // numbers
-    TOK_STRING,    // string literal
-    TOK_CHAR,      // character literal
-    TOK_ASSIGN,    // '='
-    TOK_PLUS,      // '+'
-    TOK_MINUS,     // '-'
-    TOK_ASTERISK,  // '*'
-    TOK_AMPERSAND, // '&'
-    TOK_AT,        // '@'
-    TOK_HASH,      // '#'
-    TOK_FSLASH,    // '/'
-    TOK_BSLASH,    // '\'
-    TOK_DOT,       // '.'
-    TOK_COLON,     // ':'
-    TOK_SEMI,      // ';'
-    TOK_LT,        // '<'
-    TOK_GT,        // '>'
-    TOK_MOD,       // '%'
-    TOK_ARROW,     // '->'
-    TOK_EQ,        // '=='
-    TOK_NEQ,       // '!='
-    TOK_GEQ,       // '>='
-    TOK_LEQ,       // '<='
-    TOK_ADD_ASN,   // '+='
-    TOK_SUB_ASN,   // '-='
-    TOK_DIV_ASN,   // '/='
-    TOK_MUL_ASN,   // '*='
-    TOK_MOD_ASN,   // '%='
-    TOK_POW,       // '**'
-    TOK_INCR,      // '++'
-    TOK_DECR,      // '--'
-    TOK_LPAREN,    // '('
-    TOK_RPAREN,    // ')'
-    TOK_LBRACE,    // '{'
-    TOK_RBRACE,    // '}'
-    TOK_LBRACKET,  // '['
-    TOK_RBRACKET,  // ']'
-    TOK_LANGLE,    // '<'
-    TOK_RANGLE,    // '>'
-    TOK_COMMA,     // ','
-    TOK_UNKNOWN,   // invalid or unknown token
-    TOK_EOF,       // end of file
+    // type modifiers
+    TOK_TYPE, //
+
+    // async
+    TOK_ASYNC, //
+    TOK_WAIT,  //
+
+    // type qualifiers
+    TOK_CONST,  //
+    TOK_ATOMIC, //
+
+    // access specifiers
+    TOK_EXTERNAL,
+    TOK_INTERNAL,
+    TOK_RESTRICT,
+
+    // type specifiers
+    TOK_INT,
+    TOK_FLOAT,
+
+    TOK_BOOL,     //
+    TOK_ENUM,     //
+    TOK_STRUCT,   //
+    TOK_CONTRACT, //
+    TOK_NUMBER,   // numbers
+    TOK_STRING,   // string literal
+    TOK_CHAR,     // character literal
+    TOK_VOID,     // type non-value
+
+    TOK_IDENT, // identifier
+
+    // conditions
+    TOK_IF,      //
+    TOK_ELSE,    //
+    TOK_SWITCH,  //
+    TOK_CASE,    //
+    TOK_DEFAULT, //
+
+    TOK_CONTINUE,
+
+    // loops
+    TOK_DO,
+    TOK_WHILE,
+    TOK_FOR,
+    TOK_FOREACH,
+    TOK_IN,
+
+    // module
+    TOK_MODULE, // group
+    TOK_IMPORT, //
+    TOK_FROM,   //
+
+    // function
+    TOK_RETURN,
+
+    // memory operations
+    TOK_NEW,
+    TOK_NULL, // pointer non-value
+    TOK_SIZEOF,
+    TOK_THIS,
+    TOK_PURGE,
+
+    // operations
+    TOK_ASSIGN,     // '='
+    TOK_PLUS,       // '+'
+    TOK_MINUS,      // '-'
+    TOK_BANG,       // '!'
+    TOK_TILDE,      // '~'
+    TOK_ASTERISK,   // '*'
+    TOK_AMPERSAND,  // '&'
+    TOK_AT,         // '@'
+    TOK_HASH,       // '#'
+    TOK_FSLASH,     // '/'
+    TOK_BSLASH,     // '\'
+    TOK_DOT,        // '.'
+    TOK_COLON,      // ':'
+    TOK_SEMI,       // ';'
+    TOK_LT,         // '<'
+    TOK_GT,         // '>'
+    TOK_MOD,        // '%'
+    TOK_ARROW,      // '->'
+    TOK_EQ,         // '=='
+    TOK_NEQ,        // '!='
+    TOK_GEQ,        // '>='
+    TOK_LEQ,        // '<='
+    TOK_ADD_ASSIGN, // '+='
+    TOK_SUB_ASSIGN, // '-='
+    TOK_DIV_ASSIGN, // '/='
+    TOK_MUL_ASSIGN, // '*='
+    TOK_MOD_ASSIGN, // '%='
+    TOK_POW,        // '**'
+    TOK_INCR,       // '++'
+    TOK_DECR,       // '--'
+
+    // grouping
+    TOK_LPAREN,   // '('
+    TOK_RPAREN,   // ')'
+    TOK_LBRACE,   // '{'
+    TOK_RBRACE,   // '}'
+    TOK_LBRACKET, // '['
+    TOK_RBRACKET, // ']'
+    TOK_LANGLE,   // '<'
+    TOK_RANGLE,   // '>'
+    TOK_COMMA,    // ','
+
+    // quotes
+    TOK_SQUOTE, // '
+    TOK_DQUOTE, // "
+    TOK_BQUOTE, // `
+
+    TOK_ERROR,   //
+    TOK_UNKNOWN, // unknown token
+    TOK_INVALID,
+    TOK_EOF, // end of file
 } TokenType;
+
+extern const char *ttypestr[];
 
 typedef struct {
     TokenType type;
     char value[64];
     int line;
-    int col;
+    int column;
 } Token;
 
 typedef struct {
     Token *tokens;
-    int size;
+    int count;
 } TokenList;
 
 typedef struct {
     char *buffer;
     int pos;
     int line;
-    int col;
+    int column;
 } Lexer;
+
+typedef struct KWMap {
+    char token[32];
+    TokenType type;
+    struct KWMap *next; // pointer for chaining
+} KWMap;
+
+/**
+ * @brief Initialize keyword hashmap.
+ */
+void init_kwmap();
+
+/**
+ * @brief Removes and cleanups hashmap.
+ */
+void purge_kwmap();
+
+/**
+ * @brief Finds a keyword from the hashmap.
+ * @param key Key to search.
+ * @return
+ */
+KWMap *search_kwmap(const char *name);
 
 /**
  * @brief Creates lexer and store source code to it's `buffer`.
@@ -96,9 +180,9 @@ TokenList *scan(const char *src);
 
 /**
  * @brief Print formatted token to the terminal.
- * @param token
+ * @param list
  */
-void print_token(Token token);
+void print_tokenlist(const TokenList *list);
 
 /**
  * @brief Checks if at the end of source file.
