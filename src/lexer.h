@@ -94,7 +94,6 @@ typedef enum {
     TOK_DIV_ASSIGN, // '/='
     TOK_MUL_ASSIGN, // '*='
     TOK_MOD_ASSIGN, // '%='
-    TOK_POW,        // '**'
     TOK_INCR,       // '++'
     TOK_DECR,       // '--'
 
