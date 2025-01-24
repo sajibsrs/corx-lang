@@ -1,0 +1,88 @@
+program
+    = function
+    ;
+
+function
+    = "int" identifier "(" "void" ")" "{" statement "}"
+    ;
+
+statement
+    = "return" ";"
+    ;
+
+expression
+    = factor
+    | expression binary_operator expression
+    ;
+
+factor
+    = integer_constant
+    | unary_operator factor
+    | "(" expression ")"
+    ;
+
+unary_expression
+    = unary_operator expression
+    ;
+
+grouping
+    = "(" expression ")"
+    ;
+
+modifier_specifier
+    = type_modifier
+    | type_specifier
+    | access_specifier
+    ;
+
+access_specifier
+    = "external"
+    | "internal"
+    | "restrict"
+    ;
+
+type_modifier
+    = "const"
+    | "static"
+    | "atomic"
+    ;
+
+type_specifier
+    = "int"
+    ;
+
+constant
+    = integer_constant
+    ;
+
+binary_operator
+    = "-"
+    | "+"
+    | "*"
+    | "/"
+    | "%"
+    ;
+
+unary_operator
+    = "-"
+    | "~"
+    ;
+
+identifier
+    = ( alphanumeric | "_" )+
+    ;
+
+integer_constant
+    = digit+
+    ;
+
+alphanumeric
+    = ( letter | digit )+
+
+digit
+    = "0".."9"
+    ;
+
+letter
+    = "a".."z" | "A".."Z"
+    ;
