@@ -1,36 +1,3 @@
-// a single-line comment
-# another single-line comment
-
-/**
- * multi-line comments
- * another line here
- */
-
-int x = 5;
-int y = 4;
-
-int add = x + y;
-int sub = x - y;
-
-string str = "Hello";
-char c = 'a';
-
-add++;
-sub--;
-
-x <= y;
-y >= x;
-
-struct point {
-    int x = 10;
-    int y = 15;
-};
-
-point p8nt = new point();
-point *_pt = p8nt;
-
-int x = _pt->x;
-
-x %= 20;
-
-~
+int main(void) {
+    return --2;
+}
