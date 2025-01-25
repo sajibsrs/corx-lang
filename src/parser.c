@@ -10,7 +10,7 @@ static Token advance(Parser *parser);
 Node *program(Parser *parser);
 Node *function(Parser *parser);
 Node *statement(Parser *parser);
-Node *expression(Parser *parser);
+Node *expression(Parser *parser, int prec);
 Node *factor(Parser *parser);
 
 Node *identifier(Parser *parser);
@@ -151,6 +151,24 @@ void add_child(Node *parent, Node *child) {
  * Parsing functions
  *********************************************/
 
+/**
+ * @brief Checks if it's a binary operator.
+ * @param type
+ * @return
+ */
+static bool isbinop(TokenType type) {
+    switch (type) {
+    case TOK_PLUS:     // "+"
+    case TOK_MINUS:    // "-"
+    case TOK_ASTERISK: // "*"
+    case TOK_FSLASH:   // "/"
+    case TOK_MOD:      // "%"
+        return true;
+    default: //
+        return false;
+    }
+}
+
 static Token peek(Parser *parser) {
     Token *tokens = parser->list->tokens;
     return (parser->pos == -1) ? tokens[0] : tokens[parser->pos + 1];
@@ -204,7 +222,7 @@ Node *statement(Parser *parser) {
     if (next.type != TOK_RETURN) errexit("expected 'return' ");
     advance(parser);
 
-    Node *expr = expression(parser);
+    Node *expr = expression(parser, 0);
 
     expect(parser, TOK_SEMI, "expected ';' after return");
 
@@ -214,14 +232,14 @@ Node *statement(Parser *parser) {
     return stmt;
 }
 
-Node *expression(Parser *parser) {
+Node *expression(Parser *parser, int prec) {
     Node *left = factor(parser);
     Token next = peek(parser);
 
-    while (next.type == TOK_PLUS || next.type == TOK_MINUS) {
+    while (isbinop(next.type) && precedence(next.type) >= prec) {
         advance(parser);
 
-        Node *right = factor(parser);
+        Node *right = expression(parser, precedence(next.type) + 1);
         Node *bnode = make_node(NOD_BINARY, next.value);
         add_child(bnode, left);
         add_child(bnode, right);
@@ -252,7 +270,7 @@ Node *factor(Parser *parser) {
     } else if (next.type == TOK_LPAREN) {
         advance(parser);
 
-        Node *inode = expression(parser);
+        Node *inode = expression(parser, 0);
         expect(parser, TOK_RPAREN, "expected ')' after expression");
 
         return inode;
