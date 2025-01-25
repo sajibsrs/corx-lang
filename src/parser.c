@@ -25,34 +25,38 @@ const char *ntypestr[] = {
 
 static int precedence(TokenType type) {
     switch (type) {
-    case TOK_ASSIGN:     return 1; // Assignment
-    case TOK_ADD_ASSIGN:
-    case TOK_SUB_ASSIGN:
-    case TOK_MUL_ASSIGN:
-    case TOK_DIV_ASSIGN:
-    case TOK_MOD_ASSIGN: return 2; // Compound assignment
-    case TOK_EQ:
-    case TOK_NEQ:
-    case TOK_LT:
-    case TOK_LEQ:
-    case TOK_GT:
-    case TOK_GEQ:        return 3; // Comparisons
-    case TOK_PLUS:
-    case TOK_MINUS:      return 4; // Addition and subtraction
-    case TOK_ASTERISK:        // Multiplication
-    case TOK_FSLASH:          // Division
-    case TOK_MOD:             // Modulus
-        return 5;             // Multiplication, division, modulus
-    // case TOK_POW: return 6;   // Exponentiation (right-associative)
-    case TOK_TILDE:
-    case TOK_BANG:
-    case TOK_AMPERSAND: // Address-of
-    case TOK_AT:
-    case TOK_BSLASH:    return 6; // Unary operators (including dereference `*p`)
-    case TOK_ARROW:            // Struct member access via pointer
-    case TOK_DOT:              // Struct member access
-        return 7;              // Member access
-    default: return 0;         // Default precedence for other tokens
+    case TOK_ASSIGN:     //
+        return 1;        // assignment
+    case TOK_ADD_ASSIGN: //
+    case TOK_SUB_ASSIGN: //
+    case TOK_MUL_ASSIGN: //
+    case TOK_DIV_ASSIGN: //
+    case TOK_MOD_ASSIGN: //
+        return 2;        // compound assignment
+    case TOK_EQ:         //
+    case TOK_NEQ:        //
+    case TOK_LT:         //
+    case TOK_LEQ:        //
+    case TOK_GT:         //
+    case TOK_GEQ:        //
+        return 3;        // comparisons
+    case TOK_PLUS:       //
+    case TOK_MINUS:      //
+        return 4;        // addition, subtraction
+    case TOK_ASTERISK:   //
+    case TOK_FSLASH:     //
+    case TOK_MOD:        //
+        return 5;        // multiplication, division, modulus
+    case TOK_TILDE:      //
+    case TOK_BANG:       //
+    case TOK_AMPERSAND:  // address-of
+    case TOK_AT:         // pass-by-reference
+    case TOK_BSLASH:     //
+        return 6;        // unary operators (e.g., pointer `*p` and dereference `p*`)
+    case TOK_ARROW:      // struct member access via pointer
+    case TOK_DOT:        // struct member access
+        return 7;        // member access
+    default: return 0;   // default
     }
 }
 
