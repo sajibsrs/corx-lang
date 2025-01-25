@@ -7,27 +7,22 @@ function
     ;
 
 statement
-    = "return" ";"
+    = "return" expression ";"
     ;
 
 expression
     = integer_constant
-    | unary_expression expression
+    | unary_expression
+    | binary_expression
     | "(" expression ")"
+    ;
+
+binary_expression
+    = expression binary_operator expression
     ;
 
 unary_expression
     = unary_operator expression
-    | primary_expression
-    ;
-
-primary_expression
-    = constant
-    | identifier
-    ;
-
-grouping
-    = "(" expression ")"
     ;
 
 modifier_specifier
@@ -50,10 +45,6 @@ type_modifier
 
 type_specifier
     = "int"
-    ;
-
-constant
-    = integer_constant
     ;
 
 binary_operator
