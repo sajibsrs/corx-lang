@@ -4,14 +4,17 @@
 
 #include "parser.h"
 
-/**
- * @brief Prints error message and exits.
- * @param msg
- */
-void error_exit(const char *msg) {
-    fprintf(stderr, "Error: %s\n", msg);
-    exit(1);
-}
+static Token peek(Parser *parser);
+static Token advance(Parser *parser);
+
+Node *program(Parser *parser);
+Node *function(Parser *parser);
+Node *statement(Parser *parser);
+Node *expression(Parser *parser);
+Node *factor(Parser *parser);
+
+Node *identifier(Parser *parser);
+Node *integer(Parser *parser);
 
 const char *ntypestr[] = {
     [NOD_PROGRAM]    = "NOD_PROGRAM",    //
@@ -61,6 +64,56 @@ static int precedence(TokenType type) {
 }
 
 /*********************************************
+ * Helper functions
+ *********************************************/
+
+/**
+ * @brief Prints error message and exits.
+ * @param msg
+ */
+void errexit(const char *msg) {
+    fprintf(stderr, "Error: %s\n", msg);
+    exit(1);
+}
+
+/**
+ * @brief Prints error message with current token line and column information and exits.
+ * @param parser
+ * @param msg
+ */
+static void errexitinfo(Parser *parser, const char *msg) {
+    Token next = peek(parser);
+
+    fprintf(
+        stderr, "Error: %s at token '%s' (ln: %d, column: %d)\n", msg, next.value, next.line,
+        next.column
+    );
+    exit(1);
+}
+
+/**
+ * @brief Compare expected token type against next token type. Consume on
+ * success and exit on failure.
+ *
+ * @param parser Parser to check.
+ * @param type Expected token type.
+ * @param msg Error message to be displayed.
+ */
+static void expect(Parser *parser, TokenType type, const char *msg) {
+    Token next = peek(parser);
+
+    if (next.type != type) {
+        fprintf(
+            stderr, "%s at token '%s' (ln: %d, column: %d)\n", msg, next.value, next.line,
+            next.column
+        );
+        exit(1);
+    }
+
+    advance(parser);
+}
+
+/*********************************************
  * Node functions
  *********************************************/
 
@@ -76,7 +129,7 @@ Parser *make_parser(const TokenList *list) {
 
 Node *make_node(NodeType type, const char *value) {
     Node *node = malloc(sizeof(Node));
-    if (!node) error_exit("make_node memory allocation");
+    if (!node) errexit("make_node memory allocation");
 
     node->type  = type;
     node->value = value ? strdup(value) : NULL;
@@ -88,7 +141,7 @@ Node *make_node(NodeType type, const char *value) {
 
 void add_child(Node *parent, Node *child) {
     parent->nodes = (Node **)realloc(parent->nodes, sizeof(Node *) * (parent->count + 1));
-    if (!parent->nodes) error_exit("add_child memory allocation");
+    if (!parent->nodes) errexit("add_child memory allocation");
 
     parent->nodes[parent->count] = child;
     parent->count++;
@@ -114,36 +167,6 @@ static Token advance(Parser *parser) {
     return tokens[parser->pos++];
 }
 
-/**
- * @brief Compare expected token type against next token type. Consume on
- * success and exit on failure.
- *
- * @param parser Parser to check.
- * @param type Expected token type.
- * @param msg Error message to be displayed.
- */
-static void expect(Parser *parser, TokenType type, const char *msg) {
-    Token next = peek(parser);
-
-    if (next.type != type) {
-        fprintf(
-            stderr, "%s at token '%s' (ln: %d, column: %d)\n", msg, next.value, next.line,
-            next.column
-        );
-        exit(1);
-    }
-
-    advance(parser);
-}
-
-Node *program(Parser *parser);
-Node *function(Parser *parser);
-Node *statement(Parser *parser);
-Node *expression(Parser *parser);
-
-Node *identifier(Parser *parser);
-Node *integer(Parser *parser);
-
 Node *program(Parser *parser) {
     Node *func = function(parser);
     Node *prog = make_node(NOD_PROGRAM, "program");
@@ -154,7 +177,7 @@ Node *program(Parser *parser) {
 
 Node *function(Parser *parser) {
     Token next = peek(parser);
-    if (next.type != TOK_INT) error_exit("expected a type");
+    if (next.type != TOK_INT) errexit("expected a type");
 
     advance(parser);
 
@@ -178,7 +201,7 @@ Node *function(Parser *parser) {
 
 Node *statement(Parser *parser) {
     Token next = peek(parser);
-    if (next.type != TOK_RETURN) error_exit("expected 'return' ");
+    if (next.type != TOK_RETURN) errexit("expected 'return' ");
     advance(parser);
 
     Node *expr = expression(parser);
@@ -192,32 +215,52 @@ Node *statement(Parser *parser) {
 }
 
 Node *expression(Parser *parser) {
+    Node *left = factor(parser);
+    Token next = peek(parser);
+
+    while (next.type == TOK_PLUS || next.type == TOK_MINUS) {
+        advance(parser);
+
+        Node *right = factor(parser);
+        Node *bnode = make_node(NOD_BINARY, next.value);
+        add_child(bnode, left);
+        add_child(bnode, right);
+
+        left = bnode;
+        next = peek(parser);
+    }
+
+    return left;
+}
+
+Node *factor(Parser *parser) {
     Token next = peek(parser);
 
     if (next.type == TOK_NUMBER) {
-        return integer(parser);
-    }
 
-    if (next.type == TOK_MINUS || next.type == TOK_TILDE) {
+        return integer(parser);
+
+    } else if (next.type == TOK_MINUS || next.type == TOK_TILDE) {
         advance(parser);
 
-        Node *inode = expression(parser);
+        Node *inode = factor(parser);
         Node *unode = make_node(NOD_UNARY, next.value);
         add_child(unode, inode);
 
         return unode;
-    }
 
-    if (next.type == TOK_LPAREN) {
+    } else if (next.type == TOK_LPAREN) {
         advance(parser);
 
         Node *inode = expression(parser);
         expect(parser, TOK_RPAREN, "expected ')' after expression");
 
         return inode;
+
+    } else {
+        errexitinfo(parser, "malformed factor");
     }
 
-    error_exit("malformed expression");
     return NULL;
 }
 
