@@ -11,18 +11,19 @@ statement
     ;
 
 expression
-    = factor
-    | expression binary_operator expression
-    ;
-
-factor
     = integer_constant
-    | unary_operator factor
+    | unary_expression expression
     | "(" expression ")"
     ;
 
 unary_expression
     = unary_operator expression
+    | primary_expression
+    ;
+
+primary_expression
+    = constant
+    | identifier
     ;
 
 grouping
