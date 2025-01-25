@@ -98,8 +98,6 @@ const char *ttypestr[] = {
     [TOK_DIV_ASSIGN] = "TOK_DIV_ASSIGN",
     [TOK_MUL_ASSIGN] = "TOK_MUL_ASSIGN",
     [TOK_MOD_ASSIGN] = "TOK_MOD_ASSIGN",
-    [TOK_INCR]       = "TOK_INCR",
-    [TOK_DECR]       = "TOK_DECR",
 
     // Grouping
     [TOK_LPAREN]   = "TOK_LPAREN",
@@ -595,18 +593,6 @@ static Token next(Lexer *lexer) {
     if (cin == '>' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '>='
         return (Token){TOK_GEQ, ">=", lexer->line, lexer->column - 2};
-    }
-
-    // (++)
-    if (cin == '+' && peek(lexer) == '+') {
-        advance(lexer, 2, true); // consume '++'
-        return (Token){TOK_INCR, "++", lexer->line, lexer->column - 2};
-    }
-
-    // (--)
-    if (cin == '-' && peek(lexer) == '-') {
-        advance(lexer, 2, true); // consume '--'
-        return (Token){TOK_DECR, "--", lexer->line, lexer->column - 2};
     }
 
     // (+=)
