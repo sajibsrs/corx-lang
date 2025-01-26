@@ -169,6 +169,21 @@ static bool isbinop(TokenType type) {
     }
 }
 
+/**
+ * @brief Checks if it's a unary operator.
+ * @param type
+ * @return
+ */
+static bool isunop(TokenType type) {
+    switch (type) {
+    case TOK_MINUS: //
+    case TOK_TILDE: //
+        return true;
+    default: //
+        return false;
+    }
+}
+
 static Token peek(Parser *parser) {
     Token *tokens = parser->list->tokens;
     return (parser->pos == -1) ? tokens[0] : tokens[parser->pos + 1];
@@ -259,7 +274,7 @@ Node *factor(Parser *parser) {
 
         return integer(parser);
 
-    } else if (next.type == TOK_MINUS || next.type == TOK_TILDE) {
+    } else if (isunop(next.type)) {
         advance(parser);
 
         Node *inode = factor(parser);
