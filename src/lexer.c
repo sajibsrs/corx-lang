@@ -571,25 +571,25 @@ static Token next(Lexer *lexer) {
      * compound operators
      *********************************************/
 
-    // (==)
+    // "=="
     if (cin == '=' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_EQ, "==", lexer->line, lexer->column - 2};
     }
 
-    // (!=)
+    // "!="
     if (cin == '!' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '!='
         return (Token){TOK_NEQ, "!=", lexer->line, lexer->column - 2};
     }
 
-    // (<=)
+    // "<="
     if (cin == '<' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '<='
         return (Token){TOK_LEQ, "<=", lexer->line, lexer->column - 2};
     }
 
-    // (>=)
+    // ">="
     if (cin == '>' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '>='
         return (Token){TOK_GEQ, ">=", lexer->line, lexer->column - 2};
@@ -601,25 +601,25 @@ static Token next(Lexer *lexer) {
         return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->column - 2};
     }
 
-    // (-=)
+    // "-="
     if (cin == '-' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->column - 2};
     }
 
-    // (*=)
+    // "*="
     if (cin == '*' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->column - 2};
     }
 
-    // (/=)
+    // "/="
     if (cin == '/' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->column - 2};
     }
 
-    // (%=)
+    // "%="
     if (cin == '%' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->column - 2};
