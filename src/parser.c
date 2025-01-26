@@ -236,6 +236,7 @@ Node *expression(Parser *parser, int prec) {
     Node *left = factor(parser);
     Token next = peek(parser);
 
+    // precedence climbing algorithm
     while (isbinop(next.type) && precedence(next.type) >= prec) {
         advance(parser);
 
