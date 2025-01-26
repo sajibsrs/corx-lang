@@ -13,17 +13,23 @@ Node *statement(Parser *parser);
 Node *expression(Parser *parser, int prec);
 Node *factor(Parser *parser);
 
+Node *blockitem(Parser *parser);
+
 Node *identifier(Parser *parser);
 Node *integer(Parser *parser);
 
 const char *ntypestr[] = {
-    [NOD_PROGRAM]    = "NOD_PROGRAM",    //
-    [NOD_FUNCTION]   = "NOD_FUNCTION",   //
-    [NOD_RETURN]     = "NOD_RETURN",     //
-    [NOD_UNARY]      = "NOD_UNARY",      //
-    [NOD_BINARY]     = "NOD_BINARY",     //
-    [NOD_IDENTIFIER] = "NOD_IDENTIFIER", //
-    [NOD_INT]        = "NOD_INT",        //
+    [NOD_PROGRAM]     = "NOD_PROGRAM",     //
+    [NOD_FUNCTION]    = "NOD_FUNCTION",    //
+    [NOD_RETURN]      = "NOD_RETURN",      //
+    [NOD_UNARY]       = "NOD_UNARY",       //
+    [NOD_BINARY]      = "NOD_BINARY",      //
+    [NOD_ASSIGNMENT]  = "NOD_ASSIGNMENT",  //
+    [NOD_IDENTIFIER]  = "NOD_IDENTIFIER",  //
+    [NOD_INTEGER]     = "NOD_INTEGER",     //
+    [NOD_BLOCK]       = "NOD_BLOCK",       //
+    [NOD_DECLARATION] = "NOD_DECLARATION", //
+    [NOD_EXPRESSION]  = "NOD_EXPRESSION",  //
 };
 
 /**
@@ -34,6 +40,7 @@ const char *ntypestr[] = {
 static int precedence(TokenType type) {
     switch (type) {
     case TOK_ASSIGN:   // "="
+        return 1;      //
     case TOK_OR:       // "||"
         return 5;      //
     case TOK_AND:      // "&&"
@@ -217,53 +224,112 @@ Node *function(Parser *parser) {
 
     advance(parser);
 
-    Node *indent = identifier(parser);
+    Node *ident = identifier(parser);
 
     expect(parser, TOK_LPAREN, "expected '(' after function name");
     expect(parser, TOK_VOID, "expected 'void' in the parameter list");
     expect(parser, TOK_RPAREN, "expected ')' after 'void'");
     expect(parser, TOK_LBRACE, "expected '{' in the start of function body");
 
-    Node *body = statement(parser);
+    Node *body = make_node(NOD_BLOCK, "body");
+    while (peek(parser).type != TOK_RBRACE) {
+        Node *bnode = blockitem(parser);
+        add_child(body, bnode);
+    }
 
     expect(parser, TOK_RBRACE, "expected '}' in the end of function body");
 
     Node *func = make_node(NOD_FUNCTION, "function");
-    add_child(func, indent);
+    add_child(func, ident);
     add_child(func, body);
 
     return func;
 }
 
+Node *blockitem(Parser *parser) {
+    Token next = peek(parser);
+
+    if (next.type == TOK_INT) {
+        advance(parser);
+
+        Node *ident = identifier(parser);
+        Node *decl  = make_node(NOD_DECLARATION, "declaration");
+        add_child(decl, ident);
+
+        if (peek(parser).type == TOK_ASSIGN) {
+            advance(parser);
+            Node *expr = expression(parser, 0);
+            add_child(decl, expr);
+        }
+
+        expect(parser, TOK_SEMI, "expected ';' after declaration");
+        return decl;
+    }
+
+    return statement(parser);
+}
+
 Node *statement(Parser *parser) {
     Token next = peek(parser);
-    if (next.type != TOK_RETURN) errexit("expected 'return' ");
-    advance(parser);
 
-    Node *expr = expression(parser, 0);
+    // handle return statement
+    if (next.type == TOK_RETURN) {
+        advance(parser); // consume 'return'
 
-    expect(parser, TOK_SEMI, "expected ';' after return");
+        Node *expr = expression(parser, 0);
+        expect(parser, TOK_SEMI, "expected ';' after return");
 
-    Node *stmt = make_node(NOD_RETURN, "return");
-    add_child(stmt, expr);
+        Node *stmt = make_node(NOD_RETURN, "return");
+        add_child(stmt, expr);
 
-    return stmt;
+        return stmt;
+
+    }
+    // handle identifier
+    else if (next.type == TOK_IDENT) {
+        Node *indent = identifier(parser);
+
+        next = peek(parser);
+        if (next.type == TOK_ASSIGN) {
+            advance(parser);
+
+            Node *expr = expression(parser, 0);
+            expect(parser, TOK_SEMI, "expected ';' after assignment");
+
+            Node *stmt = make_node(NOD_ASSIGNMENT, "=");
+            add_child(stmt, indent);
+            add_child(stmt, expr);
+
+            return stmt;
+        }
+    }
+
+    errexitinfo(parser, "unexpected statement");
+    return NULL;
 }
 
 Node *expression(Parser *parser, int prec) {
     Node *left = factor(parser);
     Token next = peek(parser);
 
-    // precedence climbing algorithm
+    Node *node, *right;
+
+    // precedence climbing loop
     while (isbinop(next.type) && precedence(next.type) >= prec) {
         advance(parser);
 
-        Node *right = expression(parser, precedence(next.type) + 1);
-        Node *bnode = make_node(NOD_BINARY, next.value);
-        add_child(bnode, left);
-        add_child(bnode, right);
+        if (next.type == TOK_ASSIGN) {
+            right = expression(parser, precedence(next.type));
+            node  = make_node(NOD_ASSIGNMENT, next.value);
+        } else {
+            right = expression(parser, precedence(next.type) + 1);
+            node  = make_node(NOD_BINARY, next.value);
+        }
 
-        left = bnode;
+        add_child(node, left);
+        add_child(node, right);
+
+        left = node; // update left for next iteration
         next = peek(parser);
     }
 
@@ -273,11 +339,19 @@ Node *expression(Parser *parser, int prec) {
 Node *factor(Parser *parser) {
     Token next = peek(parser);
 
+    // handle integer constants
     if (next.type == TOK_NUMBER) {
-
         return integer(parser);
 
-    } else if (isunop(next.type)) {
+    }
+    // handle identifier
+    else if (next.type == TOK_IDENT) {
+
+        return identifier(parser);
+
+    }
+    // handle unary expression
+    else if (isunop(next.type)) {
         advance(parser);
 
         Node *inode = factor(parser);
@@ -286,18 +360,18 @@ Node *factor(Parser *parser) {
 
         return unode;
 
-    } else if (next.type == TOK_LPAREN) {
+    }
+    // handle group expression
+    else if (next.type == TOK_LPAREN) {
         advance(parser);
 
         Node *inode = expression(parser, 0);
         expect(parser, TOK_RPAREN, "expected ')' after expression");
 
         return inode;
-
-    } else {
-        errexitinfo(parser, "malformed factor");
     }
 
+    errexitinfo(parser, "malformed factor");
     return NULL;
 }
 
@@ -312,7 +386,7 @@ Node *integer(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
 
-    return make_node(NOD_INT, next.value);
+    return make_node(NOD_INTEGER, next.value);
 }
 
 /*********************************************
