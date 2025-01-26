@@ -179,11 +179,11 @@ static bool isbinop(TokenType type) {
  */
 static bool isunop(TokenType type) {
     switch (type) {
-    case TOK_MINUS: //
-    case TOK_TILDE: //
-        return true;
-    default: //
-        return false;
+    case TOK_MINUS:   //
+    case TOK_TILDE:   //
+        return true;  //
+    default:          //
+        return false; //
     }
 }
 
