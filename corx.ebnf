@@ -3,26 +3,33 @@ program
     ;
 
 function
-    = "int" identifier "(" "void" ")" "{" statement "}"
+    = "int" identifier "(" "void" ")" "{" block_item* "}"
     ;
+
+block_item
+    = statement
+    | declaration
+    ;
+
+declaration
+    = "int" identifier ( "=" expression )? ";"
 
 statement
     = "return" expression ";"
+    | expression ";"
+    | ";"
     ;
 
 expression
+    = factor
+    | expression binary_operator expression
+    ;
+
+factor
     = integer_constant
-    | unary_expression
-    | binary_expression
+    | identifier
+    | unary_operator factor
     | "(" expression ")"
-    ;
-
-binary_expression
-    = expression binary_operator expression
-    ;
-
-unary_expression
-    = unary_operator expression
     ;
 
 modifier_specifier
@@ -53,11 +60,21 @@ binary_operator
     | "*"
     | "/"
     | "%"
+    | "&&"
+    | "||"
+    | "=="
+    | "!="
+    | "<"
+    | "<="
+    | ">"
+    | ">="
+    | "="
     ;
 
 unary_operator
     = "-"
     | "~"
+    | "!"
     ;
 
 identifier
