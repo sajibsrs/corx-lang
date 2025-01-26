@@ -26,40 +26,35 @@ const char *ntypestr[] = {
     [NOD_INT]        = "NOD_INT",        //
 };
 
+/**
+ * @brief Get precedence by token type.
+ * @param type
+ * @return
+ */
 static int precedence(TokenType type) {
     switch (type) {
-    case TOK_ASSIGN:     //
-        return 5;        // assignment
-    case TOK_ADD_ASSIGN: //
-    case TOK_SUB_ASSIGN: //
-    case TOK_MUL_ASSIGN: //
-    case TOK_DIV_ASSIGN: //
-    case TOK_MOD_ASSIGN: //
-        return 10;       // compound assignment
-    case TOK_EQ:         //
-    case TOK_NEQ:        //
-    case TOK_LT:         //
-    case TOK_LEQ:        //
-    case TOK_GT:         //
-    case TOK_GEQ:        //
-        return 15;       // comparisons
-    case TOK_PLUS:       //
-    case TOK_MINUS:      //
-        return 20;       // addition, subtraction
-    case TOK_ASTERISK:   //
-    case TOK_FSLASH:     //
-    case TOK_MOD:        //
-        return 25;       // multiplication, division, modulus
-    case TOK_TILDE:      //
-    case TOK_BANG:       //
-    case TOK_AMPERSAND:  // address-of
-    case TOK_AT:         // pass-by-reference
-    case TOK_BSLASH:     //
-        return 30;       // unary operators (e.g., pointer `*p` and dereference `p*`)
-    case TOK_ARROW:      // struct member access via pointer
-    case TOK_DOT:        // struct member access
-        return 35;       // member access
-    default: return 0;   // default
+    case TOK_ASSIGN:   // "="
+    case TOK_OR:       // "||"
+        return 5;      //
+    case TOK_AND:      // "&&"
+        return 10;     //
+    case TOK_EQ:       // "=="
+    case TOK_NEQ:      // "!="
+        return 30;     //
+    case TOK_LT:       // "<"
+    case TOK_LEQ:      // "<="
+    case TOK_GT:       // ">"
+    case TOK_GEQ:      // "=>"
+        return 35;     //
+    case TOK_PLUS:     // "+"
+    case TOK_MINUS:    // "-"
+        return 45;     //
+    case TOK_ASTERISK: // "*"
+    case TOK_FSLASH:   // "/"
+    case TOK_MOD:      // "%"
+        return 50;     //
+    default:           // no match
+        return 0;      //
     }
 }
 
