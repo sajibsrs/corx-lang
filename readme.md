@@ -23,7 +23,7 @@ Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how
 ### 2. Parser
 - Create initial parser
     - [ ] Context-free grammar (CFG), EBNF (Extended Backus-Naur Form)
-    - [ ] Implement recursive parsing
+    - [ ] Implement recursive descent parsing
     - [ ] Eliminate left-recursion
     - [ ] Abstract Syntax Tree (AST)
     - [ ] Error handling
