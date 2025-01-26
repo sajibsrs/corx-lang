@@ -85,8 +85,8 @@ static void errexitinfo(Parser *parser, const char *msg) {
     Token next = peek(parser);
 
     fprintf(
-        stderr, "Error: %s at token '%s' (ln: %d, column: %d)\n", msg, next.value, next.line,
-        next.column
+        stderr, "Error: %s at token '%s' (ln: %d, column: %d)\n", //
+        msg, next.value, next.line, next.column
     );
     exit(1);
 }
@@ -104,8 +104,8 @@ static void expect(Parser *parser, TokenType type, const char *msg) {
 
     if (next.type != type) {
         fprintf(
-            stderr, "%s at token '%s' (ln: %d, column: %d)\n", msg, next.value, next.line,
-            next.column
+            stderr, "%s at token '%s' (ln: %d, column: %d)\n", //
+            msg, next.value, next.line, next.column
         );
         exit(1);
     }
