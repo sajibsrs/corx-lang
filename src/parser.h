@@ -9,8 +9,12 @@ typedef enum {
     NOD_RETURN,
     NOD_UNARY,
     NOD_BINARY,
+    NOD_ASSIGNMENT,
     NOD_IDENTIFIER,
-    NOD_INT,
+    NOD_INTEGER,
+    NOD_BLOCK,
+    NOD_DECLARATION,
+    NOD_EXPRESSION,
 } NodeType;
 
 typedef struct Node {
