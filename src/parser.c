@@ -29,36 +29,36 @@ const char *ntypestr[] = {
 static int precedence(TokenType type) {
     switch (type) {
     case TOK_ASSIGN:     //
-        return 1;        // assignment
+        return 5;        // assignment
     case TOK_ADD_ASSIGN: //
     case TOK_SUB_ASSIGN: //
     case TOK_MUL_ASSIGN: //
     case TOK_DIV_ASSIGN: //
     case TOK_MOD_ASSIGN: //
-        return 2;        // compound assignment
+        return 10;       // compound assignment
     case TOK_EQ:         //
     case TOK_NEQ:        //
     case TOK_LT:         //
     case TOK_LEQ:        //
     case TOK_GT:         //
     case TOK_GEQ:        //
-        return 3;        // comparisons
+        return 15;       // comparisons
     case TOK_PLUS:       //
     case TOK_MINUS:      //
-        return 4;        // addition, subtraction
+        return 20;       // addition, subtraction
     case TOK_ASTERISK:   //
     case TOK_FSLASH:     //
     case TOK_MOD:        //
-        return 5;        // multiplication, division, modulus
+        return 25;       // multiplication, division, modulus
     case TOK_TILDE:      //
     case TOK_BANG:       //
     case TOK_AMPERSAND:  // address-of
     case TOK_AT:         // pass-by-reference
     case TOK_BSLASH:     //
-        return 6;        // unary operators (e.g., pointer `*p` and dereference `p*`)
+        return 30;       // unary operators (e.g., pointer `*p` and dereference `p*`)
     case TOK_ARROW:      // struct member access via pointer
     case TOK_DOT:        // struct member access
-        return 7;        // member access
+        return 35;       // member access
     default: return 0;   // default
     }
 }
@@ -163,6 +163,14 @@ static bool isbinop(TokenType type) {
     case TOK_ASTERISK: // "*"
     case TOK_FSLASH:   // "/"
     case TOK_MOD:      // "%"
+    case TOK_AND:      // "&&"
+    case TOK_OR:       // "||"
+    case TOK_EQ:       // "=="
+    case TOK_NEQ:      // "!="
+    case TOK_LT:       // "<"
+    case TOK_LEQ:      // "<="
+    case TOK_GT:       // ">"
+    case TOK_GEQ:      // ">="
         return true;
     default: //
         return false;
