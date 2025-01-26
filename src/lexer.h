@@ -97,6 +97,9 @@ typedef enum {
     TOK_MUL_ASSIGN, // '*='
     TOK_MOD_ASSIGN, // '%='
 
+    TOK_AND, // '&&'
+    TOK_OR,  // '||'
+
     TOK_LSHIFT, // '<<'
     TOK_RSHIFT, // '>>'
 

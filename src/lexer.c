@@ -101,6 +101,9 @@ const char *ttypestr[] = {
     [TOK_MUL_ASSIGN] = "TOK_MUL_ASSIGN",
     [TOK_MOD_ASSIGN] = "TOK_MOD_ASSIGN",
 
+    [TOK_AND] = "TOK_AND", // "&&"
+    [TOK_OR]  = "TOK_OR",  // "||"
+
     [TOK_LSHIFT] = "TOK_LSHIFT", // "<<"
     [TOK_RSHIFT] = "TOK_RSHIFT", // ">>"
 
@@ -631,6 +634,18 @@ static Token next(Lexer *lexer) {
         return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->column - 2};
     }
 
+    // "&&"
+    if (cin == '&' && peek(lexer) == '&') {
+        advance(lexer, 2, true); // consume '&&'
+        return (Token){TOK_AND, "<<", lexer->line, lexer->column - 2};
+    }
+
+    // "||"
+    if (cin == '|' && peek(lexer) == '|') {
+        advance(lexer, 2, true); // consume '||'
+        return (Token){TOK_OR, "||", lexer->line, lexer->column - 2};
+    }
+
     // "<<"
     if (cin == '<' && peek(lexer) == '<') {
         advance(lexer, 2, true); // consume '<<'
@@ -639,7 +654,7 @@ static Token next(Lexer *lexer) {
 
     // ">>"
     if (cin == '>' && peek(lexer) == '>') {
-        advance(lexer, 2, true); // consume '<<'
+        advance(lexer, 2, true); // consume '>>'
         return (Token){TOK_RSHIFT, ">>", lexer->line, lexer->column - 2};
     }
 
