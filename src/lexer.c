@@ -74,10 +74,12 @@ const char *ttypestr[] = {
     [TOK_ASSIGN]     = "TOK_ASSIGN",
     [TOK_PLUS]       = "TOK_PLUS",
     [TOK_MINUS]      = "TOK_MINUS",
-    [TOK_BANG]       = "TOK_BANG",  // '!'
-    [TOK_TILDE]      = "TOK_TILDE", // '~'
-    [TOK_ASTERISK]   = "TOK_ASTERISK",
-    [TOK_AMPERSAND]  = "TOK_AMPERSAND",
+    [TOK_BANG]       = "TOK_BANG",      // "!"
+    [TOK_TILDE]      = "TOK_TILDE",     // "~"
+    [TOK_ASTERISK]   = "TOK_ASTERISK",  //
+    [TOK_AMPERSAND]  = "TOK_AMPERSAND", //
+    [TOK_PIPE]       = "TOK_PIPE",      // "|"
+    [TOK_CARET]      = "TOK_CARET",     // "^"
     [TOK_AT]         = "TOK_AT",
     [TOK_HASH]       = "TOK_HASH",
     [TOK_FSLASH]     = "TOK_FSLASH",
@@ -98,6 +100,9 @@ const char *ttypestr[] = {
     [TOK_DIV_ASSIGN] = "TOK_DIV_ASSIGN",
     [TOK_MUL_ASSIGN] = "TOK_MUL_ASSIGN",
     [TOK_MOD_ASSIGN] = "TOK_MOD_ASSIGN",
+
+    [TOK_LSHIFT] = "TOK_LSHIFT", // "<<"
+    [TOK_RSHIFT] = "TOK_RSHIFT", // ">>"
 
     // Grouping
     [TOK_LPAREN]   = "TOK_LPAREN",
@@ -563,6 +568,7 @@ static Token next(Lexer *lexer) {
     if (cin == '"') {
         return string(lexer);
     }
+
     if (cin == '\'') {
         return character(lexer);
     }
@@ -595,7 +601,7 @@ static Token next(Lexer *lexer) {
         return (Token){TOK_GEQ, ">=", lexer->line, lexer->column - 2};
     }
 
-    // (+=)
+    // "+="
     if (cin == '+' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->column - 2};
@@ -623,6 +629,18 @@ static Token next(Lexer *lexer) {
     if (cin == '%' && peek(lexer) == '=') {
         advance(lexer, 2, true);
         return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->column - 2};
+    }
+
+    // "<<"
+    if (cin == '<' && peek(lexer) == '<') {
+        advance(lexer, 2, true); // consume '<<'
+        return (Token){TOK_LSHIFT, "<<", lexer->line, lexer->column - 2};
+    }
+
+    // ">>"
+    if (cin == '>' && peek(lexer) == '>') {
+        advance(lexer, 2, true); // consume '<<'
+        return (Token){TOK_RSHIFT, ">>", lexer->line, lexer->column - 2};
     }
 
     /*********************************************
@@ -667,6 +685,26 @@ static Token next(Lexer *lexer) {
     if (cin == ';') {
         advance(lexer, 1, true);
         return (Token){TOK_SEMI, ";", lexer->line, lexer->column - 1};
+    }
+
+    if (cin == '\\') {
+        advance(lexer, 1, true);
+        return (Token){TOK_BSLASH, "\\", lexer->line, lexer->column - 1};
+    }
+
+    if (cin == '&') {
+        advance(lexer, 1, true);
+        return (Token){TOK_AMPERSAND, "&", lexer->line, lexer->column - 1};
+    }
+
+    if (cin == '|') {
+        advance(lexer, 1, true);
+        return (Token){TOK_PIPE, "|", lexer->line, lexer->column - 1};
+    }
+
+    if (cin == '^') {
+        advance(lexer, 1, true);
+        return (Token){TOK_CARET, "^", lexer->line, lexer->column - 1};
     }
 
     if (cin == '(') {

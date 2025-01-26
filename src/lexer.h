@@ -74,10 +74,12 @@ typedef enum {
     TOK_TILDE,      // '~'
     TOK_ASTERISK,   // '*'
     TOK_AMPERSAND,  // '&'
+    TOK_PIPE,       // "|"
+    TOK_CARET,      // "^"
     TOK_AT,         // '@'
     TOK_HASH,       // '#'
     TOK_FSLASH,     // '/'
-    TOK_BSLASH,     // '\'
+    TOK_BSLASH,     // '\\'
     TOK_DOT,        // '.'
     TOK_COLON,      // ':'
     TOK_SEMI,       // ';'
@@ -94,6 +96,9 @@ typedef enum {
     TOK_DIV_ASSIGN, // '/='
     TOK_MUL_ASSIGN, // '*='
     TOK_MOD_ASSIGN, // '%='
+
+    TOK_LSHIFT, // '<<'
+    TOK_RSHIFT, // '>>'
 
     // grouping
     TOK_LPAREN,   // '('
