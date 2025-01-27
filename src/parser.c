@@ -331,8 +331,6 @@ Node *statement(Parser *parser) {
             advance(parser);
 
             Node *expr = expression(parser, 0);
-            printf("Assignment expression parsed.\n"); // Debug output
-
             Node *stmt = make_node(NOD_ASSIGNMENT, asnop.str);
             add_child(stmt, ident);
             add_child(stmt, expr);
