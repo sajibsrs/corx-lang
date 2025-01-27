@@ -196,7 +196,7 @@ static bool isunop(TokenType type) {
 }
 
 /**
- * @brief Checks if it's an assign operator.
+ * @brief Checks if it's an assignment operator.
  * @param type
  * @return
  */
