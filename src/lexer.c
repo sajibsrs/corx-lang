@@ -597,8 +597,16 @@ static Token next(Lexer *lexer) {
      *********************************************/
 
     // "<<="
+    if (cin == '<' && peek(lexer) == '<' && peeknext(lexer) == '=') {
+        advance(lexer, 3, true);
+        return (Token){TOK_LSHIFT_ASSIGN, "<<=", lexer->line, lexer->column - 3};
+    }
 
     // ">>="
+    if (cin == '>' && peek(lexer) == '>' && peeknext(lexer) == '=') {
+        advance(lexer, 3, true);
+        return (Token){TOK_RSHIFT_ASSIGN, ">>=", lexer->line, lexer->column - 3};
+    }
 
     // "=="
     if (cin == '=' && peek(lexer) == '=') {
@@ -676,6 +684,24 @@ static Token next(Lexer *lexer) {
     if (cin == '>' && peek(lexer) == '>') {
         advance(lexer, 2, true); // consume '>>'
         return (Token){TOK_RSHIFT, ">>", lexer->line, lexer->column - 2};
+    }
+
+    // "&="
+    if (cin == '&' && peek(lexer) == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_AND_ASSIGN, "&=", lexer->line, lexer->column - 2};
+    }
+
+    // "^="
+    if (cin == '^' && peek(lexer) == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_XOR_ASSIGN, "^=", lexer->line, lexer->column - 2};
+    }
+
+    // "|="
+    if (cin == '|' && peek(lexer) == '=') {
+        advance(lexer, 2, true);
+        return (Token){TOK_OR_ASSIGN, "|=", lexer->line, lexer->column - 2};
     }
 
     /*********************************************

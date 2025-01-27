@@ -134,7 +134,7 @@ Node *make_node(NodeType type, const char *str) {
     if (!node) errexit("make_node memory allocation");
 
     node->type  = type;
-    node->str = str ? strdup(str) : NULL;
+    node->str   = str ? strdup(str) : NULL;
     node->nodes = NULL;
     node->count = 0;
 
@@ -202,15 +202,19 @@ static bool isunop(TokenType type) {
  */
 static bool isasnop(TokenType type) {
     switch (type) {
-    case TOK_ASSIGN:     // "="
-    case TOK_ADD_ASSIGN: // "+="
-    case TOK_SUB_ASSIGN: // "-="
-    case TOK_MUL_ASSIGN: // "*="
-    case TOK_DIV_ASSIGN: // "/="
-    case TOK_MOD_ASSIGN: // "%="
-        return true;     //
-    default:             //
-        return false;    //
+    case TOK_ASSIGN:        // "="
+    case TOK_ADD_ASSIGN:    // "+="
+    case TOK_SUB_ASSIGN:    // "-="
+    case TOK_MUL_ASSIGN:    // "*="
+    case TOK_DIV_ASSIGN:    // "/="
+    case TOK_LSHIFT_ASSIGN: // "<<="
+    case TOK_RSHIFT_ASSIGN: // ">>="
+    case TOK_AND_ASSIGN:    // "&="
+    case TOK_XOR_ASSIGN:    // "^="
+    case TOK_OR_ASSIGN:     // "|="
+        return true;        //
+    default:                //
+        return false;       //
     }
 }
 
