@@ -129,7 +129,7 @@ extern const char *ttypestr[];
 
 typedef struct {
     TokenType type;
-    char value[64];
+    char str[64];
     int line;
     int column;
 } Token;

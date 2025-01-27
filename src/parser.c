@@ -88,7 +88,7 @@ static void errexitinfo(Parser *parser, const char *msg) {
 
     fprintf(
         stderr, "Error: %s at token '%s' (ln: %d, column: %d)\n", //
-        msg, next.value, next.line, next.column
+        msg, next.str, next.line, next.column
     );
     exit(1);
 }
@@ -107,7 +107,7 @@ static void expect(Parser *parser, TokenType type, const char *msg) {
     if (next.type != type) {
         fprintf(
             stderr, "%s at token '%s' (ln: %d, column: %d)\n", //
-            msg, next.value, next.line, next.column
+            msg, next.str, next.line, next.column
         );
         exit(1);
     }
@@ -129,12 +129,12 @@ Parser *make_parser(const TokenList *list) {
     return parser;
 }
 
-Node *make_node(NodeType type, const char *value) {
+Node *make_node(NodeType type, const char *str) {
     Node *node = malloc(sizeof(Node));
     if (!node) errexit("make_node memory allocation");
 
     node->type  = type;
-    node->value = value ? strdup(value) : NULL;
+    node->str = str ? strdup(str) : NULL;
     node->nodes = NULL;
     node->count = 0;
 
@@ -333,7 +333,7 @@ Node *statement(Parser *parser) {
             Node *expr = expression(parser, 0);
             printf("Assignment expression parsed.\n"); // Debug output
 
-            Node *stmt = make_node(NOD_ASSIGNMENT, asnop.value);
+            Node *stmt = make_node(NOD_ASSIGNMENT, asnop.str);
             add_child(stmt, ident);
             add_child(stmt, expr);
 
@@ -357,10 +357,10 @@ Node *expression(Parser *parser, int prec) {
 
         if (next.type == TOK_ASSIGN) {
             right = expression(parser, precedence(next.type));
-            node  = make_node(NOD_ASSIGNMENT, next.value);
+            node  = make_node(NOD_ASSIGNMENT, next.str);
         } else {
             right = expression(parser, precedence(next.type) + 1);
-            node  = make_node(NOD_BINARY, next.value);
+            node  = make_node(NOD_BINARY, next.str);
         }
 
         add_child(node, left);
@@ -392,7 +392,7 @@ Node *factor(Parser *parser) {
         advance(parser);
 
         Node *inode = factor(parser);
-        Node *unode = make_node(NOD_UNARY, next.value);
+        Node *unode = make_node(NOD_UNARY, next.str);
         add_child(unode, inode);
 
         return unode;
@@ -416,14 +416,14 @@ Node *identifier(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
 
-    return make_node(NOD_IDENTIFIER, next.value);
+    return make_node(NOD_IDENTIFIER, next.str);
 }
 
 Node *integer(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
 
-    return make_node(NOD_INTEGER, next.value);
+    return make_node(NOD_INTEGER, next.str);
 }
 
 /*********************************************
@@ -441,7 +441,7 @@ void purge_node(Node *node) {
         purge_node(node->nodes[i]);
     }
     free(node->nodes);
-    free(node->value);
+    free(node->str);
     free(node);
 }
 

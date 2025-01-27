@@ -379,12 +379,12 @@ static Token number(Lexer *lexer) {
 
     // Read digits
     while (isdigit(cin) || cin == '.' || cin == '_') {
-        token.value[idx++] = cin;
+        token.str[idx++] = cin;
         advance(lexer, 1, true);
         cin = current(lexer);
     }
 
-    token.value[idx] = '\0';
+    token.str[idx] = '\0';
 
     token.line   = lexer->line;
     token.column = tscol;
@@ -407,16 +407,16 @@ static Token identifier(Lexer *lexer) {
 
     // continue allowing letters, digits and underscores
     while (isalnum(cin) || cin == '_') {
-        token.value[idx++] = cin;
+        token.str[idx++] = cin;
         advance(lexer, 1, true);
         cin = current(lexer);
     }
 
-    token.value[idx] = '\0'; // null-terminate string
+    token.str[idx] = '\0'; // null-terminate string
 
     // check if it's a keyword
     init_kwmap();
-    KWMap *kw = search_kwmap(token.value);
+    KWMap *kw = search_kwmap(token.str);
     if (kw) token.type = kw->type;
     purge_kwmap();
 
@@ -443,17 +443,17 @@ static Token string(Lexer *lexer) {
     cin = current(lexer);
 
     while (cin != '"' && cin != '\0') { // end of string or EOF
-        token.value[idx++] = cin;
+        token.str[idx++] = cin;
         advance(lexer, 1, true);
         cin = current(lexer);
     }
 
     if (cin == '"') {
-        token.value[idx] = '\0'; // null-terminate string
+        token.str[idx] = '\0'; // null-terminate string
         advance(lexer, 1, true); // consume closing quote
     } else {
         token.type     = TOK_UNKNOWN;
-        token.value[0] = '\0'; // empty value
+        token.str[0] = '\0'; // empty str
     }
 
     token.line   = lexer->line;
@@ -477,7 +477,7 @@ static Token character(Lexer *lexer) {
     cin = current(lexer);
 
     if (cin != '\'') {
-        token.value[0] = cin;
+        token.str[0] = cin;
         advance(lexer, 1, true);
         cin = current(lexer);
 
@@ -486,12 +486,12 @@ static Token character(Lexer *lexer) {
         } else {
             // if there's no closing quote
             token.type     = TOK_UNKNOWN;
-            token.value[0] = '\0';
+            token.str[0] = '\0';
         }
     } else {
         // if it's just an empty quote
         token.type     = TOK_UNKNOWN;
-        token.value[0] = '\0';
+        token.str[0] = '\0';
     }
 
     token.line   = lexer->line;
@@ -791,8 +791,8 @@ static Token next(Lexer *lexer) {
 
     // handle unknown token
     Token token    = {TOK_UNKNOWN, "", lexer->line, lexer->column - 1};
-    token.value[0] = cin;
-    token.value[1] = '\0';
+    token.str[0] = cin;
+    token.str[1] = '\0';
 
     return token;
 }
@@ -882,7 +882,7 @@ void print_tokenlist(const TokenList *list) {
         token = list->tokens[i];
         printf(
             "%-16s %-10s typ:%-4d lin:%-4d col:%d\n", //
-            ttypestr[token.type], token.value, token.type, token.line, token.column
+            ttypestr[token.type], token.str, token.type, token.line, token.column
         );
     }
 }

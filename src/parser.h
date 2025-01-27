@@ -19,7 +19,7 @@ typedef enum {
 
 typedef struct Node {
     NodeType type;
-    char *value;
+    char *str;
     struct Node **nodes; // child nodes
     int count;           // children count
 } Node;
