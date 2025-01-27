@@ -304,7 +304,7 @@ Node *statement(Parser *parser) {
         }
     }
 
-    errexitinfo(parser, "unexpected statement");
+    errexitinfo(parser, "malformed statement");
     return NULL;
 }
 
