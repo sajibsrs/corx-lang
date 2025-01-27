@@ -3,7 +3,11 @@ program
     ;
 
 function
-    = "int" identifier "(" "void" ")" "{" block_item* "}"
+    = "int" identifier "(" "void" ")" block
+    ;
+
+block
+    = "{" block* "}"
     ;
 
 block_item
