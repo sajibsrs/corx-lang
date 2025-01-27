@@ -103,6 +103,13 @@ typedef enum {
     TOK_LSHIFT, // '<<'
     TOK_RSHIFT, // '>>'
 
+    // bitwise assign
+    TOK_LSHIFT_ASSIGN, // "<<="
+    TOK_RSHIFT_ASSIGN, // ">>="
+    TOK_AND_ASSIGN,    // "&="
+    TOK_XOR_ASSIGN,    // "^="
+    TOK_OR_ASSIGN,     // "|="
+
     // grouping
     TOK_LPAREN,   // '('
     TOK_RPAREN,   // ')'

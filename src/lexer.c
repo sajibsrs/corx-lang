@@ -107,6 +107,13 @@ const char *ttypestr[] = {
     [TOK_LSHIFT] = "TOK_LSHIFT", // "<<"
     [TOK_RSHIFT] = "TOK_RSHIFT", // ">>"
 
+    // bitwise assign
+    [TOK_LSHIFT_ASSIGN] = "TOK_LSHIFT_ASSIGN", // "<<="
+    [TOK_RSHIFT_ASSIGN] = "TOK_RSHIFT_ASSIGN", // ">>="
+    [TOK_AND_ASSIGN]    = "TOK_AND_ASSIGN",    // "&="
+    [TOK_XOR_ASSIGN]    = "TOK_XOR_ASSIGN",    // "^="
+    [TOK_OR_ASSIGN]     = "TOK_OR_ASSIGN",     // "|="
+
     // Grouping
     [TOK_LPAREN]   = "TOK_LPAREN",
     [TOK_RPAREN]   = "TOK_RPAREN",
@@ -352,6 +359,15 @@ static char peek(Lexer *lexer) {
 }
 
 /**
+ * @brief Peek ahead of next input from lexer buffer.
+ * @param lexer
+ * @return
+ */
+static char peeknext(Lexer *lexer) {
+    return lexer->buffer[lexer->pos + 2];
+}
+
+/**
  * @brief Skip space and tab and moves to next.
  * It keeps doing so until other character is found.
  * @param lexer
@@ -449,10 +465,10 @@ static Token string(Lexer *lexer) {
     }
 
     if (cin == '"') {
-        token.str[idx] = '\0'; // null-terminate string
+        token.str[idx] = '\0';   // null-terminate string
         advance(lexer, 1, true); // consume closing quote
     } else {
-        token.type     = TOK_UNKNOWN;
+        token.type   = TOK_UNKNOWN;
         token.str[0] = '\0'; // empty str
     }
 
@@ -485,12 +501,12 @@ static Token character(Lexer *lexer) {
             advance(lexer, 1, true);
         } else {
             // if there's no closing quote
-            token.type     = TOK_UNKNOWN;
+            token.type   = TOK_UNKNOWN;
             token.str[0] = '\0';
         }
     } else {
         // if it's just an empty quote
-        token.type     = TOK_UNKNOWN;
+        token.type   = TOK_UNKNOWN;
         token.str[0] = '\0';
     }
 
@@ -579,6 +595,10 @@ static Token next(Lexer *lexer) {
     /*********************************************
      * compound operators
      *********************************************/
+
+    // "<<="
+
+    // ">>="
 
     // "=="
     if (cin == '=' && peek(lexer) == '=') {
@@ -790,7 +810,7 @@ static Token next(Lexer *lexer) {
     advance(lexer, 1, true);
 
     // handle unknown token
-    Token token    = {TOK_UNKNOWN, "", lexer->line, lexer->column - 1};
+    Token token  = {TOK_UNKNOWN, "", lexer->line, lexer->column - 1};
     token.str[0] = cin;
     token.str[1] = '\0';
 
