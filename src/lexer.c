@@ -593,7 +593,7 @@ static Token next(Lexer *lexer) {
     }
 
     /*********************************************
-     * compound operators
+     * Compound operators
      *********************************************/
 
     // "<<="
@@ -705,7 +705,7 @@ static Token next(Lexer *lexer) {
     }
 
     /*********************************************
-     * single-character operators
+     * Single-character operators
      *********************************************/
 
     if (cin == '<') {
