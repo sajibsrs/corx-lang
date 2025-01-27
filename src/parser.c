@@ -186,11 +186,31 @@ static bool isbinop(TokenType type) {
  */
 static bool isunop(TokenType type) {
     switch (type) {
-    case TOK_MINUS:   //
-    case TOK_TILDE:   //
+    case TOK_MINUS:   // "-"
+    case TOK_TILDE:   // "~"
+    case TOK_BANG:    // "!"
         return true;  //
     default:          //
         return false; //
+    }
+}
+
+/**
+ * @brief Checks if it's an assign operator.
+ * @param type
+ * @return
+ */
+static bool isasnop(TokenType type) {
+    switch (type) {
+    case TOK_ASSIGN:     // "="
+    case TOK_ADD_ASSIGN: // "+="
+    case TOK_SUB_ASSIGN: // "-="
+    case TOK_MUL_ASSIGN: // "*="
+    case TOK_DIV_ASSIGN: // "/="
+    case TOK_MOD_ASSIGN: // "%="
+        return true;     //
+    default:             //
+        return false;    //
     }
 }
 
@@ -258,6 +278,7 @@ Node *blockitem(Parser *parser) {
 
         if (peek(parser).type == TOK_ASSIGN) {
             advance(parser);
+
             Node *expr = expression(parser, 0);
             add_child(decl, expr);
         }
@@ -266,7 +287,22 @@ Node *blockitem(Parser *parser) {
         return decl;
     }
 
-    return statement(parser);
+    Node *stmt = statement(parser);
+
+    if (stmt && stmt->type == NOD_ASSIGNMENT) {
+        Token asnop = peek(parser);
+
+        if (isasnop(asnop.type)) {
+            advance(parser);
+
+            Node *expr = expression(parser, 0);
+            add_child(stmt, expr);
+        }
+
+        expect(parser, TOK_SEMI, "expected ';' after assignment");
+    }
+
+    return stmt;
 }
 
 Node *statement(Parser *parser) {
@@ -287,17 +323,18 @@ Node *statement(Parser *parser) {
     }
     // handle identifier
     else if (next.type == TOK_IDENT) {
-        Node *indent = identifier(parser);
+        Node *ident = identifier(parser);
+        next        = peek(parser);
 
-        next = peek(parser);
-        if (next.type == TOK_ASSIGN) {
+        if (isasnop(next.type)) {
+            Token asnop = next; // save operator
             advance(parser);
 
             Node *expr = expression(parser, 0);
-            expect(parser, TOK_SEMI, "expected ';' after assignment");
+            printf("Assignment expression parsed.\n"); // Debug output
 
-            Node *stmt = make_node(NOD_ASSIGNMENT, "=");
-            add_child(stmt, indent);
+            Node *stmt = make_node(NOD_ASSIGNMENT, asnop.value);
+            add_child(stmt, ident);
             add_child(stmt, expr);
 
             return stmt;
