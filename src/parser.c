@@ -223,11 +223,21 @@ static bool isasnop(TokenType type) {
     }
 }
 
+/**
+ * @brief Peek next token without consuming.
+ * @param parser
+ * @return
+ */
 static Token peek(Parser *parser) {
     Token *tokens = parser->list->tokens;
     return (parser->pos == -1) ? tokens[0] : tokens[parser->pos + 1];
 }
 
+/**
+ * @brief Consume next token and move forward.
+ * @param parser
+ * @return Consumed token.
+ */
 static Token advance(Parser *parser) {
     Token *tokens = parser->list->tokens;
 
@@ -239,6 +249,11 @@ static Token advance(Parser *parser) {
     return tokens[parser->pos++];
 }
 
+/**
+ * @brief Parse program.
+ * @param parser
+ * @return
+ */
 Node *program(Parser *parser) {
     Node *func = function(parser);
     Node *prog = make_node(NOD_PROGRAM, "program");
@@ -247,6 +262,11 @@ Node *program(Parser *parser) {
     return prog;
 }
 
+/**
+ * @brief Parse function.
+ * @param parser
+ * @return
+ */
 Node *function(Parser *parser) {
     Token next = peek(parser);
     if (next.type != TOK_INT) errexit("expected a type");
@@ -314,6 +334,11 @@ Node *block(Parser *parser) {
     return stmt;
 }
 
+/**
+ * @brief Parse statement.
+ * @param parser
+ * @return
+ */
 Node *statement(Parser *parser) {
     Token next = peek(parser);
 
@@ -352,6 +377,12 @@ Node *statement(Parser *parser) {
     return NULL;
 }
 
+/**
+ * @brief Parse expression.
+ * @param parser
+ * @param prec
+ * @return
+ */
 Node *expression(Parser *parser, int prec) {
     Node *left = factor(parser);
     Token next = peek(parser);
@@ -380,6 +411,11 @@ Node *expression(Parser *parser, int prec) {
     return left;
 }
 
+/**
+ * @brief Parse factor.
+ * @param parser
+ * @return
+ */
 Node *factor(Parser *parser) {
     Token next = peek(parser);
 
@@ -419,6 +455,11 @@ Node *factor(Parser *parser) {
     return NULL;
 }
 
+/**
+ * @brief Parse identifier.
+ * @param parser
+ * @return
+ */
 Node *identifier(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
@@ -426,6 +467,11 @@ Node *identifier(Parser *parser) {
     return make_node(NOD_IDENTIFIER, next.str);
 }
 
+/**
+ * @brief Parse integer.
+ * @param parser
+ * @return
+ */
 Node *integer(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
