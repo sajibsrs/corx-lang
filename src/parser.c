@@ -13,7 +13,7 @@ Node *statement(Parser *parser);
 Node *expression(Parser *parser, int prec);
 Node *factor(Parser *parser);
 
-Node *blockitem(Parser *parser);
+Node *block(Parser *parser);
 
 Node *identifier(Parser *parser);
 Node *integer(Parser *parser);
@@ -186,12 +186,15 @@ static bool isbinop(TokenType type) {
  */
 static bool isunop(TokenType type) {
     switch (type) {
-    case TOK_MINUS:   // "-"
-    case TOK_TILDE:   // "~"
-    case TOK_BANG:    // "!"
-        return true;  //
-    default:          //
-        return false; //
+    case TOK_AMPERSAND: // "&"
+    case TOK_ASTERISK:  // "*"
+    case TOK_PLUS:      // "+"
+    case TOK_MINUS:     // "-"
+    case TOK_TILDE:     // "~"
+    case TOK_BANG:      // "!"
+        return true;    //
+    default:            //
+        return false;   //
     }
 }
 
@@ -257,7 +260,7 @@ Node *function(Parser *parser) {
 
     Node *body = make_node(NOD_BLOCK, "body");
     while (peek(parser).type != TOK_RBRACE) {
-        Node *bnode = blockitem(parser);
+        Node *bnode = block(parser);
         add_child(body, bnode);
     }
 
@@ -270,7 +273,7 @@ Node *function(Parser *parser) {
     return func;
 }
 
-Node *blockitem(Parser *parser) {
+Node *block(Parser *parser) {
     Token next = peek(parser);
 
     if (next.type == TOK_INT) {
