@@ -58,6 +58,20 @@ type_specifier
     = "int"
     ;
 
+assignment_operator
+    = "="
+    | "+="
+    | "-="
+    | "*="
+    | "/="
+    | "%="
+    | "<<="
+    | ">>="
+    | "&="
+    | "^="
+    | "|="
+    ;
+
 binary_operator
     = "-"
     | "+"
