@@ -21,12 +21,14 @@ declaration
 statement
     = "return" expression ";"
     | expression ";"
+    | "if" "(" expression ")" statement ( "else" statement )?
     | ";"
     ;
 
 expression
     = factor
     | expression binary_operator expression
+    | expression "?" expression ":" expression
     ;
 
 factor
