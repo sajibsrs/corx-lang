@@ -41,6 +41,8 @@ static int precedence(TokenType type) {
     switch (type) {
     case TOK_ASSIGN:   // "="
         return 1;      //
+    case TOK_QUESTION: // "?"
+        return 3;      //
     case TOK_OR:       // "||"
         return 5;      //
     case TOK_AND:      // "&&"

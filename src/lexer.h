@@ -74,6 +74,7 @@ typedef enum {
     TOK_TILDE,      // '~'
     TOK_ASTERISK,   // '*'
     TOK_AMPERSAND,  // '&'
+    TOK_QUESTION,   // "?"
     TOK_PIPE,       // "|"
     TOK_CARET,      // "^"
     TOK_AT,         // '@'

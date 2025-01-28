@@ -78,6 +78,7 @@ const char *ttypestr[] = {
     [TOK_TILDE]      = "TOK_TILDE",     // "~"
     [TOK_ASTERISK]   = "TOK_ASTERISK",  //
     [TOK_AMPERSAND]  = "TOK_AMPERSAND", //
+    [TOK_QUESTION]   = "TOK_QUESTION",  // "?"
     [TOK_PIPE]       = "TOK_PIPE",      // "|"
     [TOK_CARET]      = "TOK_CARET",     // "^"
     [TOK_AT]         = "TOK_AT",
@@ -756,6 +757,11 @@ static Token next(Lexer *lexer) {
     if (cin == '&') {
         advance(lexer, 1, true);
         return (Token){TOK_AMPERSAND, "&", lexer->line, lexer->column - 1};
+    }
+
+    if (cin == '?') {
+        advance(lexer, 1, true);
+        return (Token){TOK_QUESTION, "?", lexer->line, lexer->column - 1};
     }
 
     if (cin == '|') {
