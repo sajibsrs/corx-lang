@@ -829,6 +829,11 @@ static Token next(Lexer *lexer) {
         return (Token){TOK_DOT, ".", lexer->line, lexer->column - 1};
     }
 
+    if (cin == ':') {
+        advance(lexer, 1, true);
+        return (Token){TOK_COLON, ":", lexer->line, lexer->column - 1};
+    }
+
     if (cin == ',') {
         advance(lexer, 1, true);
         return (Token){TOK_COMMA, ",", lexer->line, lexer->column - 1};
