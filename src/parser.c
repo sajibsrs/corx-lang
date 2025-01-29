@@ -40,31 +40,31 @@ const char *ntypestr[] = {
  */
 static int precedence(TokenType type) {
     switch (type) {
-    case TOK_ASSIGN:   // "="
-        return 1;      //
-    case TOK_QUESTION: // "?"
-        return 3;      //
-    case TOK_OR:       // "||"
-        return 5;      //
-    case TOK_AND:      // "&&"
-        return 10;     //
-    case TOK_EQ:       // "=="
-    case TOK_NEQ:      // "!="
-        return 30;     //
-    case TOK_LT:       // "<"
-    case TOK_LEQ:      // "<="
-    case TOK_GT:       // ">"
-    case TOK_GEQ:      // "=>"
-        return 35;     //
-    case TOK_PLUS:     // "+"
-    case TOK_MINUS:    // "-"
-        return 45;     //
-    case TOK_ASTERISK: // "*"
-    case TOK_FSLASH:   // "/"
-    case TOK_MOD:      // "%"
-        return 50;     //
-    default:           // No match
-        return 0;      //
+    case T_EQ:       // "="
+        return 1;    //
+    case T_QMARK:    // "?"
+        return 3;    //
+    case T_OR:       // "||"
+        return 5;    //
+    case T_AND:      // "&&"
+        return 10;   //
+    case T_EQEQ:     // "=="
+    case T_NTEQ:     // "!="
+        return 30;   //
+    case T_LT:       // "<"
+    case T_LTEQ:     // "<="
+    case T_GT:       // ">"
+    case T_GTEQ:     // "=>"
+        return 35;   //
+    case T_PLUS:     // "+"
+    case T_MINUS:    // "-"
+        return 45;   //
+    case T_ASTERISK: // "*"
+    case T_FSLASH:   // "/"
+    case T_MODULUS:  // "%"
+        return 50;   //
+    default:         // No match
+        return 0;    //
     }
 }
 
@@ -163,19 +163,19 @@ void add_child(Node *parent, Node *child) {
  */
 static bool isbinop(TokenType type) {
     switch (type) {
-    case TOK_PLUS:     // "+"
-    case TOK_MINUS:    // "-"
-    case TOK_ASTERISK: // "*"
-    case TOK_FSLASH:   // "/"
-    case TOK_MOD:      // "%"
-    case TOK_AND:      // "&&"
-    case TOK_OR:       // "||"
-    case TOK_EQ:       // "=="
-    case TOK_NEQ:      // "!="
-    case TOK_LT:       // "<"
-    case TOK_LEQ:      // "<="
-    case TOK_GT:       // ">"
-    case TOK_GEQ:      // ">="
+    case T_PLUS:     // "+"
+    case T_MINUS:    // "-"
+    case T_ASTERISK: // "*"
+    case T_FSLASH:   // "/"
+    case T_MODULUS:  // "%"
+    case T_AND:      // "&&"
+    case T_OR:       // "||"
+    case T_EQEQ:     // "=="
+    case T_NTEQ:     // "!="
+    case T_LT:       // "<"
+    case T_LTEQ:     // "<="
+    case T_GT:       // ">"
+    case T_GTEQ:     // ">="
         return true;
     default: //
         return false;
@@ -189,15 +189,15 @@ static bool isbinop(TokenType type) {
  */
 static bool isunop(TokenType type) {
     switch (type) {
-    case TOK_AMPERSAND: // "&"
-    case TOK_ASTERISK:  // "*"
-    case TOK_PLUS:      // "+"
-    case TOK_MINUS:     // "-"
-    case TOK_TILDE:     // "~"
-    case TOK_BANG:      // "!"
-        return true;    //
-    default:            //
-        return false;   //
+    case T_AMPERSAND: // "&"
+    case T_ASTERISK:  // "*"
+    case T_PLUS:      // "+"
+    case T_MINUS:     // "-"
+    case T_TILDE:     // "~"
+    case T_BANG:      // "!"
+        return true;  //
+    default:          //
+        return false; //
     }
 }
 
@@ -208,19 +208,19 @@ static bool isunop(TokenType type) {
  */
 static bool isasnop(TokenType type) {
     switch (type) {
-    case TOK_ASSIGN:        // "="
-    case TOK_ADD_ASSIGN:    // "+="
-    case TOK_SUB_ASSIGN:    // "-="
-    case TOK_MUL_ASSIGN:    // "*="
-    case TOK_DIV_ASSIGN:    // "/="
-    case TOK_LSHIFT_ASSIGN: // "<<="
-    case TOK_RSHIFT_ASSIGN: // ">>="
-    case TOK_AND_ASSIGN:    // "&="
-    case TOK_XOR_ASSIGN:    // "^="
-    case TOK_OR_ASSIGN:     // "|="
-        return true;        //
-    default:                //
-        return false;       //
+    case T_EQ:        // "="
+    case T_PLUSEQ:    // "+="
+    case T_MINUSEQ:   // "-="
+    case T_MULEQ:     // "*="
+    case T_DIVEQ:     // "/="
+    case T_LSHIFTEQ:  // "<<="
+    case T_RSHIFTEQ:  // ">>="
+    case T_ANDEQ:     // "&="
+    case T_XOREQ:     // "^="
+    case T_OREQ:      // "|="
+        return true;  //
+    default:          //
+        return false; //
     }
 }
 
@@ -270,24 +270,24 @@ Node *program(Parser *parser) {
  */
 Node *function(Parser *parser) {
     Token next = peek(parser);
-    if (next.type != TOK_INT) errexit("expected a type");
+    if (next.type != T_INT) errexit("expected a type");
 
     advance(parser);
 
     Node *ident = identifier(parser);
 
-    expect(parser, TOK_LPAREN, "expected '(' after function name");
-    expect(parser, TOK_VOID, "expected 'void' in the parameter list");
-    expect(parser, TOK_RPAREN, "expected ')' after 'void'");
-    expect(parser, TOK_LBRACE, "expected '{' in the start of function body");
+    expect(parser, T_LPAREN, "expected '(' after function name");
+    expect(parser, T_VOID, "expected 'void' in the parameter list");
+    expect(parser, T_RPAREN, "expected ')' after 'void'");
+    expect(parser, T_LBRACE, "expected '{' in the start of function body");
 
     Node *body = make_node(NOD_BLOCK, "body");
-    while (peek(parser).type != TOK_RBRACE) {
+    while (peek(parser).type != T_RBRACE) {
         Node *bnode = block(parser);
         add_child(body, bnode);
     }
 
-    expect(parser, TOK_RBRACE, "expected '}' in the end of function body");
+    expect(parser, T_RBRACE, "expected '}' in the end of function body");
 
     Node *func = make_node(NOD_FUNCTION, "function");
     add_child(func, ident);
@@ -300,27 +300,27 @@ Node *block(Parser *parser) {
     Token next = peek(parser);
 
     // Handle variable declarations
-    if (next.type == TOK_INT) {
+    if (next.type == T_INT) {
         advance(parser);
 
         Node *ident = identifier(parser);
         Node *decl  = make_node(NOD_DECLARATION, "declaration");
         add_child(decl, ident);
 
-        if (peek(parser).type == TOK_ASSIGN) {
+        if (peek(parser).type == T_EQ) {
             advance(parser);
 
             Node *expr = expression(parser, 0);
             add_child(decl, expr);
         }
 
-        expect(parser, TOK_SEMI, "expected ';' after declaration");
+        expect(parser, T_SCOLON, "expected ';' after declaration");
         return decl;
     }
     // Handle statements (e.g., return, assignments)
     else {
         Node *stmt = statement(parser);
-        expect(parser, TOK_SEMI, "expected ';' after statement");
+        expect(parser, T_SCOLON, "expected ';' after statement");
         return stmt;
     }
 
@@ -337,7 +337,7 @@ Node *statement(Parser *parser) {
     Token next = peek(parser);
 
     // Handle return statement
-    if (next.type == TOK_RETURN) {
+    if (next.type == T_RETURN) {
         advance(parser); // Consume 'return'
 
         Node *expr = expression(parser, 0);
@@ -347,7 +347,7 @@ Node *statement(Parser *parser) {
         return stmt;
     }
     // Handle identifier (assignments)
-    else if (next.type == TOK_IDENT) {
+    else if (next.type == T_IDENT) {
         Node *ident = identifier(parser);
         next        = peek(parser);
 
@@ -393,14 +393,14 @@ Node *expression(Parser *parser, int prec) {
     }
 
     // Handle ternary conditional operator
-    if (next.type == TOK_QUESTION) {
+    if (next.type == T_QMARK) {
         advance(parser); // Consume '?'
 
         // Parse the true expression
         Node *leftexpr = expression(parser, 0);
 
         // Expect the colon separator
-        expect(parser, TOK_COLON, "expected ':' in ternary operator");
+        expect(parser, T_COLON, "expected ':' in ternary operator");
 
         // Parse the false expression
         Node *rightexpr = expression(parser, precedence(next.type));
@@ -426,12 +426,12 @@ Node *factor(Parser *parser) {
     Token next = peek(parser);
 
     // Handle integer constants
-    if (next.type == TOK_NUMBER) {
+    if (next.type == T_NUMBER) {
         return integer(parser);
 
     }
     // Handle identifier
-    else if (next.type == TOK_IDENT) {
+    else if (next.type == T_IDENT) {
 
         return identifier(parser);
 
@@ -448,11 +448,11 @@ Node *factor(Parser *parser) {
 
     }
     // Handle group expression
-    else if (next.type == TOK_LPAREN) {
+    else if (next.type == T_LPAREN) {
         advance(parser);
 
         Node *inode = expression(parser, 0);
-        expect(parser, TOK_RPAREN, "expected ')' after expression");
+        expect(parser, T_RPAREN, "expected ')' after expression");
 
         return inode;
     }

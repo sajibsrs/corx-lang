@@ -21,14 +21,14 @@ typedef enum {
 typedef struct Node {
     NodeType type;
     char *str;
-    struct Node **nodes; // child nodes
-    int count;           // children count
+    struct Node **nodes; // Child nodes
+    int count;           // Children count
 } Node;
 
 typedef struct {
-    const TokenList *list; // token array
+    const TokenList *list; // Token array
     int pos;
-    Node *node; // root node
+    Node *node; // Root node
 } Parser;
 
 extern const char *ntypestr[];
