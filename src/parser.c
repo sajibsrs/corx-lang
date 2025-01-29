@@ -63,13 +63,13 @@ static int precedence(TokenType type) {
     case TOK_FSLASH:   // "/"
     case TOK_MOD:      // "%"
         return 50;     //
-    default:           // no match
+    default:           // No match
         return 0;      //
     }
 }
 
 /*********************************************
- * Helper functions
+ * Helper Functions
  *********************************************/
 
 /**
@@ -119,14 +119,14 @@ static void expect(Parser *parser, TokenType type, const char *msg) {
 }
 
 /*********************************************
- * Node functions
+ * Node Functions
  *********************************************/
 
 Parser *make_parser(const TokenList *list) {
     Parser *parser = malloc(sizeof(Parser));
 
     parser->list = list;
-    parser->pos  = -1; // uninitialized state
+    parser->pos  = -1; // Uninitialized state
     parser->node = NULL;
 
     return parser;
@@ -338,7 +338,7 @@ Node *statement(Parser *parser) {
 
     // Handle return statement
     if (next.type == TOK_RETURN) {
-        advance(parser); // consume 'return'
+        advance(parser); // Consume 'return'
 
         Node *expr = expression(parser, 0);
         Node *stmt = make_node(NOD_RETURN, "return");
@@ -352,7 +352,7 @@ Node *statement(Parser *parser) {
         next        = peek(parser);
 
         if (isasnop(next.type)) {
-            Token asnop = next; // save operator
+            Token asnop = next; // Save operator
             advance(parser);
 
             Node *expr = expression(parser, 0);
@@ -425,18 +425,18 @@ Node *expression(Parser *parser, int prec) {
 Node *factor(Parser *parser) {
     Token next = peek(parser);
 
-    // handle integer constants
+    // Handle integer constants
     if (next.type == TOK_NUMBER) {
         return integer(parser);
 
     }
-    // handle identifier
+    // Handle identifier
     else if (next.type == TOK_IDENT) {
 
         return identifier(parser);
 
     }
-    // handle unary expression
+    // Handle unary expression
     else if (isunop(next.type)) {
         advance(parser);
 
@@ -447,7 +447,7 @@ Node *factor(Parser *parser) {
         return unode;
 
     }
-    // handle group expression
+    // Handle group expression
     else if (next.type == TOK_LPAREN) {
         advance(parser);
 
@@ -486,7 +486,7 @@ Node *integer(Parser *parser) {
 }
 
 /*********************************************
- * Cleanup functions
+ * Cleanup Functions
  *********************************************/
 
 /**
