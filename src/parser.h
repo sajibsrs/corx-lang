@@ -15,8 +15,9 @@ typedef enum {
     N_BLOCK,
     N_DECLARATION,
     N_EXPRESSION,
-    N_CONDITIONAL,
-    N_EMPTY,
+    N_CONDITIONAL, //
+    N_IF,          // Represents an if statement
+    N_EMPTY,       // Represents an empty statement (;)
 } NodeType;
 
 typedef struct Node {

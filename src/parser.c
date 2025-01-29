@@ -31,6 +31,8 @@ const char *ntypestr[] = {
     [N_DECLARATION] = "N_DECLARATION", //
     [N_EXPRESSION]  = "N_EXPRESSION",  //
     [N_CONDITIONAL] = "N_CONDITIONAL", //
+    [N_IF]          = "N_IF",          //
+    [N_EMPTY]       = "N_EMPTY",       //
 };
 
 /**
