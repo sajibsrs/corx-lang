@@ -19,18 +19,18 @@ Node *identifier(Parser *parser);
 Node *integer(Parser *parser);
 
 const char *ntypestr[] = {
-    [NOD_PROGRAM]     = "NOD_PROGRAM",     //
-    [NOD_FUNCTION]    = "NOD_FUNCTION",    //
-    [NOD_RETURN]      = "NOD_RETURN",      //
-    [NOD_UNARY]       = "NOD_UNARY",       //
-    [NOD_BINARY]      = "NOD_BINARY",      //
-    [NOD_ASSIGNMENT]  = "NOD_ASSIGNMENT",  //
-    [NOD_IDENTIFIER]  = "NOD_IDENTIFIER",  //
-    [NOD_INTEGER]     = "NOD_INTEGER",     //
-    [NOD_BLOCK]       = "NOD_BLOCK",       //
-    [NOD_DECLARATION] = "NOD_DECLARATION", //
-    [NOD_EXPRESSION]  = "NOD_EXPRESSION",  //
-    [NOD_CONDITIONAL] = "NOD_CONDITIONAL", //
+    [N_PROGRAM]     = "N_PROGRAM",     //
+    [N_FUNCTION]    = "N_FUNCTION",    //
+    [N_RETURN]      = "N_RETURN",      //
+    [N_UNARY]       = "N_UNARY",       //
+    [N_BINARY]      = "N_BINARY",      //
+    [N_ASSIGNMENT]  = "N_ASSIGNMENT",  //
+    [N_IDENTIFIER]  = "N_IDENTIFIER",  //
+    [N_INTEGER]     = "N_INTEGER",     //
+    [N_BLOCK]       = "N_BLOCK",       //
+    [N_DECLARATION] = "N_DECLARATION", //
+    [N_EXPRESSION]  = "N_EXPRESSION",  //
+    [N_CONDITIONAL] = "N_CONDITIONAL", //
 };
 
 /**
@@ -257,7 +257,7 @@ static Token advance(Parser *parser) {
  */
 Node *program(Parser *parser) {
     Node *func = function(parser);
-    Node *prog = make_node(NOD_PROGRAM, "program");
+    Node *prog = make_node(N_PROGRAM, "program");
 
     add_child(prog, func);
     return prog;
@@ -281,7 +281,7 @@ Node *function(Parser *parser) {
     expect(parser, T_RPAREN, "expected ')' after 'void'");
     expect(parser, T_LBRACE, "expected '{' in the start of function body");
 
-    Node *body = make_node(NOD_BLOCK, "body");
+    Node *body = make_node(N_BLOCK, "body");
     while (peek(parser).type != T_RBRACE) {
         Node *bnode = block(parser);
         add_child(body, bnode);
@@ -289,7 +289,7 @@ Node *function(Parser *parser) {
 
     expect(parser, T_RBRACE, "expected '}' in the end of function body");
 
-    Node *func = make_node(NOD_FUNCTION, "function");
+    Node *func = make_node(N_FUNCTION, "function");
     add_child(func, ident);
     add_child(func, body);
 
@@ -304,7 +304,7 @@ Node *block(Parser *parser) {
         advance(parser);
 
         Node *ident = identifier(parser);
-        Node *decl  = make_node(NOD_DECLARATION, "declaration");
+        Node *decl  = make_node(N_DECLARATION, "declaration");
         add_child(decl, ident);
 
         if (peek(parser).type == T_EQ) {
@@ -341,7 +341,7 @@ Node *statement(Parser *parser) {
         advance(parser); // Consume 'return'
 
         Node *expr = expression(parser, 0);
-        Node *stmt = make_node(NOD_RETURN, "return");
+        Node *stmt = make_node(N_RETURN, "return");
         add_child(stmt, expr);
 
         return stmt;
@@ -356,7 +356,7 @@ Node *statement(Parser *parser) {
             advance(parser);
 
             Node *expr = expression(parser, 0);
-            Node *stmt = make_node(NOD_ASSIGNMENT, asnop.str);
+            Node *stmt = make_node(N_ASSIGNMENT, asnop.str);
             add_child(stmt, ident);
             add_child(stmt, expr);
 
@@ -384,7 +384,7 @@ Node *expression(Parser *parser, int prec) {
 
         // Handle binary operation
         Node *right = expression(parser, precedence(next.type) + 1);
-        Node *node  = make_node(NOD_BINARY, next.str);
+        Node *node  = make_node(N_BINARY, next.str);
         add_child(node, left);
         add_child(node, right);
 
@@ -406,7 +406,7 @@ Node *expression(Parser *parser, int prec) {
         Node *rightexpr = expression(parser, precedence(next.type));
 
         // Create a conditional node
-        Node *node = make_node(NOD_CONDITIONAL, "conditional");
+        Node *node = make_node(N_CONDITIONAL, "conditional");
         add_child(node, left);      // Condition
         add_child(node, leftexpr);  // True expression
         add_child(node, rightexpr); // False expression
@@ -441,7 +441,7 @@ Node *factor(Parser *parser) {
         advance(parser);
 
         Node *inode = factor(parser);
-        Node *unode = make_node(NOD_UNARY, next.str);
+        Node *unode = make_node(N_UNARY, next.str);
         add_child(unode, inode);
 
         return unode;
@@ -470,7 +470,7 @@ Node *identifier(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
 
-    return make_node(NOD_IDENTIFIER, next.str);
+    return make_node(N_IDENTIFIER, next.str);
 }
 
 /**
@@ -482,7 +482,7 @@ Node *integer(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
 
-    return make_node(NOD_INTEGER, next.str);
+    return make_node(N_INTEGER, next.str);
 }
 
 /*********************************************

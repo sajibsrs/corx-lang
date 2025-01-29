@@ -4,18 +4,19 @@
 #include "lexer.h"
 
 typedef enum {
-    NOD_PROGRAM,
-    NOD_FUNCTION,
-    NOD_RETURN,
-    NOD_UNARY,
-    NOD_BINARY,
-    NOD_ASSIGNMENT,
-    NOD_IDENTIFIER,
-    NOD_INTEGER,
-    NOD_BLOCK,
-    NOD_DECLARATION,
-    NOD_EXPRESSION,
-    NOD_CONDITIONAL,
+    N_PROGRAM,
+    N_FUNCTION,
+    N_RETURN,
+    N_UNARY,
+    N_BINARY,
+    N_ASSIGNMENT,
+    N_IDENTIFIER,
+    N_INTEGER,
+    N_BLOCK,
+    N_DECLARATION,
+    N_EXPRESSION,
+    N_CONDITIONAL,
+    N_EMPTY,
 } NodeType;
 
 typedef struct Node {
