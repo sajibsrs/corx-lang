@@ -15,6 +15,7 @@ typedef enum {
     NOD_BLOCK,
     NOD_DECLARATION,
     NOD_EXPRESSION,
+    NOD_CONDITIONAL,
 } NodeType;
 
 typedef struct Node {

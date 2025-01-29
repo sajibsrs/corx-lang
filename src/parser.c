@@ -30,6 +30,7 @@ const char *ntypestr[] = {
     [NOD_BLOCK]       = "NOD_BLOCK",       //
     [NOD_DECLARATION] = "NOD_DECLARATION", //
     [NOD_EXPRESSION]  = "NOD_EXPRESSION",  //
+    [NOD_CONDITIONAL] = "NOD_CONDITIONAL", //
 };
 
 /**
@@ -298,6 +299,7 @@ Node *function(Parser *parser) {
 Node *block(Parser *parser) {
     Token next = peek(parser);
 
+    // Handle variable declarations
     if (next.type == TOK_INT) {
         advance(parser);
 
@@ -315,23 +317,15 @@ Node *block(Parser *parser) {
         expect(parser, TOK_SEMI, "expected ';' after declaration");
         return decl;
     }
-
-    Node *stmt = statement(parser);
-
-    if (stmt && stmt->type == NOD_ASSIGNMENT) {
-        Token asnop = peek(parser);
-
-        if (isasnop(asnop.type)) {
-            advance(parser);
-
-            Node *expr = expression(parser, 0);
-            add_child(stmt, expr);
-        }
-
-        expect(parser, TOK_SEMI, "expected ';' after assignment");
+    // Handle statements (e.g., return, assignments)
+    else {
+        Node *stmt = statement(parser);
+        expect(parser, TOK_SEMI, "expected ';' after statement");
+        return stmt;
     }
 
-    return stmt;
+    errexitinfo(parser, "malformed block statement");
+    return NULL;
 }
 
 /**
@@ -342,20 +336,17 @@ Node *block(Parser *parser) {
 Node *statement(Parser *parser) {
     Token next = peek(parser);
 
-    // handle return statement
+    // Handle return statement
     if (next.type == TOK_RETURN) {
         advance(parser); // consume 'return'
 
         Node *expr = expression(parser, 0);
-        expect(parser, TOK_SEMI, "expected ';' after return");
-
         Node *stmt = make_node(NOD_RETURN, "return");
         add_child(stmt, expr);
 
         return stmt;
-
     }
-    // handle identifier
+    // Handle identifier (assignments)
     else if (next.type == TOK_IDENT) {
         Node *ident = identifier(parser);
         next        = peek(parser);
@@ -380,32 +371,47 @@ Node *statement(Parser *parser) {
 /**
  * @brief Parse expression.
  * @param parser
- * @param prec
+ * @param prec Minimum precedence.
  * @return
  */
 Node *expression(Parser *parser, int prec) {
     Node *left = factor(parser);
     Token next = peek(parser);
 
-    Node *node, *right;
-
-    // precedence climbing loop
+    // Precedence climbing loop for binary operators
     while (isbinop(next.type) && precedence(next.type) >= prec) {
         advance(parser);
 
-        if (next.type == TOK_ASSIGN) {
-            right = expression(parser, precedence(next.type));
-            node  = make_node(NOD_ASSIGNMENT, next.str);
-        } else {
-            right = expression(parser, precedence(next.type) + 1);
-            node  = make_node(NOD_BINARY, next.str);
-        }
-
+        // Handle binary operation
+        Node *right = expression(parser, precedence(next.type) + 1);
+        Node *node  = make_node(NOD_BINARY, next.str);
         add_child(node, left);
         add_child(node, right);
 
-        left = node; // update left for next iteration
+        left = node; // Update left for next iteration
         next = peek(parser);
+    }
+
+    // Handle ternary conditional operator
+    if (next.type == TOK_QUESTION) {
+        advance(parser); // Consume '?'
+
+        // Parse the true expression
+        Node *true_expr = expression(parser, 0);
+
+        // Expect the colon separator
+        expect(parser, TOK_COLON, "expected ':' in ternary operator");
+
+        // Parse the false expression
+        Node *false_expr = expression(parser, precedence(next.type));
+
+        // Create a conditional node
+        Node *node = make_node(NOD_CONDITIONAL, "conditional");
+        add_child(node, left);       // Condition
+        add_child(node, true_expr);  // True expression
+        add_child(node, false_expr); // False expression
+
+        left = node; // Update left for next iteration
     }
 
     return left;
