@@ -397,19 +397,19 @@ Node *expression(Parser *parser, int prec) {
         advance(parser); // Consume '?'
 
         // Parse the true expression
-        Node *true_expr = expression(parser, 0);
+        Node *leftexpr = expression(parser, 0);
 
         // Expect the colon separator
         expect(parser, TOK_COLON, "expected ':' in ternary operator");
 
         // Parse the false expression
-        Node *false_expr = expression(parser, precedence(next.type));
+        Node *rightexpr = expression(parser, precedence(next.type));
 
         // Create a conditional node
         Node *node = make_node(NOD_CONDITIONAL, "conditional");
-        add_child(node, left);       // Condition
-        add_child(node, true_expr);  // True expression
-        add_child(node, false_expr); // False expression
+        add_child(node, left);      // Condition
+        add_child(node, leftexpr);  // True expression
+        add_child(node, rightexpr); // False expression
 
         left = node; // Update left for next iteration
     }
