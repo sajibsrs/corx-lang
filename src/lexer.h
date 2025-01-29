@@ -4,133 +4,133 @@
 #include <stdbool.h>
 
 typedef enum {
-    // type modifiers
-    TOK_TYPE, //
+    // Type modifiers
+    T_TYPE, //
 
-    // async
-    TOK_ASYNC, //
-    TOK_WAIT,  //
+    // Async
+    T_ASYNC, //
+    T_WAIT,  //
 
-    // type qualifiers
-    TOK_CONST,  //
-    TOK_ATOMIC, //
+    // Type qualifiers
+    T_CONST,  //
+    T_ATOMIC, //
 
-    // access specifiers
-    TOK_EXTERNAL,
-    TOK_INTERNAL,
-    TOK_RESTRICT,
+    // Access specifiers
+    T_EXTERNAL,
+    T_INTERNAL,
+    T_RESTRICT,
 
-    // type specifiers
-    TOK_INT,
-    TOK_FLOAT,
+    // Type specifiers
+    T_INT,
+    T_FLOAT,
 
-    TOK_BOOL,     //
-    TOK_ENUM,     //
-    TOK_STRUCT,   //
-    TOK_CONTRACT, //
-    TOK_NUMBER,   // numbers
-    TOK_STRING,   // string literal
-    TOK_CHAR,     // character literal
-    TOK_VOID,     // type non-value
+    T_BOOL,     //
+    T_ENUM,     //
+    T_STRUCT,   //
+    T_CONTRACT, //
+    T_NUMBER,   // Numbers
+    T_STRING,   // String literal
+    T_CHAR,     // Character literal
+    T_VOID,     // Type non-value
 
-    TOK_IDENT, // identifier
+    T_IDENT, // Identifier
 
-    // conditions
-    TOK_IF,      //
-    TOK_ELSE,    //
-    TOK_SWITCH,  //
-    TOK_CASE,    //
-    TOK_DEFAULT, //
+    // Conditions
+    T_IF,      //
+    T_ELSE,    //
+    T_SWITCH,  //
+    T_CASE,    //
+    T_DEFAULT, //
 
-    TOK_CONTINUE,
+    T_CONTINUE,
 
-    // loops
-    TOK_DO,
-    TOK_WHILE,
-    TOK_FOR,
-    TOK_FOREACH,
-    TOK_IN,
+    // Loops
+    T_DO,
+    T_WHILE,
+    T_FOR,
+    T_FOREACH,
+    T_IN,
 
-    // module
-    TOK_MODULE, // group
-    TOK_IMPORT, //
-    TOK_FROM,   //
+    // Module
+    T_MODULE, // Group
+    T_IMPORT, //
+    T_FROM,   //
 
-    // function
-    TOK_RETURN,
+    // Function
+    T_RETURN,
 
-    // memory operations
-    TOK_NEW,
-    TOK_NULL, // pointer non-value
-    TOK_SIZEOF,
-    TOK_THIS,
-    TOK_PURGE,
+    // Memory operations
+    T_NEW,
+    T_NULL, // Pointer non-value
+    T_SIZEOF,
+    T_THIS,
+    T_PURGE,
 
-    // operations
-    TOK_ASSIGN,     // '='
-    TOK_PLUS,       // '+'
-    TOK_MINUS,      // '-'
-    TOK_BANG,       // '!'
-    TOK_TILDE,      // '~'
-    TOK_ASTERISK,   // '*'
-    TOK_AMPERSAND,  // '&'
-    TOK_QUESTION,   // "?"
-    TOK_PIPE,       // "|"
-    TOK_CARET,      // "^"
-    TOK_AT,         // '@'
-    TOK_HASH,       // '#'
-    TOK_FSLASH,     // '/'
-    TOK_BSLASH,     // '\\'
-    TOK_DOT,        // '.'
-    TOK_COLON,      // ':'
-    TOK_SEMI,       // ';'
-    TOK_LT,         // '<'
-    TOK_GT,         // '>'
-    TOK_MOD,        // '%'
-    TOK_ARROW,      // '->'
-    TOK_EQ,         // '=='
-    TOK_NEQ,        // '!='
-    TOK_GEQ,        // '>='
-    TOK_LEQ,        // '<='
-    TOK_ADD_ASSIGN, // '+='
-    TOK_SUB_ASSIGN, // '-='
-    TOK_DIV_ASSIGN, // '/='
-    TOK_MUL_ASSIGN, // '*='
-    TOK_MOD_ASSIGN, // '%='
+    // Operations
+    T_EQ,        // '='
+    T_PLUS,      // '+'
+    T_MINUS,     // '-'
+    T_BANG,      // '!'
+    T_TILDE,     // '~'
+    T_ASTERISK,  // '*'
+    T_AMPERSAND, // '&'
+    T_QMARK,     // "?"
+    T_PIPE,      // "|"
+    T_CARET,     // "^"
+    T_AT,        // '@'
+    T_HASH,      // '#'
+    T_FSLASH,    // '/'
+    T_BSLASH,    // '\\'
+    T_DOT,       // '.'
+    T_COLON,     // ':'
+    T_SCOLON,    // ';'
+    T_LT,        // '<'
+    T_GT,        // '>'
+    T_MODULUS,   // '%'
+    T_ARROW,     // '->'
+    T_EQEQ,      // '=='
+    T_NTEQ,      // '!='
+    T_GTEQ,      // '>='
+    T_LTEQ,      // '<='
+    T_PLUSEQ,    // '+='
+    T_MINUSEQ,   // '-='
+    T_DIVEQ,     // '/='
+    T_MULEQ,     // '*='
+    T_MODEQ,     // '%='
 
-    TOK_AND, // '&&'
-    TOK_OR,  // '||'
+    T_AND, // '&&'
+    T_OR,  // '||'
 
-    TOK_LSHIFT, // '<<'
-    TOK_RSHIFT, // '>>'
+    T_LSHIFT, // '<<'
+    T_RSHIFT, // '>>'
 
-    // bitwise assign
-    TOK_LSHIFT_ASSIGN, // "<<="
-    TOK_RSHIFT_ASSIGN, // ">>="
-    TOK_AND_ASSIGN,    // "&="
-    TOK_XOR_ASSIGN,    // "^="
-    TOK_OR_ASSIGN,     // "|="
+    // Bitwise assign
+    T_LSHIFTEQ, // "<<="
+    T_RSHIFTEQ, // ">>="
+    T_ANDEQ,    // "&="
+    T_XOREQ,    // "^="
+    T_OREQ,     // "|="
 
-    // grouping
-    TOK_LPAREN,   // '('
-    TOK_RPAREN,   // ')'
-    TOK_LBRACE,   // '{'
-    TOK_RBRACE,   // '}'
-    TOK_LBRACKET, // '['
-    TOK_RBRACKET, // ']'
-    TOK_LANGLE,   // '<'
-    TOK_RANGLE,   // '>'
-    TOK_COMMA,    // ','
+    // Grouping
+    T_LPAREN,   // '('
+    T_RPAREN,   // ')'
+    T_LBRACE,   // '{'
+    T_RBRACE,   // '}'
+    T_LBRACKET, // '['
+    T_RBRACKET, // ']'
+    T_LANGLE,   // '<'
+    T_RANGLE,   // '>'
+    T_COMMA,    // ','
 
-    // quotes
-    TOK_SQUOTE, // '
-    TOK_DQUOTE, // "
-    TOK_BQUOTE, // `
+    // Quotes
+    T_SQUOTE, // '
+    T_DQUOTE, // "
+    T_BQUOTE, // `
 
-    TOK_ERROR,   //
-    TOK_UNKNOWN, // unknown token
-    TOK_INVALID,
-    TOK_EOF, // end of file
+    T_ERROR,   //
+    T_UNKNOWN, // Unknown token
+    T_INVALID, //
+    T_EOF,     // End of file
 } TokenType;
 
 extern const char *ttypestr[];

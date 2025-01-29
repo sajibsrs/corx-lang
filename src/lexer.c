@@ -8,134 +8,134 @@
 // Token type to token string lookup table.
 const char *ttypestr[] = {
     // Type specifiers
-    [TOK_INT]   = "TOK_INT",
-    [TOK_FLOAT] = "TOK_FLOAT",
+    [T_INT]   = "T_INT",
+    [T_FLOAT] = "T_FLOAT",
 
-    [TOK_BOOL]     = "TOK_BOOL",
-    [TOK_ENUM]     = "TOK_ENUM",
-    [TOK_STRUCT]   = "TOK_STRUCT",
-    [TOK_CONTRACT] = "TOK_CONTRACT",
-    [TOK_NUMBER]   = "TOK_NUMBER",
-    [TOK_STRING]   = "TOK_STRING",
-    [TOK_CHAR]     = "TOK_CHAR",
-    [TOK_VOID]     = "TOK_VOID",
+    [T_BOOL]     = "T_BOOL",
+    [T_ENUM]     = "T_ENUM",
+    [T_STRUCT]   = "T_STRUCT",
+    [T_CONTRACT] = "T_CONTRACT",
+    [T_NUMBER]   = "T_NUMBER",
+    [T_STRING]   = "T_STRING",
+    [T_CHAR]     = "T_CHAR",
+    [T_VOID]     = "T_VOID",
 
     // Type modifiers
-    [TOK_TYPE] = "TOK_TYPE",
+    [T_TYPE] = "T_TYPE",
 
     // Async operations
-    [TOK_ASYNC] = "TOK_ASYNC",
-    [TOK_WAIT]  = "TOK_WAIT",
+    [T_ASYNC] = "T_ASYNC",
+    [T_WAIT]  = "T_WAIT",
 
     // Type qualifiers
-    [TOK_CONST]  = "TOK_CONST",
-    [TOK_ATOMIC] = "TOK_ATOMIC",
+    [T_CONST]  = "T_CONST",
+    [T_ATOMIC] = "T_ATOMIC",
 
     // Access specifiers
-    [TOK_EXTERNAL] = "TOK_EXTERNAL",
-    [TOK_INTERNAL] = "TOK_INTERNAL",
-    [TOK_RESTRICT] = "TOK_RESTRICT",
+    [T_EXTERNAL] = "T_EXTERNAL",
+    [T_INTERNAL] = "T_INTERNAL",
+    [T_RESTRICT] = "T_RESTRICT",
 
     // Conditions
-    [TOK_IF]      = "TOK_IF",
-    [TOK_ELSE]    = "TOK_ELSE",
-    [TOK_SWITCH]  = "TOK_SWITCH",
-    [TOK_CASE]    = "TOK_CASE",
-    [TOK_DEFAULT] = "TOK_DEFAULT",
+    [T_IF]      = "T_IF",
+    [T_ELSE]    = "T_ELSE",
+    [T_SWITCH]  = "T_SWITCH",
+    [T_CASE]    = "T_CASE",
+    [T_DEFAULT] = "T_DEFAULT",
 
-    [TOK_CONTINUE] = "TOK_CONTINUE",
+    [T_CONTINUE] = "T_CONTINUE",
 
     // Loops
-    [TOK_DO]      = "TOK_DO",
-    [TOK_WHILE]   = "TOK_WHILE",
-    [TOK_FOR]     = "TOK_FOR",
-    [TOK_FOREACH] = "TOK_FOREACH",
-    [TOK_IN]      = "TOK_IN",
+    [T_DO]      = "T_DO",
+    [T_WHILE]   = "T_WHILE",
+    [T_FOR]     = "T_FOR",
+    [T_FOREACH] = "T_FOREACH",
+    [T_IN]      = "T_IN",
 
     // Module
-    [TOK_MODULE] = "TOK_MODULE",
-    [TOK_IMPORT] = "TOK_IMPORT",
-    [TOK_FROM]   = "TOK_FROM",
+    [T_MODULE] = "T_MODULE",
+    [T_IMPORT] = "T_IMPORT",
+    [T_FROM]   = "T_FROM",
 
     // Functions
-    [TOK_RETURN] = "TOK_RETURN",
+    [T_RETURN] = "T_RETURN",
 
     // Memory operations
-    [TOK_NEW]    = "TOK_NEW",
-    [TOK_NULL]   = "TOK_NULL",
-    [TOK_SIZEOF] = "TOK_SIZEOF",
-    [TOK_THIS]   = "TOK_THIS",
-    [TOK_PURGE]  = "TOK_PURGE",
+    [T_NEW]    = "T_NEW",
+    [T_NULL]   = "T_NULL",
+    [T_SIZEOF] = "T_SIZEOF",
+    [T_THIS]   = "T_THIS",
+    [T_PURGE]  = "T_PURGE",
 
     // Identifiers
-    [TOK_IDENT] = "TOK_IDENT",
+    [T_IDENT] = "T_IDENT",
 
     // Operators
-    [TOK_ASSIGN]     = "TOK_ASSIGN",
-    [TOK_PLUS]       = "TOK_PLUS",
-    [TOK_MINUS]      = "TOK_MINUS",
-    [TOK_BANG]       = "TOK_BANG",      // "!"
-    [TOK_TILDE]      = "TOK_TILDE",     // "~"
-    [TOK_ASTERISK]   = "TOK_ASTERISK",  //
-    [TOK_AMPERSAND]  = "TOK_AMPERSAND", //
-    [TOK_QUESTION]   = "TOK_QUESTION",  // "?"
-    [TOK_PIPE]       = "TOK_PIPE",      // "|"
-    [TOK_CARET]      = "TOK_CARET",     // "^"
-    [TOK_AT]         = "TOK_AT",
-    [TOK_HASH]       = "TOK_HASH",
-    [TOK_FSLASH]     = "TOK_FSLASH",
-    [TOK_BSLASH]     = "TOK_BSLASH",
-    [TOK_DOT]        = "TOK_DOT",
-    [TOK_COLON]      = "TOK_COLON",
-    [TOK_SEMI]       = "TOK_SEMI",
-    [TOK_LT]         = "TOK_LT",
-    [TOK_GT]         = "TOK_GT",
-    [TOK_MOD]        = "TOK_MOD",
-    [TOK_ARROW]      = "TOK_ARROW",
-    [TOK_EQ]         = "TOK_EQ",
-    [TOK_NEQ]        = "TOK_NEQ",
-    [TOK_GEQ]        = "TOK_GEQ",
-    [TOK_LEQ]        = "TOK_LEQ",
-    [TOK_ADD_ASSIGN] = "TOK_ADD_ASSIGN",
-    [TOK_SUB_ASSIGN] = "TOK_SUB_ASSIGN",
-    [TOK_DIV_ASSIGN] = "TOK_DIV_ASSIGN",
-    [TOK_MUL_ASSIGN] = "TOK_MUL_ASSIGN",
-    [TOK_MOD_ASSIGN] = "TOK_MOD_ASSIGN",
+    [T_EQ]        = "T_EQ",
+    [T_PLUS]      = "T_PLUS",
+    [T_MINUS]     = "T_MINUS",
+    [T_BANG]      = "T_BANG",      // "!"
+    [T_TILDE]     = "T_TILDE",     // "~"
+    [T_ASTERISK]  = "T_ASTERISK",  //
+    [T_AMPERSAND] = "T_AMPERSAND", //
+    [T_QMARK]     = "T_QMARK",     // "?"
+    [T_PIPE]      = "T_PIPE",      // "|"
+    [T_CARET]     = "T_CARET",     // "^"
+    [T_AT]        = "T_AT",
+    [T_HASH]      = "T_HASH",
+    [T_FSLASH]    = "T_FSLASH",
+    [T_BSLASH]    = "T_BSLASH",
+    [T_DOT]       = "T_DOT",
+    [T_COLON]     = "T_COLON",
+    [T_SCOLON]    = "T_SCOLON",
+    [T_LT]        = "T_LT",
+    [T_GT]        = "T_GT",
+    [T_MODULUS]   = "T_MODULUS",
+    [T_ARROW]     = "T_ARROW",
+    [T_EQEQ]      = "T_EQEQ",
+    [T_NTEQ]      = "T_NTEQ",
+    [T_GTEQ]      = "T_GTEQ",
+    [T_LTEQ]      = "T_LTEQ",
+    [T_PLUSEQ]    = "T_PLUSEQ",
+    [T_MINUSEQ]   = "T_MINUSEQ",
+    [T_DIVEQ]     = "T_DIVEQ",
+    [T_MULEQ]     = "T_MULEQ",
+    [T_MODEQ]     = "T_MODEQ",
 
-    [TOK_AND] = "TOK_AND", // "&&"
-    [TOK_OR]  = "TOK_OR",  // "||"
+    [T_AND] = "T_AND", // "&&"
+    [T_OR]  = "T_OR",  // "||"
 
-    [TOK_LSHIFT] = "TOK_LSHIFT", // "<<"
-    [TOK_RSHIFT] = "TOK_RSHIFT", // ">>"
+    [T_LSHIFT] = "T_LSHIFT", // "<<"
+    [T_RSHIFT] = "T_RSHIFT", // ">>"
 
-    // bitwise assign
-    [TOK_LSHIFT_ASSIGN] = "TOK_LSHIFT_ASSIGN", // "<<="
-    [TOK_RSHIFT_ASSIGN] = "TOK_RSHIFT_ASSIGN", // ">>="
-    [TOK_AND_ASSIGN]    = "TOK_AND_ASSIGN",    // "&="
-    [TOK_XOR_ASSIGN]    = "TOK_XOR_ASSIGN",    // "^="
-    [TOK_OR_ASSIGN]     = "TOK_OR_ASSIGN",     // "|="
+    // Bitwise assign
+    [T_LSHIFTEQ] = "T_LSHIFTEQ", // "<<="
+    [T_RSHIFTEQ] = "T_RSHIFTEQ", // ">>="
+    [T_ANDEQ]    = "T_ANDEQ",    // "&="
+    [T_XOREQ]    = "T_XOREQ",    // "^="
+    [T_OREQ]     = "T_OREQ",     // "|="
 
     // Grouping
-    [TOK_LPAREN]   = "TOK_LPAREN",
-    [TOK_RPAREN]   = "TOK_RPAREN",
-    [TOK_LBRACE]   = "TOK_LBRACE",
-    [TOK_RBRACE]   = "TOK_RBRACE",
-    [TOK_LBRACKET] = "TOK_LBRACKET",
-    [TOK_RBRACKET] = "TOK_RBRACKET",
-    [TOK_LANGLE]   = "TOK_LANGLE",
-    [TOK_RANGLE]   = "TOK_RANGLE",
-    [TOK_COMMA]    = "TOK_COMMA",
+    [T_LPAREN]   = "T_LPAREN",
+    [T_RPAREN]   = "T_RPAREN",
+    [T_LBRACE]   = "T_LBRACE",
+    [T_RBRACE]   = "T_RBRACE",
+    [T_LBRACKET] = "T_LBRACKET",
+    [T_RBRACKET] = "T_RBRACKET",
+    [T_LANGLE]   = "T_LANGLE",
+    [T_RANGLE]   = "T_RANGLE",
+    [T_COMMA]    = "T_COMMA",
 
     // Quotes
-    [TOK_SQUOTE] = "TOK_SQUOTE",
-    [TOK_DQUOTE] = "TOK_DQUOTE",
-    [TOK_BQUOTE] = "TOK_BQUOTE",
+    [T_SQUOTE] = "T_SQUOTE",
+    [T_DQUOTE] = "T_DQUOTE",
+    [T_BQUOTE] = "T_BQUOTE",
 
     // Miscellaneous
-    [TOK_ERROR]   = "TOK_ERROR",
-    [TOK_UNKNOWN] = "TOK_UNKNOWN",
-    [TOK_INVALID] = "TOK_INVALID",
-    [TOK_EOF]     = "TOK_EOF",
+    [T_ERROR]   = "T_ERROR",
+    [T_UNKNOWN] = "T_UNKNOWN",
+    [T_INVALID] = "T_INVALID",
+    [T_EOF]     = "T_EOF",
 };
 
 #define HASH_SIZE 256
@@ -169,65 +169,65 @@ void init_kwmap() {
     }
 
     // type modifiers
-    kwmap_add(TOK_TYPE, "type");
+    kwmap_add(T_TYPE, "type");
 
     // async
-    kwmap_add(TOK_ASYNC, "async");
-    kwmap_add(TOK_WAIT, "wait");
+    kwmap_add(T_ASYNC, "async");
+    kwmap_add(T_WAIT, "wait");
 
     // type qualifiers
-    kwmap_add(TOK_CONST, "const");
-    kwmap_add(TOK_ATOMIC, "atomic");
+    kwmap_add(T_CONST, "const");
+    kwmap_add(T_ATOMIC, "atomic");
 
     // access specifier
-    kwmap_add(TOK_EXTERNAL, "external");
-    kwmap_add(TOK_INTERNAL, "internal");
-    kwmap_add(TOK_RESTRICT, "restrict");
+    kwmap_add(T_EXTERNAL, "external");
+    kwmap_add(T_INTERNAL, "internal");
+    kwmap_add(T_RESTRICT, "restrict");
 
     // type specifiers
-    kwmap_add(TOK_INT, "int");
-    kwmap_add(TOK_FLOAT, "float");
+    kwmap_add(T_INT, "int");
+    kwmap_add(T_FLOAT, "float");
 
-    kwmap_add(TOK_BOOL, "bool");
-    kwmap_add(TOK_ENUM, "enum");
-    kwmap_add(TOK_STRUCT, "struct");
-    kwmap_add(TOK_CONTRACT, "contract");
-    kwmap_add(TOK_STRING, "string");
-    kwmap_add(TOK_CHAR, "char");
-    kwmap_add(TOK_VOID, "void");
+    kwmap_add(T_BOOL, "bool");
+    kwmap_add(T_ENUM, "enum");
+    kwmap_add(T_STRUCT, "struct");
+    kwmap_add(T_CONTRACT, "contract");
+    kwmap_add(T_STRING, "string");
+    kwmap_add(T_CHAR, "char");
+    kwmap_add(T_VOID, "void");
 
     // conditions
-    kwmap_add(TOK_IF, "if");
-    kwmap_add(TOK_ELSE, "else");
-    kwmap_add(TOK_SWITCH, "switch");
-    kwmap_add(TOK_CASE, "case");
-    kwmap_add(TOK_DEFAULT, "default");
-    kwmap_add(TOK_CONTINUE, "continue");
+    kwmap_add(T_IF, "if");
+    kwmap_add(T_ELSE, "else");
+    kwmap_add(T_SWITCH, "switch");
+    kwmap_add(T_CASE, "case");
+    kwmap_add(T_DEFAULT, "default");
+    kwmap_add(T_CONTINUE, "continue");
 
     // loops
-    kwmap_add(TOK_DO, "do");
-    kwmap_add(TOK_WHILE, "while");
-    kwmap_add(TOK_FOR, "for");
-    kwmap_add(TOK_FOREACH, "foreach");
-    kwmap_add(TOK_IN, "in");
+    kwmap_add(T_DO, "do");
+    kwmap_add(T_WHILE, "while");
+    kwmap_add(T_FOR, "for");
+    kwmap_add(T_FOREACH, "foreach");
+    kwmap_add(T_IN, "in");
 
     // module
-    kwmap_add(TOK_MODULE, "module");
-    kwmap_add(TOK_IMPORT, "import");
-    kwmap_add(TOK_FROM, "from");
+    kwmap_add(T_MODULE, "module");
+    kwmap_add(T_IMPORT, "import");
+    kwmap_add(T_FROM, "from");
 
     // function
-    kwmap_add(TOK_RETURN, "return");
+    kwmap_add(T_RETURN, "return");
 
     // memory operations
-    kwmap_add(TOK_NEW, "new");
-    kwmap_add(TOK_NULL, "null");
-    kwmap_add(TOK_SIZEOF, "sizeof");
-    kwmap_add(TOK_THIS, "this");
-    kwmap_add(TOK_PURGE, "purge");
+    kwmap_add(T_NEW, "new");
+    kwmap_add(T_NULL, "null");
+    kwmap_add(T_SIZEOF, "sizeof");
+    kwmap_add(T_THIS, "this");
+    kwmap_add(T_PURGE, "purge");
 
     // others
-    kwmap_add(TOK_ERROR, "error");
+    kwmap_add(T_ERROR, "error");
 }
 
 /**
@@ -388,7 +388,7 @@ static void skipblank(Lexer *lexer) {
  */
 static Token number(Lexer *lexer) {
     Token token;
-    token.type = TOK_NUMBER;
+    token.type = T_NUMBER;
 
     char cin  = current(lexer);
     int idx   = 0;
@@ -416,7 +416,7 @@ static Token number(Lexer *lexer) {
  */
 static Token identifier(Lexer *lexer) {
     Token token;
-    token.type = TOK_IDENT; // default is identifier
+    token.type = T_IDENT; // default is identifier
 
     char cin  = current(lexer);
     int idx   = 0;
@@ -450,7 +450,7 @@ static Token identifier(Lexer *lexer) {
  */
 static Token string(Lexer *lexer) {
     Token token;
-    token.type = TOK_STRING;
+    token.type = T_STRING;
 
     char cin  = current(lexer);
     int idx   = 0;
@@ -469,7 +469,7 @@ static Token string(Lexer *lexer) {
         token.str[idx] = '\0';   // null-terminate string
         advance(lexer, 1, true); // consume closing quote
     } else {
-        token.type   = TOK_UNKNOWN;
+        token.type   = T_UNKNOWN;
         token.str[0] = '\0'; // empty str
     }
 
@@ -486,7 +486,7 @@ static Token string(Lexer *lexer) {
  */
 static Token character(Lexer *lexer) {
     Token token;
-    token.type = TOK_CHAR;
+    token.type = T_CHAR;
 
     char cin = current(lexer);
 
@@ -502,12 +502,12 @@ static Token character(Lexer *lexer) {
             advance(lexer, 1, true);
         } else {
             // if there's no closing quote
-            token.type   = TOK_UNKNOWN;
+            token.type   = T_UNKNOWN;
             token.str[0] = '\0';
         }
     } else {
         // if it's just an empty quote
-        token.type   = TOK_UNKNOWN;
+        token.type   = T_UNKNOWN;
         token.str[0] = '\0';
     }
 
@@ -600,254 +600,254 @@ static Token next(Lexer *lexer) {
     // "<<="
     if (cin == '<' && peek(lexer) == '<' && peeknext(lexer) == '=') {
         advance(lexer, 3, true);
-        return (Token){TOK_LSHIFT_ASSIGN, "<<=", lexer->line, lexer->column - 3};
+        return (Token){T_LSHIFTEQ, "<<=", lexer->line, lexer->column - 3};
     }
 
     // ">>="
     if (cin == '>' && peek(lexer) == '>' && peeknext(lexer) == '=') {
         advance(lexer, 3, true);
-        return (Token){TOK_RSHIFT_ASSIGN, ">>=", lexer->line, lexer->column - 3};
+        return (Token){T_RSHIFTEQ, ">>=", lexer->line, lexer->column - 3};
     }
 
     // "=="
     if (cin == '=' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_EQ, "==", lexer->line, lexer->column - 2};
+        return (Token){T_EQEQ, "==", lexer->line, lexer->column - 2};
     }
 
     // "!="
     if (cin == '!' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '!='
-        return (Token){TOK_NEQ, "!=", lexer->line, lexer->column - 2};
+        return (Token){T_NTEQ, "!=", lexer->line, lexer->column - 2};
     }
 
     // "<="
     if (cin == '<' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '<='
-        return (Token){TOK_LEQ, "<=", lexer->line, lexer->column - 2};
+        return (Token){T_LTEQ, "<=", lexer->line, lexer->column - 2};
     }
 
     // ">="
     if (cin == '>' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '>='
-        return (Token){TOK_GEQ, ">=", lexer->line, lexer->column - 2};
+        return (Token){T_GTEQ, ">=", lexer->line, lexer->column - 2};
     }
 
     // "+="
     if (cin == '+' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_ADD_ASSIGN, "+=", lexer->line, lexer->column - 2};
+        return (Token){T_PLUSEQ, "+=", lexer->line, lexer->column - 2};
     }
 
     // "-="
     if (cin == '-' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_SUB_ASSIGN, "-=", lexer->line, lexer->column - 2};
+        return (Token){T_MINUSEQ, "-=", lexer->line, lexer->column - 2};
     }
 
     // "*="
     if (cin == '*' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MUL_ASSIGN, "*=", lexer->line, lexer->column - 2};
+        return (Token){T_MULEQ, "*=", lexer->line, lexer->column - 2};
     }
 
     // "/="
     if (cin == '/' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_DIV_ASSIGN, "/=", lexer->line, lexer->column - 2};
+        return (Token){T_DIVEQ, "/=", lexer->line, lexer->column - 2};
     }
 
     // "%="
     if (cin == '%' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_MOD_ASSIGN, "%=", lexer->line, lexer->column - 2};
+        return (Token){T_MODEQ, "%=", lexer->line, lexer->column - 2};
     }
 
     // "&&"
     if (cin == '&' && peek(lexer) == '&') {
         advance(lexer, 2, true); // consume '&&'
-        return (Token){TOK_AND, "<<", lexer->line, lexer->column - 2};
+        return (Token){T_AND, "<<", lexer->line, lexer->column - 2};
     }
 
     // "||"
     if (cin == '|' && peek(lexer) == '|') {
         advance(lexer, 2, true); // consume '||'
-        return (Token){TOK_OR, "||", lexer->line, lexer->column - 2};
+        return (Token){T_OR, "||", lexer->line, lexer->column - 2};
     }
 
     // "<<"
     if (cin == '<' && peek(lexer) == '<') {
         advance(lexer, 2, true); // consume '<<'
-        return (Token){TOK_LSHIFT, "<<", lexer->line, lexer->column - 2};
+        return (Token){T_LSHIFT, "<<", lexer->line, lexer->column - 2};
     }
 
     // ">>"
     if (cin == '>' && peek(lexer) == '>') {
         advance(lexer, 2, true); // consume '>>'
-        return (Token){TOK_RSHIFT, ">>", lexer->line, lexer->column - 2};
+        return (Token){T_RSHIFT, ">>", lexer->line, lexer->column - 2};
     }
 
     // "&="
     if (cin == '&' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_AND_ASSIGN, "&=", lexer->line, lexer->column - 2};
+        return (Token){T_ANDEQ, "&=", lexer->line, lexer->column - 2};
     }
 
     // "^="
     if (cin == '^' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_XOR_ASSIGN, "^=", lexer->line, lexer->column - 2};
+        return (Token){T_XOREQ, "^=", lexer->line, lexer->column - 2};
     }
 
     // "|="
     if (cin == '|' && peek(lexer) == '=') {
         advance(lexer, 2, true);
-        return (Token){TOK_OR_ASSIGN, "|=", lexer->line, lexer->column - 2};
+        return (Token){T_OREQ, "|=", lexer->line, lexer->column - 2};
     }
 
     /*********************************************
-     * Single-character operators
+     * Single-character Operators
      *********************************************/
 
     if (cin == '<') {
         advance(lexer, 1, true);
-        return (Token){TOK_LT, "<", lexer->line, lexer->column - 1};
+        return (Token){T_LT, "<", lexer->line, lexer->column - 1};
     }
 
     if (cin == '>') {
         advance(lexer, 1, true);
-        return (Token){TOK_GT, ">", lexer->line, lexer->column - 1};
+        return (Token){T_GT, ">", lexer->line, lexer->column - 1};
     }
 
     if (cin == '=') {
         advance(lexer, 1, true);
-        return (Token){TOK_ASSIGN, "=", lexer->line, lexer->column - 1};
+        return (Token){T_EQ, "=", lexer->line, lexer->column - 1};
     }
 
     if (cin == '+') {
         advance(lexer, 1, true);
-        return (Token){TOK_PLUS, "+", lexer->line, lexer->column - 1};
+        return (Token){T_PLUS, "+", lexer->line, lexer->column - 1};
     }
 
     if (cin == '-') {
         advance(lexer, 1, true);
-        return (Token){TOK_MINUS, "-", lexer->line, lexer->column - 1};
+        return (Token){T_MINUS, "-", lexer->line, lexer->column - 1};
     }
 
     if (cin == '*') {
         advance(lexer, 1, true);
-        return (Token){TOK_ASTERISK, "*", lexer->line, lexer->column - 1};
+        return (Token){T_ASTERISK, "*", lexer->line, lexer->column - 1};
     }
 
     if (cin == '/') {
         advance(lexer, 1, true);
-        return (Token){TOK_FSLASH, "/", lexer->line, lexer->column - 1};
+        return (Token){T_FSLASH, "/", lexer->line, lexer->column - 1};
     }
 
     if (cin == ';') {
         advance(lexer, 1, true);
-        return (Token){TOK_SEMI, ";", lexer->line, lexer->column - 1};
+        return (Token){T_SCOLON, ";", lexer->line, lexer->column - 1};
     }
 
     if (cin == '\\') {
         advance(lexer, 1, true);
-        return (Token){TOK_BSLASH, "\\", lexer->line, lexer->column - 1};
+        return (Token){T_BSLASH, "\\", lexer->line, lexer->column - 1};
     }
 
     if (cin == '&') {
         advance(lexer, 1, true);
-        return (Token){TOK_AMPERSAND, "&", lexer->line, lexer->column - 1};
+        return (Token){T_AMPERSAND, "&", lexer->line, lexer->column - 1};
     }
 
     if (cin == '?') {
         advance(lexer, 1, true);
-        return (Token){TOK_QUESTION, "?", lexer->line, lexer->column - 1};
+        return (Token){T_QMARK, "?", lexer->line, lexer->column - 1};
     }
 
     if (cin == '|') {
         advance(lexer, 1, true);
-        return (Token){TOK_PIPE, "|", lexer->line, lexer->column - 1};
+        return (Token){T_PIPE, "|", lexer->line, lexer->column - 1};
     }
 
     if (cin == '^') {
         advance(lexer, 1, true);
-        return (Token){TOK_CARET, "^", lexer->line, lexer->column - 1};
+        return (Token){T_CARET, "^", lexer->line, lexer->column - 1};
     }
 
     if (cin == '(') {
         advance(lexer, 1, true);
-        return (Token){TOK_LPAREN, "(", lexer->line, lexer->column - 1};
+        return (Token){T_LPAREN, "(", lexer->line, lexer->column - 1};
     }
 
     if (cin == ')') {
         advance(lexer, 1, true);
-        return (Token){TOK_RPAREN, ")", lexer->line, lexer->column - 1};
+        return (Token){T_RPAREN, ")", lexer->line, lexer->column - 1};
     }
 
     if (cin == '{') {
         advance(lexer, 1, true);
-        return (Token){TOK_LBRACE, "{", lexer->line, lexer->column - 1};
+        return (Token){T_LBRACE, "{", lexer->line, lexer->column - 1};
     }
 
     if (cin == '}') {
         advance(lexer, 1, true);
-        return (Token){TOK_RBRACE, "}", lexer->line, lexer->column - 1};
+        return (Token){T_RBRACE, "}", lexer->line, lexer->column - 1};
     }
 
     if (cin == '[') {
         advance(lexer, 1, true);
-        return (Token){TOK_LBRACKET, "[", lexer->line, lexer->column - 1};
+        return (Token){T_LBRACKET, "[", lexer->line, lexer->column - 1};
     }
 
     if (cin == ']') {
         advance(lexer, 1, true);
-        return (Token){TOK_RBRACKET, "]", lexer->line, lexer->column - 1};
+        return (Token){T_RBRACKET, "]", lexer->line, lexer->column - 1};
     }
 
     if (cin == '%') {
         advance(lexer, 1, true);
-        return (Token){TOK_MOD, "%", lexer->line, lexer->column - 1};
+        return (Token){T_MODULUS, "%", lexer->line, lexer->column - 1};
     }
 
     if (cin == '!') {
         advance(lexer, 1, true);
-        return (Token){TOK_BANG, "!", lexer->line, lexer->column - 1};
+        return (Token){T_BANG, "!", lexer->line, lexer->column - 1};
     }
 
     if (cin == '@') {
         advance(lexer, 1, true);
-        return (Token){TOK_AT, "@", lexer->line, lexer->column - 1};
+        return (Token){T_AT, "@", lexer->line, lexer->column - 1};
     }
 
     if (cin == '~') {
         advance(lexer, 1, true);
-        return (Token){TOK_TILDE, "~", lexer->line, lexer->column - 1};
+        return (Token){T_TILDE, "~", lexer->line, lexer->column - 1};
     }
 
     if (cin == '.') {
         advance(lexer, 1, true);
-        return (Token){TOK_DOT, ".", lexer->line, lexer->column - 1};
+        return (Token){T_DOT, ".", lexer->line, lexer->column - 1};
     }
 
     if (cin == ':') {
         advance(lexer, 1, true);
-        return (Token){TOK_COLON, ":", lexer->line, lexer->column - 1};
+        return (Token){T_COLON, ":", lexer->line, lexer->column - 1};
     }
 
     if (cin == ',') {
         advance(lexer, 1, true);
-        return (Token){TOK_COMMA, ",", lexer->line, lexer->column - 1};
+        return (Token){T_COMMA, ",", lexer->line, lexer->column - 1};
     }
 
     if (cin == '\0') {
         advance(lexer, 1, true);
-        return (Token){TOK_EOF, "EOF", lexer->line, lexer->column - 1};
+        return (Token){T_EOF, "EOF", lexer->line, lexer->column - 1};
     }
 
     advance(lexer, 1, true);
 
     // handle unknown token
-    Token token  = {TOK_UNKNOWN, "", lexer->line, lexer->column - 1};
+    Token token  = {T_UNKNOWN, "", lexer->line, lexer->column - 1};
     token.str[0] = cin;
     token.str[1] = '\0';
 
@@ -913,7 +913,7 @@ TokenList *scan(const char *src) {
  * @return
  */
 bool token_eof(Token token) {
-    return token.type == TOK_EOF;
+    return token.type == T_EOF;
 }
 
 /**
