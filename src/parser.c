@@ -348,13 +348,28 @@ Node *statement(Parser *parser) {
 
         return stmt;
     }
+    // Handle if..else statement
+    else if (next.type == T_IF) {
+        advance(parser);
+
+        expect(parser, T_LPAREN, "expected '(' after if statement");
+        Node *expr = expression(parser, 0);
+        expect(parser, T_RPAREN, "expected ')' after if statement");
+        Node *stmt = statement(parser);
+
+        Node *node = make_node(N_IF, "if-stmt");
+        add_child(node, expr);
+        add_child(node, stmt);
+
+        return node;
+    }
     // Handle identifier (assignments)
     else if (next.type == T_IDENT) {
         Node *ident = identifier(parser);
         next        = peek(parser);
 
         if (isasnop(next.type)) {
-            Token asnop = next; // Save operator
+            Token asnop = next; // Save assignment operator
             advance(parser);
 
             Node *expr = expression(parser, 0);
@@ -408,7 +423,7 @@ Node *expression(Parser *parser, int prec) {
         Node *rightexpr = expression(parser, precedence(next.type));
 
         // Create a conditional node
-        Node *node = make_node(N_CONDITIONAL, "conditional");
+        Node *node = make_node(N_CONDITIONAL, "cond-expr");
         add_child(node, left);      // Condition
         add_child(node, leftexpr);  // True expression
         add_child(node, rightexpr); // False expression
