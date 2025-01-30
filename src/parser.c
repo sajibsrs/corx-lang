@@ -322,11 +322,10 @@ Node *block(Parser *parser) {
     // Handle statements (e.g., return, assignments)
     else {
         Node *stmt = statement(parser);
-        expect(parser, T_SCOLON, "expected ';' after statement");
         return stmt;
     }
 
-    errexitinfo(parser, "malformed block statement");
+    errexitinfo(parser, "malformed block-statement");
     return NULL;
 }
 
@@ -343,6 +342,9 @@ Node *statement(Parser *parser) {
         advance(parser); // Consume 'return'
 
         Node *expr = expression(parser, 0);
+
+        expect(parser, T_SCOLON, "expected ';' semicolon after return statement");
+
         Node *stmt = make_node(N_RETURN, "return");
         add_child(stmt, expr);
 
@@ -355,13 +357,34 @@ Node *statement(Parser *parser) {
         expect(parser, T_LPAREN, "expected '(' after if statement");
         Node *expr = expression(parser, 0);
         expect(parser, T_RPAREN, "expected ')' after if statement");
-        Node *stmt = statement(parser);
 
-        Node *node = make_node(N_IF, "if-stmt");
-        add_child(node, expr);
-        add_child(node, stmt);
+        // Handle blockstatement statement
+        if (peek(parser).type == T_LBRACE) {
+            advance(parser);
 
-        return node;
+            Node *body = make_node(N_BLOCK, "body");
+            while (peek(parser).type != T_RBRACE) {
+                Node *bnode = block(parser);
+                add_child(body, bnode);
+            }
+
+            expect(parser, T_RBRACE, "expected '}' in the end of if-expr body");
+
+            Node *node = make_node(N_IF, "if-stmt");
+            add_child(node, expr);
+            add_child(node, body);
+
+            return node;
+        }
+        // Handle single statement
+        else {
+            Node *stmt = statement(parser);
+            Node *node = make_node(N_IF, "if-stmt");
+            add_child(node, expr);
+            add_child(node, stmt);
+
+            return node;
+        }
     }
     // Handle identifier (assignments)
     else if (next.type == T_IDENT) {
@@ -373,6 +396,8 @@ Node *statement(Parser *parser) {
             advance(parser);
 
             Node *expr = expression(parser, 0);
+            expect(parser, T_SCOLON, "expected ';' after assignment statement");
+
             Node *stmt = make_node(N_ASSIGNMENT, asnop.str);
             add_child(stmt, ident);
             add_child(stmt, expr);
