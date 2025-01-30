@@ -7,7 +7,7 @@ function
     ;
 
 block
-    = "{" block* "}"
+    = "{" { block_item } "}"
     ;
 
 block_item
@@ -16,12 +16,13 @@ block_item
     ;
 
 declaration
-    = "int" identifier ( "=" expression )? ";"
+    = "int" identifier [ "=" expression ]
+    ;
 
 statement
     = "return" expression ";"
     | expression ";"
-    | "if" "(" expression ")" statement ( "else" statement )?
+    | "if" "(" expression ")" statement [ "else" statement ]
     | ";"
     ;
 
@@ -101,15 +102,16 @@ unary_operator
     ;
 
 identifier
-    = ( alphanumeric | "_" )+
+    = ( letter | "_" ) { alphanumeric }
     ;
 
 integer_constant
-    = digit+
+    = digit { digit }
     ;
 
 alphanumeric
-    = ( letter | digit )+
+    = letter | digit
+    ;
 
 digit
     = "0".."9"
