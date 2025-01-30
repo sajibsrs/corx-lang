@@ -32,6 +32,7 @@ const char *ntypestr[] = {
     [N_EXPRESSION]  = "N_EXPRESSION",  //
     [N_CONDITIONAL] = "N_CONDITIONAL", //
     [N_IF]          = "N_IF",          //
+    [N_ELSE]        = "N_ELSE",        //
     [N_EMPTY]       = "N_EMPTY",       //
 };
 
@@ -283,7 +284,7 @@ Node *function(Parser *parser) {
     expect(parser, T_RPAREN, "expected ')' after 'void'");
     expect(parser, T_LBRACE, "expected '{' in the start of function body");
 
-    Node *body = make_node(N_BLOCK, "body");
+    Node *body = make_node(N_BLOCK, "block");
     while (peek(parser).type != T_RBRACE) {
         Node *bnode = block(parser);
         add_child(body, bnode);
@@ -350,42 +351,66 @@ Node *statement(Parser *parser) {
 
         return stmt;
     }
-    // Handle if..else statement
+
+    // Handle if statement
     else if (next.type == T_IF) {
-        advance(parser);
+        advance(parser); // Consume 'if'
 
         expect(parser, T_LPAREN, "expected '(' after if statement");
         Node *expr = expression(parser, 0);
         expect(parser, T_RPAREN, "expected ')' after if statement");
 
-        // Handle blockstatement statement
-        if (peek(parser).type == T_LBRACE) {
-            advance(parser);
+        Node *ibody;
 
-            Node *body = make_node(N_BLOCK, "body");
+        if (peek(parser).type == T_LBRACE) {
+            advance(parser); // Consume '{'
+
+            ibody = make_node(N_BLOCK, "block");
+
             while (peek(parser).type != T_RBRACE) {
                 Node *bnode = block(parser);
-                add_child(body, bnode);
+                add_child(ibody, bnode);
             }
 
-            expect(parser, T_RBRACE, "expected '}' in the end of if-expr body");
-
-            Node *node = make_node(N_IF, "if-stmt");
-            add_child(node, expr);
-            add_child(node, body);
-
-            return node;
+            expect(parser, T_RBRACE, "expected '}' at the end of if body");
+        } else {
+            ibody = statement(parser); // Single statement or expression
         }
-        // Handle single statement
-        else {
-            Node *stmt = statement(parser);
-            Node *node = make_node(N_IF, "if-stmt");
-            add_child(node, expr);
-            add_child(node, stmt);
 
-            return node;
+        Node *inode = make_node(N_IF, "if-stmt");
+        add_child(inode, expr);
+        add_child(inode, ibody);
+
+        // Handle optional else statement
+        next = peek(parser);
+        if (next.type == T_ELSE) {
+            advance(parser); // Consume 'else'
+
+            Node *ebody;
+
+            if (peek(parser).type == T_LBRACE) {
+                advance(parser); // Consume '{'
+
+                ebody = make_node(N_BLOCK, "block");
+
+                while (peek(parser).type != T_RBRACE) {
+                    Node *bnode = block(parser);
+                    add_child(ebody, bnode);
+                }
+
+                expect(parser, T_RBRACE, "expected '}' at the end of else body");
+            } else {
+                ebody = statement(parser); // Single statement or expression
+            }
+
+            Node *enode = make_node(N_ELSE, "else-stmt");
+            add_child(enode, ebody);
+            add_child(inode, enode);
         }
+
+        return inode;
     }
+
     // Handle identifier (assignments)
     else if (next.type == T_IDENT) {
         Node *ident = identifier(parser);
@@ -406,6 +431,7 @@ Node *statement(Parser *parser) {
         }
     }
 
+    // Handle other statements or report error
     errexitinfo(parser, "malformed statement");
     return NULL;
 }
