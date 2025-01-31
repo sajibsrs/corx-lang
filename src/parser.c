@@ -13,7 +13,7 @@ Node *statement(Parser *parser);
 Node *expression(Parser *parser, int prec);
 Node *factor(Parser *parser);
 
-Node *block(Parser *parser);
+Node *block_item(Parser *parser);
 
 Node *identifier(Parser *parser);
 Node *integer(Parser *parser);
@@ -284,9 +284,9 @@ Node *function(Parser *parser) {
     expect(parser, T_RPAREN, "expected ')' after 'void'");
     expect(parser, T_LBRACE, "expected '{' in the start of function body");
 
-    Node *body = make_node(N_BLOCK, "block");
+    Node *body = make_node(N_BLOCK, "block_item");
     while (peek(parser).type != T_RBRACE) {
-        Node *bnode = block(parser);
+        Node *bnode = block_item(parser);
         add_child(body, bnode);
     }
 
@@ -300,6 +300,20 @@ Node *function(Parser *parser) {
 }
 
 Node *block(Parser *parser) {
+    expect(parser, T_LBRACE, "expected '{' after before block");
+    Node *nblock = make_node(N_BLOCK, "block");
+
+    while (peek(parser).type != T_RBRACE && peek(parser).type != T_EOF) {
+        Node *stmt = statement(parser);
+        add_child(nblock, stmt);
+    }
+
+    expect(parser, T_RBRACE, "expected '}' after the block");
+
+    return nblock;
+}
+
+Node *block_item(Parser *parser) {
     Token next = peek(parser);
 
     // Handle variable declarations
@@ -326,7 +340,7 @@ Node *block(Parser *parser) {
         return stmt;
     }
 
-    errexitinfo(parser, "malformed block-statement");
+    errexitinfo(parser, "malformed block-sitem statement");
     return NULL;
 }
 
@@ -363,16 +377,7 @@ Node *statement(Parser *parser) {
         Node *ibody;
 
         if (peek(parser).type == T_LBRACE) {
-            advance(parser); // Consume '{'
-
-            ibody = make_node(N_BLOCK, "block");
-
-            while (peek(parser).type != T_RBRACE) {
-                Node *bnode = block(parser);
-                add_child(ibody, bnode);
-            }
-
-            expect(parser, T_RBRACE, "expected '}' at the end of if body");
+            ibody = block(parser);
         } else {
             ibody = statement(parser); // Single statement or expression
         }
@@ -391,10 +396,10 @@ Node *statement(Parser *parser) {
             if (peek(parser).type == T_LBRACE) {
                 advance(parser); // Consume '{'
 
-                ebody = make_node(N_BLOCK, "block");
+                ebody = make_node(N_BLOCK, "block_item");
 
                 while (peek(parser).type != T_RBRACE) {
-                    Node *bnode = block(parser);
+                    Node *bnode = block_item(parser);
                     add_child(ebody, bnode);
                 }
 
