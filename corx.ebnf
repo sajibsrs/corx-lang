@@ -23,6 +23,7 @@ statement
     = "return" expression ";"
     | expression ";"
     | "if" "(" expression ")" statement [ "else" statement ]
+    | block
     | ";"
     ;
 
