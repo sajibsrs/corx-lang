@@ -11,23 +11,23 @@
 Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how `corx` can help you write clean, efficient, and performance-driven code.
 
 ## # Status
-### 1. Lexer
+### 1. Lexer : complete(initial)
 - [x] Create initial lexer
 - [x] Recognize different tokens
 - [x] Track line and column for every token
 - [x] Handle different comment types
 - [x] Handle undefined tokens
-- [ ] Error reporting
+- [x] Error reporting
 - [x] Testing
 
-### 2. Parser
+### 2. Parser : in-progress (initial))
 - Create initial parser
-    - [ ] Context-free grammar (CFG), EBNF (Extended Backus-Naur Form)
-    - [ ] Implement recursive descent parsing
-    - [ ] Eliminate left-recursion
-    - [ ] Abstract Syntax Tree (AST)
-    - [ ] Error handling
-    - [ ] Error reporting
+    - [x] Context-free grammar (CFG), EBNF (Extended Backus-Naur Form)
+    - [x] Implement recursive descent parsing
+    - [x] Eliminate left-recursion
+    - [x] Abstract Syntax Tree (AST)
+    - [x] Error handling
+    - [x] Error reporting
     - [ ] Testing
 - [ ] REPL (Read-Eval-Print Loop)
 
