@@ -416,6 +416,12 @@ Node *parse_statement(Parser *parser) {
         }
     }
 
+    // Handle null statement
+    else if (next.type == T_SCOLON) {
+        Token tok = advance(parser);
+        return make_node(N_EMPTY, tok.str);
+    }
+
     // Handle other statements or report error
     errexitinfo(parser, "malformed statement");
     return NULL;
