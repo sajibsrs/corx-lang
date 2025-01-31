@@ -125,6 +125,8 @@ static void expect(Parser *parser, TokenType type, const char *msg) {
 Parser *make_parser(const TokenList *list) {
     Parser *parser = malloc(sizeof(Parser));
 
+    if (!parser) errexit("make_parser allocation failed");
+
     parser->list = list;
     parser->pos  = -1;
     parser->node = NULL;
@@ -148,7 +150,7 @@ void add_child(Node *parent, Node *child) {
     static const int CAPACITY = 4;
 
     if (parent->count % CAPACITY == 0) {
-        int nsize     = (parent->count == 0) ? CAPACITY : parent->count * 2;
+        int nsize     = (parent->count == 0) ? CAPACITY : parent->count * CAPACITY;
         parent->nodes = (Node **)realloc(parent->nodes, sizeof(Node *) * nsize);
 
         if (!parent->nodes) errexit("add_child memory allocation");
@@ -166,7 +168,7 @@ void add_child(Node *parent, Node *child) {
  * @param type
  * @return
  */
-static bool isbinop(TokenType type) {
+static inline bool isbinop(TokenType type) {
     switch (type) {
     case T_PLUS:     // "+"
     case T_MINUS:    // "-"
@@ -192,7 +194,7 @@ static bool isbinop(TokenType type) {
  * @param type
  * @return
  */
-static bool isunop(TokenType type) {
+static inline bool isunop(TokenType type) {
     switch (type) {
     case T_AMPERSAND: // "&"
     case T_ASTERISK:  // "*"
@@ -211,7 +213,7 @@ static bool isunop(TokenType type) {
  * @param type
  * @return
  */
-static bool isasnop(TokenType type) {
+static inline bool isasnop(TokenType type) {
     switch (type) {
     case T_EQ:        // "="
     case T_PLUSEQ:    // "+="
@@ -286,7 +288,7 @@ Node *parse_function(Parser *parser) {
 }
 
 Node *parse_block(Parser *parser) {
-    expect(parser, T_LBRACE, "expected '{' after before block");
+    expect(parser, T_LBRACE, "expected '{' before block");
     Node *node = make_node(N_BLOCK, "block");
 
     while (peek(parser).type != T_RBRACE) {
@@ -326,7 +328,6 @@ Node *parse_block_item(Parser *parser) {
         return stmt;
     }
 
-    errexitinfo(parser, "malformed block-sitem statement");
     return NULL;
 }
 
