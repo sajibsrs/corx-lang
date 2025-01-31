@@ -354,7 +354,6 @@ Node *parse_statement(Parser *parser) {
         advance(parser); // Consume 'return'
 
         Node *expr = parse_expression(parser, 0);
-
         expect(parser, T_SCOLON, "expected ';' semicolon after return statement");
 
         Node *stmt = make_node(N_RETURN, "return");
@@ -371,14 +370,7 @@ Node *parse_statement(Parser *parser) {
         Node *expr = parse_expression(parser, 0);
         expect(parser, T_RPAREN, "expected ')' after if statement");
 
-        Node *ibody; // If statement body
-
-        if (peek(parser).type == T_LBRACE) {
-            ibody = parse_block(parser);
-        } else {
-            ibody = parse_statement(parser); // Single statement or expression
-        }
-
+        Node *ibody = parse_statement(parser);
         Node *inode = make_node(N_IF, "if-stmt");
         add_child(inode, expr);
         add_child(inode, ibody);
@@ -389,20 +381,18 @@ Node *parse_statement(Parser *parser) {
         if (next.type == T_ELSE) {
             advance(parser); // Consume 'else'
 
-            Node *ebody;
-
-            if (peek(parser).type == T_LBRACE) {
-                ebody = parse_block(parser);
-            } else {
-                ebody = parse_statement(parser);
-            }
-
+            Node *ebody = parse_statement(parser);
             Node *enode = make_node(N_ELSE, "else-stmt");
             add_child(enode, ebody);
             add_child(inode, enode);
         }
 
         return inode;
+    }
+
+    // Handle block statement
+    else if (next.type == T_LBRACE) {
+        return parse_block(parser);
     }
 
     // Handle identifier (assignments)
