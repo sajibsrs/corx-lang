@@ -281,16 +281,8 @@ Node *parse_function(Parser *parser) {
     expect(parser, T_LPAREN, "expected '(' after function name");
     expect(parser, T_VOID, "expected 'void' in the parameter list");
     expect(parser, T_RPAREN, "expected ')' after 'void'");
-    expect(parser, T_LBRACE, "expected '{' in the start of function body");
 
-    Node *body = make_node(N_BLOCK, "block_item");
-    while (peek(parser).type != T_RBRACE) {
-        Node *bnode = parse_block_item(parser);
-        add_child(body, bnode);
-    }
-
-    expect(parser, T_RBRACE, "expected '}' in the end of function body");
-
+    Node *body = parse_block(parser);
     Node *func = make_node(N_FUNCTION, "function");
     add_child(func, ident);
     add_child(func, body);
@@ -303,7 +295,7 @@ Node *parse_block(Parser *parser) {
     Node *nblock = make_node(N_BLOCK, "block");
 
     while (peek(parser).type != T_RBRACE && peek(parser).type != T_EOF) {
-        Node *stmt = parse_statement(parser);
+        Node *stmt = parse_block_item(parser);
         add_child(nblock, stmt);
     }
 
@@ -373,7 +365,7 @@ Node *parse_statement(Parser *parser) {
         Node *expr = parse_expression(parser, 0);
         expect(parser, T_RPAREN, "expected ')' after if statement");
 
-        Node *ibody;
+        Node *ibody; // If statement body
 
         if (peek(parser).type == T_LBRACE) {
             ibody = parse_block(parser);
@@ -387,24 +379,16 @@ Node *parse_statement(Parser *parser) {
 
         // Handle optional else statement
         next = peek(parser);
+
         if (next.type == T_ELSE) {
             advance(parser); // Consume 'else'
 
             Node *ebody;
 
             if (peek(parser).type == T_LBRACE) {
-                advance(parser); // Consume '{'
-
-                ebody = make_node(N_BLOCK, "block_item");
-
-                while (peek(parser).type != T_RBRACE) {
-                    Node *bnode = parse_block_item(parser);
-                    add_child(ebody, bnode);
-                }
-
-                expect(parser, T_RBRACE, "expected '}' at the end of else body");
+                ebody = parse_block(parser);
             } else {
-                ebody = parse_statement(parser); // Single statement or expression
+                ebody = parse_statement(parser);
             }
 
             Node *enode = make_node(N_ELSE, "else-stmt");
@@ -418,7 +402,8 @@ Node *parse_statement(Parser *parser) {
     // Handle identifier (assignments)
     else if (next.type == T_IDENT) {
         Node *ident = parse_identifier(parser);
-        next        = peek(parser);
+
+        next = peek(parser);
 
         if (isasnop(next.type)) {
             Token asnop = next; // Save assignment operator
