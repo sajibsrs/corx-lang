@@ -198,13 +198,6 @@ TokenList *scan(const char *src);
 void print_tokenlist(const TokenList *list);
 
 /**
- * @brief Checks if at the end of source file.
- * @param token
- * @return
- */
-bool token_eof(Token token);
-
-/**
  * @brief Cleanup allocated for lexer and it's `buffer`.
  * @param lexer
  */

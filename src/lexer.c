@@ -884,7 +884,7 @@ TokenList *scan(const char *src) {
                 exit(1);
             }
         }
-    } while (!token_eof(token));
+    } while (token.type != T_EOF);
 
     purge_lexer(lexer);
 
@@ -905,15 +905,6 @@ TokenList *scan(const char *src) {
     list->count  = idx;
 
     return list;
-}
-
-/**
- * @brief Checks if at the end of source file.
- * @param token
- * @return
- */
-bool token_eof(Token token) {
-    return token.type == T_EOF;
 }
 
 /**
