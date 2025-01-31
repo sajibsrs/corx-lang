@@ -128,7 +128,7 @@ Parser *make_parser(const TokenList *list) {
     Parser *parser = malloc(sizeof(Parser));
 
     parser->list = list;
-    parser->pos  = -1; // Uninitialized state
+    parser->pos  = -1;
     parser->node = NULL;
 
     return parser;
@@ -232,13 +232,7 @@ static bool isasnop(TokenType type) {
  * @return
  */
 static Token peek(Parser *parser) {
-    Token *tokens = parser->list->tokens;
-
-    if (parser->pos == -1) {
-        return tokens[0];
-    }
-
-    return tokens[parser->pos + 1];
+    return parser->list->tokens[parser->pos + 1];
 }
 
 /**
@@ -247,15 +241,7 @@ static Token peek(Parser *parser) {
  * @return Consumed token.
  */
 static Token advance(Parser *parser) {
-    Token *tokens = parser->list->tokens;
-
-    if (parser->pos == -1) {
-        parser->pos = 0;
-
-        return tokens[0];
-    }
-
-    return tokens[parser->pos++];
+    return parser->list->tokens[parser->pos++];
 }
 
 /**
@@ -298,16 +284,16 @@ Node *parse_function(Parser *parser) {
 
 Node *parse_block(Parser *parser) {
     expect(parser, T_LBRACE, "expected '{' after before block");
-    Node *nblock = make_node(N_BLOCK, "block");
+    Node *node = make_node(N_BLOCK, "block");
 
-    while (peek(parser).type != T_RBRACE && peek(parser).type != T_EOF) {
+    while (peek(parser).type != T_RBRACE) {
         Node *stmt = parse_block_item(parser);
-        add_child(nblock, stmt);
+        add_child(node, stmt);
     }
 
     expect(parser, T_RBRACE, "expected '}' after the block");
 
-    return nblock;
+    return node;
 }
 
 Node *parse_block_item(Parser *parser) {
