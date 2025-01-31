@@ -233,7 +233,12 @@ static bool isasnop(TokenType type) {
  */
 static Token peek(Parser *parser) {
     Token *tokens = parser->list->tokens;
-    return (parser->pos == -1) ? tokens[0] : tokens[parser->pos + 1];
+
+    if (parser->pos == -1) {
+        return tokens[0];
+    }
+
+    return tokens[parser->pos + 1];
 }
 
 /**
@@ -246,6 +251,7 @@ static Token advance(Parser *parser) {
 
     if (parser->pos == -1) {
         parser->pos = 0;
+
         return tokens[0];
     }
 
