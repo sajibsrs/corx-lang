@@ -35,39 +35,37 @@ const char *ntypestr[] = {
     [N_EMPTY]       = "N_EMPTY",       //
 };
 
+// Precedence table
+static const int prectable[] = {
+    [T_EQ]    = 1, //
+    [T_QMARK] = 3, //
+    [T_OR]    = 5, //
+
+    [T_AND]  = 10, //
+    [T_EQEQ] = 30, //
+    [T_NTEQ] = 30, //
+
+    [T_LT]   = 35, //
+    [T_LTEQ] = 35, //
+    [T_GT]   = 35, //
+    [T_GTEQ] = 35, //
+
+    [T_PLUS]  = 45, //
+    [T_MINUS] = 45, //
+
+    [T_ASTERISK] = 50, //
+    [T_FSLASH]   = 50, //
+    [T_MODULUS]  = 50,
+};
+
 /**
  * @brief Get precedence by token type.
  * @param type
  * @return
  */
-static int precedence(TokenType type) {
-    switch (type) {
-    case T_EQ:       // "="
-        return 1;    //
-    case T_QMARK:    // "?"
-        return 3;    //
-    case T_OR:       // "||"
-        return 5;    //
-    case T_AND:      // "&&"
-        return 10;   //
-    case T_EQEQ:     // "=="
-    case T_NTEQ:     // "!="
-        return 30;   //
-    case T_LT:       // "<"
-    case T_LTEQ:     // "<="
-    case T_GT:       // ">"
-    case T_GTEQ:     // "=>"
-        return 35;   //
-    case T_PLUS:     // "+"
-    case T_MINUS:    // "-"
-        return 45;   //
-    case T_ASTERISK: // "*"
-    case T_FSLASH:   // "/"
-    case T_MODULUS:  // "%"
-        return 50;   //
-    default:         // No match
-        return 0;    //
-    }
+static inline int precedence(TokenType type) {
+    int len = sizeof(prectable) / sizeof(prectable[0]);
+    return (type < len) ? prectable[type] : 0;
 }
 
 /*********************************************
@@ -147,11 +145,16 @@ Node *make_node(NodeType type, const char *str) {
 }
 
 void add_child(Node *parent, Node *child) {
-    parent->nodes = (Node **)realloc(parent->nodes, sizeof(Node *) * (parent->count + 1));
-    if (!parent->nodes) errexit("add_child memory allocation");
+    static const int CAPACITY = 4;
 
-    parent->nodes[parent->count] = child;
-    parent->count++;
+    if (parent->count % CAPACITY == 0) {
+        int nsize     = (parent->count == 0) ? CAPACITY : parent->count * 2;
+        parent->nodes = (Node **)realloc(parent->nodes, sizeof(Node *) * nsize);
+
+        if (!parent->nodes) errexit("add_child memory allocation");
+    }
+
+    parent->nodes[parent->count++] = child;
 }
 
 /*********************************************
