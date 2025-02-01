@@ -42,6 +42,7 @@ typedef enum {
     T_CASE,    //
     T_DEFAULT, //
 
+    T_BREAK,
     T_CONTINUE,
 
     // Loops

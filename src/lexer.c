@@ -43,6 +43,7 @@ const char *ttypestr[] = {
     [T_CASE]    = "T_CASE",
     [T_DEFAULT] = "T_DEFAULT",
 
+    [T_BREAK]    = "T_BREAK",
     [T_CONTINUE] = "T_CONTINUE",
 
     // Loops
@@ -202,6 +203,7 @@ void init_kwmap() {
     kwmap_add(T_SWITCH, "switch");
     kwmap_add(T_CASE, "case");
     kwmap_add(T_DEFAULT, "default");
+    kwmap_add(T_BREAK, "break");
     kwmap_add(T_CONTINUE, "continue");
 
     // loops
