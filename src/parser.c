@@ -9,6 +9,7 @@ static Token advance(Parser *parser);
 
 Node *parse_program(Parser *parser);
 Node *parse_function(Parser *parser);
+Node *parse_declaration(Parser *parser);
 
 Node *parse_for_init(Parser *parser);
 Node *parse_for(Parser *parser);
@@ -301,6 +302,30 @@ Node *parse_function(Parser *parser) {
 }
 
 /**
+ * @brief Parse declarations.
+ * @param parser
+ * @return
+ */
+Node *parse_declaration(Parser *parser) {
+    advance(parser); // Consume 'type'
+
+    Node *ident = parse_identifier(parser);
+    Node *decl  = make_node(N_DECLARATION, "for-decl");
+    add_child(decl, ident);
+
+    // Handle assignment
+    if (peek(parser).type == T_EQ) {
+        advance(parser);
+
+        Node *expr = parse_expression(parser, 0);
+        add_child(decl, expr);
+    }
+    expect(parser, T_SCOLON, "expected ';' after declaration");
+
+    return decl;
+}
+
+/**
  * @brief Parse a for loop statement.
  */
 Node *parse_for(Parser *parser) {
@@ -343,30 +368,18 @@ Node *parse_for(Parser *parser) {
 Node *parse_for_init(Parser *parser) {
     Token next = peek(parser);
 
+    // Parse null statement
     if (next.type == T_SCOLON) {
         advance(parser);
 
         return make_node(N_EMPTY, "empty");
     }
 
-    if (next.type == T_INT) {
-        advance(parser); // Consume 'type'
-
-        Node *ident = parse_identifier(parser);
-        Node *decl  = make_node(N_DECLARATION, "for-decl");
-        add_child(decl, ident);
-
-        // Handle assignment
-        if (peek(parser).type == T_EQ) {
-            advance(parser);
-
-            Node *expr = parse_expression(parser, 0);
-            add_child(decl, expr);
-        }
-        expect(parser, T_SCOLON, "expected ';' after for-loop declaration");
-
-        return decl;
+    // Parse declaration
+    else if (next.type == T_INT) {
+        return parse_declaration(parser);
     }
+
     expect(parser, T_SCOLON, "expected ';' after for-loop expression");
 
     // Otherwise parse expression
@@ -381,6 +394,7 @@ Node *parse_block(Parser *parser) {
         Node *stmt = parse_block_item(parser);
         add_child(node, stmt);
     }
+
     expect(parser, T_RBRACE, "expected '}' after the block");
 
     return node;
@@ -391,22 +405,9 @@ Node *parse_block_item(Parser *parser) {
 
     // Handle variable declarations
     if (next.type == T_INT) {
-        advance(parser);
-
-        Node *ident = parse_identifier(parser);
-        Node *decl  = make_node(N_DECLARATION, "declaration");
-        add_child(decl, ident);
-
-        if (peek(parser).type == T_EQ) {
-            advance(parser);
-
-            Node *expr = parse_expression(parser, 0);
-            add_child(decl, expr);
-        }
-
-        expect(parser, T_SCOLON, "expected ';' after declaration");
-        return decl;
+        return parse_declaration(parser);
     }
+
     // Handle statements (e.g., return, assignments)
     else {
         Node *stmt = parse_statement(parser);
