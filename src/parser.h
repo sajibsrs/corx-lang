@@ -18,6 +18,9 @@ typedef enum {
     N_CONDITIONAL, //
     N_IF,          // Represents an if statement
     N_ELSE,        //
+    N_FOR,         //
+    N_BREAK,       //
+    N_CONTINUE,    //
     N_EMPTY,       // Represents an empty statement (;)
 } NodeType;
 

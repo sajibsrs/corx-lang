@@ -9,11 +9,16 @@ static Token advance(Parser *parser);
 
 Node *parse_program(Parser *parser);
 Node *parse_function(Parser *parser);
+
+Node *parse_for_init(Parser *parser);
+Node *parse_for(Parser *parser);
+
 Node *parse_statement(Parser *parser);
 Node *parse_expression(Parser *parser, int prec);
 Node *parse_factor(Parser *parser);
 Node *parse_block(Parser *parser);
 Node *parse_block_item(Parser *parser);
+
 Node *parse_identifier(Parser *parser);
 Node *parse_integer(Parser *parser);
 
@@ -32,6 +37,9 @@ const char *ntypestr[] = {
     [N_CONDITIONAL] = "N_CONDITIONAL", //
     [N_IF]          = "N_IF",          //
     [N_ELSE]        = "N_ELSE",        //
+    [N_BREAK]       = "N_BREAK",       //
+    [N_CONTINUE]    = "N_CONTINUE",    //
+    [N_FOR]         = "N_FOR",         //
     [N_EMPTY]       = "N_EMPTY",       //
 };
 
@@ -160,7 +168,7 @@ void add_child(Node *parent, Node *child) {
 }
 
 /*********************************************
- * Parsing functions
+ * Helper Functions
  *********************************************/
 
 /**
@@ -183,6 +191,7 @@ static inline bool isbinop(TokenType type) {
     case T_LTEQ:     // "<="
     case T_GT:       // ">"
     case T_GTEQ:     // ">="
+    case T_EQ:       // "="
         return true;
     default: //
         return false;
@@ -230,6 +239,10 @@ static inline bool isasnop(TokenType type) {
         return false; //
     }
 }
+
+/*********************************************
+ * Parsing Functions
+ *********************************************/
 
 /**
  * @brief Peek next token without consuming.
@@ -287,6 +300,79 @@ Node *parse_function(Parser *parser) {
     return func;
 }
 
+/**
+ * @brief Parse a for loop statement.
+ */
+Node *parse_for(Parser *parser) {
+    expect(parser, T_LPAREN, "expected '(' after 'for'"); // Consume '('
+
+    Node *init = parse_for_init(parser);
+
+    // Handle optional expression
+    Node *expr1 = NULL;
+    if (peek(parser).type != T_SCOLON) {
+        expr1 = parse_expression(parser, 0);
+    }
+
+    expect(parser, T_SCOLON, "expected ';' after for-loop expression");
+
+    // Handle optional expression
+    Node *expr2 = NULL;
+    if (peek(parser).type != T_RPAREN) {
+        expr2 = parse_expression(parser, 0);
+    }
+
+    expect(parser, T_RPAREN, "expected ')' after for-loop expression");
+
+    // Parse loop body
+    Node *body = parse_statement(parser);
+
+    Node *fnode = make_node(N_FOR, "for-loop");
+    add_child(fnode, init);
+    add_child(fnode, expr1 ? expr1 : make_node(N_EMPTY, "empty"));
+    add_child(fnode, expr2 ? expr2 : make_node(N_EMPTY, "empty"));
+    add_child(fnode, body);
+
+    return fnode;
+}
+
+/**
+ * @brief Parse the initialization part of a for loop.
+ * It can be either a variable declaration or an expression.
+ */
+Node *parse_for_init(Parser *parser) {
+    Token next = peek(parser);
+
+    if (next.type == T_SCOLON) {
+        advance(parser);
+
+        return make_node(N_EMPTY, "empty");
+    }
+
+    if (next.type == T_INT) {
+        advance(parser); // Consume 'type'
+
+        Node *ident = parse_identifier(parser);
+        Node *decl  = make_node(N_DECLARATION, "for-decl");
+        add_child(decl, ident);
+
+        // Handle assignment
+        if (peek(parser).type == T_EQ) {
+            advance(parser);
+
+            Node *expr = parse_expression(parser, 0);
+            add_child(decl, expr);
+        }
+        expect(parser, T_SCOLON, "expected ';' after for-loop declaration");
+
+        return decl;
+    }
+    expect(parser, T_SCOLON, "expected ';' after for-loop expression");
+
+    // Otherwise parse expression
+    return parse_expression(parser, 0);
+}
+
 Node *parse_block(Parser *parser) {
     expect(parser, T_LBRACE, "expected '{' before block");
     Node *node = make_node(N_BLOCK, "block");
@@ -295,7 +381,6 @@ Node *parse_block(Parser *parser) {
         Node *stmt = parse_block_item(parser);
         add_child(node, stmt);
     }
-
     expect(parser, T_RBRACE, "expected '}' after the block");
 
     return node;
@@ -404,6 +489,24 @@ Node *parse_statement(Parser *parser) {
 
             return stmt;
         }
+    }
+
+    // Handle for loop
+    else if (next.type == T_FOR) {
+        advance(parser);
+        return parse_for(parser);
+    }
+
+    // Handle break statement
+    else if (next.type == T_BREAK) {
+        Token tok = advance(parser);
+        return make_node(N_BREAK, tok.str);
+    }
+
+    // Handle continue statement
+    else if (next.type == T_CONTINUE) {
+        Token tok = advance(parser);
+        return make_node(T_CONTINUE, tok.str);
     }
 
     // Handle null statement
