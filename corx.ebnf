@@ -24,7 +24,16 @@ statement
     | expression ";"
     | "if" "(" expression ")" statement [ "else" statement ]
     | block
+    | "break" ";"
+    | "continue" ";"
+    | "while" "(" expression ")" statement
+    | "do" statement "while" "(" expression ")" ";"
+    | "for" "(" for_init [ expression ] ";" [ expression ] ")" statement
     | ";"
+    ;
+
+for_init
+    = declaration | [ expression ] ";"
     ;
 
 expression
