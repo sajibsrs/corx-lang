@@ -31,8 +31,8 @@ Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how
     - [ ] Testing
 - [ ] REPL (Read-Eval-Print Loop)
 
-### 3. Intermediate Representation (IR)
-### 4. Semantic Analysis
+### 3. Semantic Analysis
+### 4. Intermediate Representation (IR)
 ### 5. Code Generation
 ### 6. Optimization
 ### 7. Documentation
