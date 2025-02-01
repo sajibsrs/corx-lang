@@ -41,7 +41,6 @@ extern const char *ntypestr[];
 
 Parser *make_parser(const TokenList *list);
 void purge_parser(Parser *parser);
-
-Node *parse_program(Parser *parser);
+Node *parse_prog(Parser *parser);
 
 #endif

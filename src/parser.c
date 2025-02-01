@@ -7,20 +7,20 @@
 static Token peek(Parser *parser);
 static Token advance(Parser *parser);
 
-Node *parse_program(Parser *parser);
-Node *parse_function(Parser *parser);
-Node *parse_declaration(Parser *parser);
+Node *parse_prog(Parser *parser);
+Node *parse_func(Parser *parser);
+Node *parse_var_decl(Parser *parser);
 
 Node *parse_for_init(Parser *parser);
-Node *parse_for(Parser *parser);
+Node *parse_for_expr(Parser *parser);
 
-Node *parse_statement(Parser *parser);
-Node *parse_expression(Parser *parser, int prec);
+Node *parse_stmt(Parser *parser);
+Node *parse_expr(Parser *parser, int prec);
 Node *parse_factor(Parser *parser);
 Node *parse_block(Parser *parser);
 Node *parse_block_item(Parser *parser);
 
-Node *parse_identifier(Parser *parser);
+Node *parse_ident(Parser *parser);
 Node *parse_integer(Parser *parser);
 
 const char *ntypestr[] = {
@@ -268,8 +268,8 @@ static Token advance(Parser *parser) {
  * @param parser
  * @return
  */
-Node *parse_program(Parser *parser) {
-    Node *func = parse_function(parser);
+Node *parse_prog(Parser *parser) {
+    Node *func = parse_func(parser);
     Node *prog = make_node(N_PROGRAM, "program");
 
     add_child(prog, func);
@@ -281,13 +281,13 @@ Node *parse_program(Parser *parser) {
  * @param parser
  * @return
  */
-Node *parse_function(Parser *parser) {
+Node *parse_func(Parser *parser) {
     Token next = peek(parser);
     if (next.type != T_INT) errexit("expected a type");
 
     advance(parser);
 
-    Node *ident = parse_identifier(parser);
+    Node *ident = parse_ident(parser);
 
     expect(parser, T_LPAREN, "expected '(' after function name");
     expect(parser, T_VOID, "expected 'void' in the parameter list");
@@ -306,10 +306,10 @@ Node *parse_function(Parser *parser) {
  * @param parser
  * @return
  */
-Node *parse_declaration(Parser *parser) {
+Node *parse_var_decl(Parser *parser) {
     advance(parser); // Consume 'type'
 
-    Node *ident = parse_identifier(parser);
+    Node *ident = parse_ident(parser);
     Node *decl  = make_node(N_DECLARATION, "for-decl");
     add_child(decl, ident);
 
@@ -317,7 +317,7 @@ Node *parse_declaration(Parser *parser) {
     if (peek(parser).type == T_EQ) {
         advance(parser);
 
-        Node *expr = parse_expression(parser, 0);
+        Node *expr = parse_expr(parser, 0);
         add_child(decl, expr);
     }
     expect(parser, T_SCOLON, "expected ';' after declaration");
@@ -328,34 +328,35 @@ Node *parse_declaration(Parser *parser) {
 /**
  * @brief Parse a for loop statement.
  */
-Node *parse_for(Parser *parser) {
+Node *parse_for_expr(Parser *parser) {
     expect(parser, T_LPAREN, "expected '(' after 'for'"); // Consume '('
 
+    // Handle initialization expression
     Node *init = parse_for_init(parser);
 
-    // Handle optional expression
-    Node *expr1 = NULL;
+    // Handle optional conditional/test expression
+    Node *cond = NULL;
     if (peek(parser).type != T_SCOLON) {
-        expr1 = parse_expression(parser, 0);
+        cond = parse_expr(parser, 0);
     }
 
     expect(parser, T_SCOLON, "expected ';' after for-loop expression");
 
-    // Handle optional expression
-    Node *expr2 = NULL;
+    // Handle optional iteration/increment expression
+    Node *iter = NULL;
     if (peek(parser).type != T_RPAREN) {
-        expr2 = parse_expression(parser, 0);
+        iter = parse_expr(parser, 0);
     }
 
     expect(parser, T_RPAREN, "expected ')' after for-loop expression");
 
     // Parse loop body
-    Node *body = parse_statement(parser);
+    Node *body = parse_stmt(parser);
 
     Node *fnode = make_node(N_FOR, "for-loop");
     add_child(fnode, init);
-    add_child(fnode, expr1 ? expr1 : make_node(N_EMPTY, "empty"));
-    add_child(fnode, expr2 ? expr2 : make_node(N_EMPTY, "empty"));
+    add_child(fnode, cond ? cond : make_node(N_EMPTY, "empty"));
+    add_child(fnode, iter ? iter : make_node(N_EMPTY, "empty"));
     add_child(fnode, body);
 
     return fnode;
@@ -377,13 +378,13 @@ Node *parse_for_init(Parser *parser) {
 
     // Parse declaration
     else if (next.type == T_INT) {
-        return parse_declaration(parser);
+        return parse_var_decl(parser);
     }
 
     expect(parser, T_SCOLON, "expected ';' after for-loop expression");
 
     // Otherwise parse expression
-    return parse_expression(parser, 0);
+    return parse_expr(parser, 0);
 }
 
 Node *parse_block(Parser *parser) {
@@ -405,12 +406,12 @@ Node *parse_block_item(Parser *parser) {
 
     // Handle variable declarations
     if (next.type == T_INT) {
-        return parse_declaration(parser);
+        return parse_var_decl(parser);
     }
 
     // Handle statements (e.g., return, assignments)
     else {
-        Node *stmt = parse_statement(parser);
+        Node *stmt = parse_stmt(parser);
         return stmt;
     }
 
@@ -422,14 +423,14 @@ Node *parse_block_item(Parser *parser) {
  * @param parser
  * @return
  */
-Node *parse_statement(Parser *parser) {
+Node *parse_stmt(Parser *parser) {
     Token next = peek(parser);
 
     // Handle return statement
     if (next.type == T_RETURN) {
         advance(parser); // Consume 'return'
 
-        Node *expr = parse_expression(parser, 0);
+        Node *expr = parse_expr(parser, 0);
         expect(parser, T_SCOLON, "expected ';' semicolon after return statement");
 
         Node *stmt = make_node(N_RETURN, "return");
@@ -443,10 +444,10 @@ Node *parse_statement(Parser *parser) {
         advance(parser); // Consume 'if'
 
         expect(parser, T_LPAREN, "expected '(' after if statement");
-        Node *expr = parse_expression(parser, 0);
+        Node *expr = parse_expr(parser, 0);
         expect(parser, T_RPAREN, "expected ')' after if statement");
 
-        Node *ibody = parse_statement(parser);
+        Node *ibody = parse_stmt(parser);
         Node *inode = make_node(N_IF, "if-stmt");
         add_child(inode, expr);
         add_child(inode, ibody);
@@ -457,7 +458,7 @@ Node *parse_statement(Parser *parser) {
         if (next.type == T_ELSE) {
             advance(parser); // Consume 'else'
 
-            Node *ebody = parse_statement(parser);
+            Node *ebody = parse_stmt(parser);
             Node *enode = make_node(N_ELSE, "else-stmt");
             add_child(enode, ebody);
             add_child(inode, enode);
@@ -473,7 +474,7 @@ Node *parse_statement(Parser *parser) {
 
     // Handle identifier (assignments)
     else if (next.type == T_IDENT) {
-        Node *ident = parse_identifier(parser);
+        Node *ident = parse_ident(parser);
 
         next = peek(parser);
 
@@ -481,7 +482,7 @@ Node *parse_statement(Parser *parser) {
             Token asnop = next; // Save assignment operator
             advance(parser);
 
-            Node *expr = parse_expression(parser, 0);
+            Node *expr = parse_expr(parser, 0);
             expect(parser, T_SCOLON, "expected ';' after assignment statement");
 
             Node *stmt = make_node(N_ASSIGNMENT, asnop.str);
@@ -495,7 +496,7 @@ Node *parse_statement(Parser *parser) {
     // Handle for loop
     else if (next.type == T_FOR) {
         advance(parser);
-        return parse_for(parser);
+        return parse_for_expr(parser);
     }
 
     // Handle break statement
@@ -527,7 +528,7 @@ Node *parse_statement(Parser *parser) {
  * @param prec Minimum precedence.
  * @return
  */
-Node *parse_expression(Parser *parser, int prec) {
+Node *parse_expr(Parser *parser, int prec) {
     Node *left = parse_factor(parser);
     Token next = peek(parser);
 
@@ -536,7 +537,7 @@ Node *parse_expression(Parser *parser, int prec) {
         advance(parser);
 
         // Handle binary operation
-        Node *right = parse_expression(parser, precedence(next.type) + 1);
+        Node *right = parse_expr(parser, precedence(next.type) + 1);
         Node *node  = make_node(N_BINARY, next.str);
         add_child(node, left);
         add_child(node, right);
@@ -550,13 +551,13 @@ Node *parse_expression(Parser *parser, int prec) {
         advance(parser); // Consume '?'
 
         // Parse the true expression
-        Node *leftexpr = parse_expression(parser, 0);
+        Node *leftexpr = parse_expr(parser, 0);
 
         // Expect the colon separator
         expect(parser, T_COLON, "expected ':' in ternary operator");
 
         // Parse the false expression
-        Node *rightexpr = parse_expression(parser, precedence(next.type));
+        Node *rightexpr = parse_expr(parser, precedence(next.type));
 
         // Create a conditional node
         Node *node = make_node(N_CONDITIONAL, "cond-expr");
@@ -586,7 +587,7 @@ Node *parse_factor(Parser *parser) {
     // Handle identifier
     else if (next.type == T_IDENT) {
 
-        return parse_identifier(parser);
+        return parse_ident(parser);
 
     }
     // Handle unary expression
@@ -604,7 +605,7 @@ Node *parse_factor(Parser *parser) {
     else if (next.type == T_LPAREN) {
         advance(parser);
 
-        Node *inode = parse_expression(parser, 0);
+        Node *inode = parse_expr(parser, 0);
         expect(parser, T_RPAREN, "expected ')' after expression");
 
         return inode;
@@ -619,7 +620,7 @@ Node *parse_factor(Parser *parser) {
  * @param parser
  * @return
  */
-Node *parse_identifier(Parser *parser) {
+Node *parse_ident(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
 
