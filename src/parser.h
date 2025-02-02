@@ -22,7 +22,7 @@ typedef enum {
     N_BREAK,       //
     N_CONTINUE,    //
     N_PARAM_LIST,  //
-    N_VOID,        //
+    N_TYPE,        //
     N_EMPTY,       // Represents an empty statement (;)
 } NodeType;
 

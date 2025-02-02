@@ -13,6 +13,8 @@ Node *parse_decl(Parser *parser);
 Node *parse_func_decl(Parser *parser);
 Node *parse_var_decl(Parser *parser);
 
+Node *parse_param_list(Parser *parser);
+
 Node *parse_for_expr(Parser *parser);
 Node *parse_for_init(Parser *parser);
 
@@ -44,7 +46,7 @@ const char *ntypestr[] = {
     [N_CONTINUE]    = "N_CONTINUE",    //
     [N_FOR]         = "N_FOR",         //
     [N_PARAM_LIST]  = "N_PARAM_LIST",  //
-    [N_VOID]        = "N_VOID",        //
+    [N_TYPE]        = "N_TYPE",        //
     [N_EMPTY]       = "N_EMPTY",       //
 };
 
@@ -349,49 +351,29 @@ Node *parse_func_decl(Parser *parser) {
     Node *ident = parse_ident(parser);
 
     expect(parser, T_LPAREN, "expected '(' after function name");
-    Node *plist = make_node(N_PARAM_LIST, "param_list");
 
-    Token next = peek(parser);
-    if (next.type == T_VOID) {
-        // Handle `void` parameter list
-        advance(parser); // Consume 'void'
-        next = peek(parser);
-        if (next.type != T_RPAREN) {
-            errexit("unexpected token after 'void' in function parameters");
-        }
-    } else if (next.type == T_INT) {
-        // Handle list of parameters
-        while (next.type == T_INT) {
-            advance(parser); // Consume 'int'
-            Node *param = parse_ident(parser);
-            add_child(plist, param);
-
-            next = peek(parser);
-            if (next.type == T_COMMA) {
-                advance(parser); // Consume ','
-                next = peek(parser);
-                if (next.type != T_INT) errexit("expected 'int' after ','");
-            }
-        }
-    }
+    // Parse parameter-list
+    Node *plist = parse_param_list(parser);
 
     expect(parser, T_RPAREN, "expected ')' after parameter list");
 
-    // Parse function body (or just a declaration)
-    next       = peek(parser);
-    Node *body = NULL;
-    if (next.type == T_LBRACE) {
-        body = parse_block(parser);
-    } else {
-        expect(parser, T_SCOLON, "expected ';' after function declaration");
-    }
-
-    // Construct function node
     Node *func = make_node(N_FUNCTION, "function");
     add_child(func, ident);
-    add_child(func, plist);
-    if (body) {
+
+    // Attach parameter list
+    if (plist) add_child(func, plist);
+
+    Token next = peek(parser);
+
+    // Parse body
+    if (next.type == T_LBRACE) {
+        Node *body = parse_block(parser);
         add_child(func, body);
+    }
+
+    // Parse declaration
+    else {
+        expect(parser, T_SCOLON, "expected ';' after function declaration");
     }
 
     return func;
@@ -405,37 +387,33 @@ Node *parse_func_decl(Parser *parser) {
 Node *parse_param_list(Parser *parser) {
     Token next = peek(parser);
 
-    Node *plist = make_node(N_PARAM_LIST, "parameters");
-
-    if (next.type == T_VOID) {
-        advance(parser); // Consume "void"
-
-        Node *nvoid = make_node(N_VOID, "void");
-        add_child(plist, nvoid);
-
-        return plist;
-    }
+    // If there are no parameters
+    if (next.type == T_RPAREN) return NULL;
 
     // Handle int type
-    else if (next.type == T_INT) {
-        advance(parser);
+    if (next.type == T_INT) {
+        Node *plist = make_node(N_PARAM_LIST, "parameters");
 
-        Node *param = parse_ident(parser);
-        add_child(plist, param);
+        // Handle additional parameters
+        while (peek(parser).type != T_RPAREN) {
+            expect(parser, T_INT, "expected 'type' before param");
 
-        // Handle additional ',' separated parameters
-        while (peek(parser).type == T_COMMA) {
-            advance(parser);
+            if (peek(parser).type == T_IDENT) {
+                Node *param = parse_ident(parser);
+                add_child(plist, param);
+            } else {
+                Node *param = make_node(N_TYPE, "unnamed param");
+                add_child(plist, param);
+            }
 
-            expect(parser, T_INT, "exprected 'int' after comma in parameter list");
-            param = parse_ident(parser);
-            add_child(plist, param);
+            // Comsume comma ','
+            if (peek(parser).type == T_COMMA) advance(parser);
         }
 
         return plist;
     }
 
-    errexitinfo(parser, "malformed parameter list");
+    errexitinfo(parser, "invalid parameter-list syntax");
     return NULL;
 }
 
@@ -641,7 +619,7 @@ Node *parse_stmt(Parser *parser) {
     }
 
     // Handle other statements or report error
-    errexitinfo(parser, "malformed statement");
+    errexitinfo(parser, "invalid statement syntax");
     return NULL;
 }
 
@@ -734,7 +712,7 @@ Node *parse_factor(Parser *parser) {
         return inode;
     }
 
-    errexitinfo(parser, "malformed factor");
+    errexitinfo(parser, "invalid factor syntax");
     return NULL;
 }
 
