@@ -3,6 +3,8 @@
 
 "Trust the programmer" - `corx`
 
+**# This project aims to create a fully hand-crafted compiler, written from scratch.**
+
 ![corx programming language](./corx-lang.png)
 
 ## # About `corx`
