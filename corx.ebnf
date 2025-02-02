@@ -1,9 +1,22 @@
 program
-    = function
+    = { function_declaration }
     ;
 
-function
-    = "int" identifier "(" "void" ")" block
+declaration
+    = variable_declaration
+    | function_declaration
+    ;
+
+variable_declaration
+    = "int" identifier [ "=" expression ] ";"
+    ;
+
+function_declaration
+    = "int" identifier "(" param_list ")" ( block | ";" )
+    ;
+
+param_list
+    = "void" | "int" identifier { "," "int" identifier }
     ;
 
 block
@@ -33,7 +46,8 @@ statement
     ;
 
 for_init
-    = declaration | [ expression ] ";"
+    = variable_declaration
+    | [ expression ] ";"
     ;
 
 expression
@@ -47,6 +61,11 @@ factor
     | identifier
     | unary_operator factor
     | "(" expression ")"
+    | identifier "(" [ argument_list ] ")"
+    ;
+
+argument_list
+    = expression { "," expression }
     ;
 
 modifier_specifier
