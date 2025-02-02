@@ -8,11 +8,13 @@ static Token peek(Parser *parser);
 static Token advance(Parser *parser);
 
 Node *parse_prog(Parser *parser);
-Node *parse_func(Parser *parser);
+
+Node *parse_decl(Parser *parser);
+Node *parse_func_decl(Parser *parser);
 Node *parse_var_decl(Parser *parser);
 
-Node *parse_for_init(Parser *parser);
 Node *parse_for_expr(Parser *parser);
+Node *parse_for_init(Parser *parser);
 
 Node *parse_stmt(Parser *parser);
 Node *parse_expr(Parser *parser, int prec);
@@ -41,6 +43,8 @@ const char *ntypestr[] = {
     [N_BREAK]       = "N_BREAK",       //
     [N_CONTINUE]    = "N_CONTINUE",    //
     [N_FOR]         = "N_FOR",         //
+    [N_PARAM_LIST]  = "N_PARAM_LIST",  //
+    [N_VOID]        = "N_VOID",        //
     [N_EMPTY]       = "N_EMPTY",       //
 };
 
@@ -255,6 +259,16 @@ static Token peek(Parser *parser) {
 }
 
 /**
+ * @brief Peek forward nth token, without consumption.
+ * @param parser Pointer to current parser.
+ * @param pos Number of token to look forward.
+ * @return
+ */
+static Token peekfw(Parser *parser, int pos) {
+    return parser->list->tokens[parser->pos + pos];
+}
+
+/**
  * @brief Consume next token and move forward.
  * @param parser
  * @return Consumed token.
@@ -269,7 +283,7 @@ static Token advance(Parser *parser) {
  * @return
  */
 Node *parse_prog(Parser *parser) {
-    Node *func = parse_func(parser);
+    Node *func = parse_decl(parser);
     Node *prog = make_node(N_PROGRAM, "program");
 
     add_child(prog, func);
@@ -277,28 +291,27 @@ Node *parse_prog(Parser *parser) {
 }
 
 /**
- * @brief Parse function.
+ * @brief Parse declaration.
+ * Determines declaration without consuming tokens.
  * @param parser
  * @return
  */
-Node *parse_func(Parser *parser) {
+Node *parse_decl(Parser *parser) {
     Token next = peek(parser);
-    if (next.type != T_INT) errexit("expected a type");
 
-    advance(parser);
+    // Look for a type
+    if (next.type != T_INT) {
+        errexitinfo(parser, "expected a type");
+    }
 
-    Node *ident = parse_ident(parser);
+    // Ignore identifier and look forward
+    Token lookahead = peekfw(parser, 3);
 
-    expect(parser, T_LPAREN, "expected '(' after function name");
-    expect(parser, T_VOID, "expected 'void' in the parameter list");
-    expect(parser, T_RPAREN, "expected ')' after 'void'");
-
-    Node *body = parse_block(parser);
-    Node *func = make_node(N_FUNCTION, "function");
-    add_child(func, ident);
-    add_child(func, body);
-
-    return func;
+    if (lookahead.type == T_LPAREN) {
+        return parse_func_decl(parser);
+    } else {
+        return parse_var_decl(parser);
+    }
 }
 
 /**
@@ -326,7 +339,110 @@ Node *parse_var_decl(Parser *parser) {
 }
 
 /**
+ * @brief Parse function declaration.
+ * @param parser
+ * @return
+ */
+Node *parse_func_decl(Parser *parser) {
+    advance(parser); // Consume 'type'
+
+    Node *ident = parse_ident(parser);
+
+    expect(parser, T_LPAREN, "expected '(' after function name");
+    Node *plist = make_node(N_PARAM_LIST, "param_list");
+
+    Token next = peek(parser);
+    if (next.type == T_VOID) {
+        // Handle `void` parameter list
+        advance(parser); // Consume 'void'
+        next = peek(parser);
+        if (next.type != T_RPAREN) {
+            errexit("unexpected token after 'void' in function parameters");
+        }
+    } else if (next.type == T_INT) {
+        // Handle list of parameters
+        while (next.type == T_INT) {
+            advance(parser); // Consume 'int'
+            Node *param = parse_ident(parser);
+            add_child(plist, param);
+
+            next = peek(parser);
+            if (next.type == T_COMMA) {
+                advance(parser); // Consume ','
+                next = peek(parser);
+                if (next.type != T_INT) errexit("expected 'int' after ','");
+            }
+        }
+    }
+
+    expect(parser, T_RPAREN, "expected ')' after parameter list");
+
+    // Parse function body (or just a declaration)
+    next       = peek(parser);
+    Node *body = NULL;
+    if (next.type == T_LBRACE) {
+        body = parse_block(parser);
+    } else {
+        expect(parser, T_SCOLON, "expected ';' after function declaration");
+    }
+
+    // Construct function node
+    Node *func = make_node(N_FUNCTION, "function");
+    add_child(func, ident);
+    add_child(func, plist);
+    if (body) {
+        add_child(func, body);
+    }
+
+    return func;
+}
+
+/**
+ * @brief Parse function parameter list.
+ * @param parser
+ * @return
+ */
+Node *parse_param_list(Parser *parser) {
+    Token next = peek(parser);
+
+    Node *plist = make_node(N_PARAM_LIST, "parameters");
+
+    if (next.type == T_VOID) {
+        advance(parser); // Consume "void"
+
+        Node *nvoid = make_node(N_VOID, "void");
+        add_child(plist, nvoid);
+
+        return plist;
+    }
+
+    // Handle int type
+    else if (next.type == T_INT) {
+        advance(parser);
+
+        Node *param = parse_ident(parser);
+        add_child(plist, param);
+
+        // Handle additional ',' separated parameters
+        while (peek(parser).type == T_COMMA) {
+            advance(parser);
+
+            expect(parser, T_INT, "exprected 'int' after comma in parameter list");
+            param = parse_ident(parser);
+            add_child(plist, param);
+        }
+
+        return plist;
+    }
+
+    errexitinfo(parser, "malformed parameter list");
+    return NULL;
+}
+
+/**
  * @brief Parse a for loop statement.
+ * @param parser
+ * @return
  */
 Node *parse_for_expr(Parser *parser) {
     expect(parser, T_LPAREN, "expected '(' after 'for'"); // Consume '('
@@ -365,6 +481,8 @@ Node *parse_for_expr(Parser *parser) {
 /**
  * @brief Parse the initialization part of a for loop.
  * It can be either a variable declaration or an expression.
+ * @param parser
+ * @return
  */
 Node *parse_for_init(Parser *parser) {
     Token next = peek(parser);
@@ -378,7 +496,7 @@ Node *parse_for_init(Parser *parser) {
 
     // Parse declaration
     else if (next.type == T_INT) {
-        return parse_var_decl(parser);
+        return parse_decl(parser);
     }
 
     expect(parser, T_SCOLON, "expected ';' after for-loop expression");
@@ -401,12 +519,17 @@ Node *parse_block(Parser *parser) {
     return node;
 }
 
+/**
+ * @brief Parse block item.
+ * @param parser
+ * @return
+ */
 Node *parse_block_item(Parser *parser) {
     Token next = peek(parser);
 
     // Handle variable declarations
     if (next.type == T_INT) {
-        return parse_var_decl(parser);
+        return parse_decl(parser);
     }
 
     // Handle statements (e.g., return, assignments)
@@ -508,7 +631,7 @@ Node *parse_stmt(Parser *parser) {
     // Handle continue statement
     else if (next.type == T_CONTINUE) {
         Token tok = advance(parser);
-        return make_node(T_CONTINUE, tok.str);
+        return make_node(N_CONTINUE, tok.str);
     }
 
     // Handle null statement
