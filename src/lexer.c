@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "utils.h"
 #include "lexer.h"
 
 // Token type to token string lookup table.
@@ -141,21 +142,6 @@ const char *ttypestr[] = {
 
 #define HASH_SIZE 256
 
-/**
- * @brief Returns hash for token string (Fowler–Noll–Vo hash).
- * @param str Token string.
- * @return
- */
-unsigned int hashfnv(const char *str) {
-    unsigned int hash = 2166136261u; // FNV offset basis
-    while (*str) {
-        hash ^= (unsigned char)(*str); // XOR with byte
-        hash *= 16777619u;             // FNV prime
-        str++;
-    }
-    return hash % HASH_SIZE;
-}
-
 // keyword mapper
 KWMap *kwmap[HASH_SIZE] = {NULL};
 
@@ -238,7 +224,7 @@ void init_kwmap() {
  * @param token Token string.
  */
 void kwmap_add(TokenType type, const char *token) {
-    unsigned int idx = hashfnv(token);
+    unsigned int idx = hashfnv(token, HASH_SIZE);
     KWMap *entry     = malloc(sizeof(KWMap));
     if (!entry) {
         perror("Memory allocation failed");
@@ -260,7 +246,7 @@ void kwmap_add(TokenType type, const char *token) {
  * @return
  */
 KWMap *search_kwmap(const char *key) {
-    unsigned int idx = hashfnv(key);
+    unsigned int idx = hashfnv(key, HASH_SIZE);
     KWMap *current   = kwmap[idx];
 
     while (current) {
@@ -918,23 +904,6 @@ void purge_lexer(Lexer *lexer) {
 
     free(lexer->buffer);
     free(lexer);
-}
-
-/**
- * @brief Print formatted token to the terminal.
- * @param list
- */
-void print_tokenlist(const TokenList *list) {
-    printf("Scanned %d tokens:\n\n", list->count);
-
-    Token token;
-    for (int i = 0; i < list->count; i++) {
-        token = list->tokens[i];
-        printf(
-            "%-16s %-10s typ:%-4d lin:%-4d col:%d\n", //
-            ttypestr[token.type], token.str, token.type, token.line, token.column
-        );
-    }
 }
 
 /**
