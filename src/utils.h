@@ -1,5 +1,5 @@
-#ifndef _UTIL_H_
-#define _UTIL_H_
+#ifndef _UTILS_H_
+#define _UTILS_H_
 
 #include "lexer.h"
 #include "parser.h"
