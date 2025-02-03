@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "lexer.h"
 
-#define TABLE_SIZE 256 // Hash-table size
+#define TABLE_SIZE 128 // Hash-table size
 
 // Token type to token string lookup table.
 const char *ttypestr[] = {
@@ -224,8 +224,8 @@ void make_kwtable() {
  * @param token Token string.
  */
 void kwtable_add(TokenType type, const char *token) {
-    unsigned int idx = hashfnv(token, TABLE_SIZE);
-    KWTable *entry   = malloc(sizeof(KWTable));
+    unsigned idx   = hashfnv(token, TABLE_SIZE);
+    KWTable *entry = malloc(sizeof(KWTable));
     if (!entry) {
         perror("Memory allocation failed");
         exit(1);
@@ -246,14 +246,14 @@ void kwtable_add(TokenType type, const char *token) {
  * @return
  */
 KWTable *search_kwtable(const char *key) {
-    unsigned int idx = hashfnv(key, TABLE_SIZE);
-    KWTable *current = kwtable[idx];
+    unsigned idx  = hashfnv(key, TABLE_SIZE);
+    KWTable *curr = kwtable[idx];
 
-    while (current) {
-        if (strcmp(current->token, key) == 0) {
-            return current;
+    while (curr) {
+        if (strcmp(curr->token, key) == 0) {
+            return curr;
         }
-        current = current->next;
+        curr = curr->next;
     }
     return NULL;
 }
@@ -263,11 +263,11 @@ KWTable *search_kwtable(const char *key) {
  */
 void purge_kwtable() {
     for (int i = 0; i < TABLE_SIZE; i++) {
-        KWTable *current = kwtable[i];
+        KWTable *curr = kwtable[i];
 
-        while (current) {
-            KWTable *temp = current;
-            current       = current->next;
+        while (curr) {
+            KWTable *temp = curr;
+            curr          = curr->next;
             free(temp);
         }
         kwtable[i] = NULL;
@@ -420,10 +420,8 @@ static Token identifier(Lexer *lexer) {
     token.str[idx] = '\0'; // null-terminate string
 
     // check if it's a keyword
-    make_kwtable();
     KWTable *kw = search_kwtable(token.str);
     if (kw) token.type = kw->type;
-    purge_kwtable();
 
     token.line   = lexer->line;
     token.column = tscol; // lexer->column;
@@ -848,12 +846,17 @@ static Token next(Lexer *lexer) {
  * @return
  */
 TokenList *scan(const char *src) {
-    Lexer *lexer    = make_lexer(src);
-    const int isize = 64;    // initial array size
-    int csize       = isize; // current array size
-    int idx         = 0;
+    // Initialize keyword hash-table
+    make_kwtable();
+
+    Lexer *lexer = make_lexer(src);
+    int isize    = 64;    // initial array size
+    int csize    = isize; // current array size
+    int idx      = 0;
 
     Token token;
+
+    // Allocate memory for token list
     Token *arr = malloc(isize * sizeof(Token));
     if (!arr) {
         perror("Memory allocation error");
