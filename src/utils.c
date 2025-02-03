@@ -2,8 +2,8 @@
 #include "utils.h"
 
 /**
- * @brief Returns hash for token string (Fowler–Noll–Vo hash).
- * @param str Token string.
+ * @brief Returns hash for string (Fowler–Noll–Vo hash).
+ * @param str String input.
  * @param size Hash map size.
  * @return
  */
