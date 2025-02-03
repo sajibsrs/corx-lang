@@ -27,6 +27,7 @@ Node *parse_block_item(Parser *parser);
 Node *parse_ident(Parser *parser);
 Node *parse_integer(Parser *parser);
 
+// Node type to string lookup-table.
 const char *ntypestr[] = {
     [N_PROGRAM]     = "N_PROGRAM",     //
     [N_FUNCTION]    = "N_FUNCTION",    //
@@ -50,7 +51,7 @@ const char *ntypestr[] = {
     [N_EMPTY]       = "N_EMPTY",       //
 };
 
-// Precedence table
+// Precedence lookup-table.
 static const int prectable[] = {
     [T_EQ]    = 1, //
     [T_QMARK] = 3, //
@@ -137,6 +138,11 @@ static void expect(Parser *parser, TokenType type, const char *msg) {
  * Node Functions
  *********************************************/
 
+/**
+ * @brief Make a parser object.
+ * @param list Token list source.
+ * @return
+ */
 Parser *make_parser(const TokenList *list) {
     Parser *parser = malloc(sizeof(Parser));
 
@@ -149,6 +155,12 @@ Parser *make_parser(const TokenList *list) {
     return parser;
 }
 
+/**
+ * @brief Create AST node.
+ * @param type Node type.
+ * @param str String value.
+ * @return
+ */
 Node *make_node(NodeType type, const char *str) {
     Node *node = malloc(sizeof(Node));
     if (!node) errexit("make_node memory allocation");
@@ -161,6 +173,11 @@ Node *make_node(NodeType type, const char *str) {
     return node;
 }
 
+/**
+ * @brief Attach a child node to a parent AST node.
+ * @param parent
+ * @param child
+ */
 void add_child(Node *parent, Node *child) {
     static const int CAPACITY = 4;
 
