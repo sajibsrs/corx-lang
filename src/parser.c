@@ -4,6 +4,10 @@
 
 #include "parser.h"
 
+/*********************************************
+ * Declarations
+ *********************************************/
+
 static Token peek(Parser *parser);
 static Token advance(Parser *parser);
 
@@ -26,6 +30,10 @@ Node *parse_block_item(Parser *parser);
 
 Node *parse_ident(Parser *parser);
 Node *parse_integer(Parser *parser);
+
+/*********************************************
+ * Data Definitions
+ *********************************************/
 
 // Node type to string lookup-table.
 const char *ntypestr[] = {
