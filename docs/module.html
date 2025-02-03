@@ -61,8 +61,43 @@
         <br>
         <hr>
 
+        <br>
+        <h3>Module Declaration</h3>
+        <p>From the module declaration starting, the current declaration is effective until another module declaration is found or EOF encountered.</p>
         <pre><code class="language-corx">
+module parent; # parent module
 
+module parent::child; # child module
+        </code></pre>
+
+        <br>
+        <h3>Import Module</h3>
+        <p></p>
+        <pre><code class="language-corx">
+import "include/helper"; # imports module names
+# or
+import * from "include/helper"; # imports module names
+
+util::format("string");
+        </code></pre>
+        <p>Note: If there's no module to import, contents of that file gets imported.</p>
+
+        <br>
+        <h3>Module Unwrapping</h3>
+        <p></p>
+        <pre><code class="language-corx">
+import util from "include/helper"; # imports and unwraps `util`
+
+format("string");
+        </code></pre>
+
+        <pre><code class="language-corx">
+        </code></pre>
+
+        <pre><code class="language-corx">
+        </code></pre>
+
+        <pre><code class="language-corx">
         </code></pre>
     </div>
 
