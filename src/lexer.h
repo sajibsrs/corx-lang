@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+// Token types
 typedef enum {
     // Type modifiers
     T_TYPE, //

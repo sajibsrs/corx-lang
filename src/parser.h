@@ -3,6 +3,7 @@
 
 #include "lexer.h"
 
+// Node types
 typedef enum {
     N_PROGRAM,
     N_FUNCTION,
