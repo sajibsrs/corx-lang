@@ -6,6 +6,8 @@
 #include "utils.h"
 #include "lexer.h"
 
+#define TABLE_SIZE 256 // Hash-table size
+
 // Token type to token string lookup table.
 const char *ttypestr[] = {
     // Type specifiers
@@ -140,92 +142,90 @@ const char *ttypestr[] = {
     [T_EOF]     = "T_EOF",
 };
 
-#define HASH_SIZE 256
+// keyword hash-table
+KWTable *kwtable[TABLE_SIZE] = {NULL};
 
-// keyword mapper
-KWMap *kwmap[HASH_SIZE] = {NULL};
-
-void kwmap_add(TokenType type, const char *token); // forward declaration
+void kwtable_add(TokenType type, const char *token); // forward declaration
 
 /**
- * @brief Initialize keyword hashmap.
+ * @brief Initialize keyword hash-table.
  */
-void init_kwmap() {
-    for (int i = 0; i < HASH_SIZE; i++) {
-        kwmap[i] = NULL; // make buckets empty
+void make_kwtable() {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        kwtable[i] = NULL; // make buckets empty
     }
 
     // type modifiers
-    kwmap_add(T_TYPE, "type");
+    kwtable_add(T_TYPE, "type");
 
     // async
-    kwmap_add(T_ASYNC, "async");
-    kwmap_add(T_WAIT, "wait");
+    kwtable_add(T_ASYNC, "async");
+    kwtable_add(T_WAIT, "wait");
 
     // type qualifiers
-    kwmap_add(T_CONST, "const");
-    kwmap_add(T_ATOMIC, "atomic");
+    kwtable_add(T_CONST, "const");
+    kwtable_add(T_ATOMIC, "atomic");
 
     // access specifier
-    kwmap_add(T_EXTERNAL, "external");
-    kwmap_add(T_INTERNAL, "internal");
-    kwmap_add(T_RESTRICT, "restrict");
+    kwtable_add(T_EXTERNAL, "external");
+    kwtable_add(T_INTERNAL, "internal");
+    kwtable_add(T_RESTRICT, "restrict");
 
     // type specifiers
-    kwmap_add(T_INT, "int");
-    kwmap_add(T_FLOAT, "float");
+    kwtable_add(T_INT, "int");
+    kwtable_add(T_FLOAT, "float");
 
-    kwmap_add(T_BOOL, "bool");
-    kwmap_add(T_ENUM, "enum");
-    kwmap_add(T_STRUCT, "struct");
-    kwmap_add(T_CONTRACT, "contract");
-    kwmap_add(T_STRING, "string");
-    kwmap_add(T_CHAR, "char");
-    kwmap_add(T_VOID, "void");
+    kwtable_add(T_BOOL, "bool");
+    kwtable_add(T_ENUM, "enum");
+    kwtable_add(T_STRUCT, "struct");
+    kwtable_add(T_CONTRACT, "contract");
+    kwtable_add(T_STRING, "string");
+    kwtable_add(T_CHAR, "char");
+    kwtable_add(T_VOID, "void");
 
     // conditions
-    kwmap_add(T_IF, "if");
-    kwmap_add(T_ELSE, "else");
-    kwmap_add(T_SWITCH, "switch");
-    kwmap_add(T_CASE, "case");
-    kwmap_add(T_DEFAULT, "default");
-    kwmap_add(T_BREAK, "break");
-    kwmap_add(T_CONTINUE, "continue");
+    kwtable_add(T_IF, "if");
+    kwtable_add(T_ELSE, "else");
+    kwtable_add(T_SWITCH, "switch");
+    kwtable_add(T_CASE, "case");
+    kwtable_add(T_DEFAULT, "default");
+    kwtable_add(T_BREAK, "break");
+    kwtable_add(T_CONTINUE, "continue");
 
     // loops
-    kwmap_add(T_DO, "do");
-    kwmap_add(T_WHILE, "while");
-    kwmap_add(T_FOR, "for");
-    kwmap_add(T_FOREACH, "foreach");
-    kwmap_add(T_IN, "in");
+    kwtable_add(T_DO, "do");
+    kwtable_add(T_WHILE, "while");
+    kwtable_add(T_FOR, "for");
+    kwtable_add(T_FOREACH, "foreach");
+    kwtable_add(T_IN, "in");
 
     // module
-    kwmap_add(T_MODULE, "module");
-    kwmap_add(T_IMPORT, "import");
-    kwmap_add(T_FROM, "from");
+    kwtable_add(T_MODULE, "module");
+    kwtable_add(T_IMPORT, "import");
+    kwtable_add(T_FROM, "from");
 
     // function
-    kwmap_add(T_RETURN, "return");
+    kwtable_add(T_RETURN, "return");
 
     // memory operations
-    kwmap_add(T_NEW, "new");
-    kwmap_add(T_NULL, "null");
-    kwmap_add(T_SIZEOF, "sizeof");
-    kwmap_add(T_THIS, "this");
-    kwmap_add(T_PURGE, "purge");
+    kwtable_add(T_NEW, "new");
+    kwtable_add(T_NULL, "null");
+    kwtable_add(T_SIZEOF, "sizeof");
+    kwtable_add(T_THIS, "this");
+    kwtable_add(T_PURGE, "purge");
 
     // others
-    kwmap_add(T_ERROR, "error");
+    kwtable_add(T_ERROR, "error");
 }
 
 /**
- * @brief Adds new keyword entry to hashmap.
+ * @brief Adds new keyword entry to hash-table.
  * @param type Token type.
  * @param token Token string.
  */
-void kwmap_add(TokenType type, const char *token) {
-    unsigned int idx = hashfnv(token, HASH_SIZE);
-    KWMap *entry     = malloc(sizeof(KWMap));
+void kwtable_add(TokenType type, const char *token) {
+    unsigned int idx = hashfnv(token, TABLE_SIZE);
+    KWTable *entry   = malloc(sizeof(KWTable));
     if (!entry) {
         perror("Memory allocation failed");
         exit(1);
@@ -236,18 +236,18 @@ void kwmap_add(TokenType type, const char *token) {
 
     entry->type = type;
 
-    entry->next = kwmap[idx]; // move current head
-    kwmap[idx]  = entry;      // insert at head
+    entry->next  = kwtable[idx]; // move current head
+    kwtable[idx] = entry;        // insert at head
 }
 
 /**
- * @brief Finds a keyword from the hashmap.
+ * @brief Finds a keyword from the hash-table.
  * @param key Key to search.
  * @return
  */
-KWMap *search_kwmap(const char *key) {
-    unsigned int idx = hashfnv(key, HASH_SIZE);
-    KWMap *current   = kwmap[idx];
+KWTable *search_kwtable(const char *key) {
+    unsigned int idx = hashfnv(key, TABLE_SIZE);
+    KWTable *current = kwtable[idx];
 
     while (current) {
         if (strcmp(current->token, key) == 0) {
@@ -259,18 +259,18 @@ KWMap *search_kwmap(const char *key) {
 }
 
 /**
- * @brief Removes and cleanups hashmap.
+ * @brief Removes and cleanups hash-table.
  */
-void purge_kwmap() {
-    for (int i = 0; i < HASH_SIZE; i++) {
-        KWMap *current = kwmap[i];
+void purge_kwtable() {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        KWTable *current = kwtable[i];
 
         while (current) {
-            KWMap *temp = current;
-            current     = current->next;
+            KWTable *temp = current;
+            current       = current->next;
             free(temp);
         }
-        kwmap[i] = NULL;
+        kwtable[i] = NULL;
     }
 }
 
@@ -420,10 +420,10 @@ static Token identifier(Lexer *lexer) {
     token.str[idx] = '\0'; // null-terminate string
 
     // check if it's a keyword
-    init_kwmap();
-    KWMap *kw = search_kwmap(token.str);
+    make_kwtable();
+    KWTable *kw = search_kwtable(token.str);
     if (kw) token.type = kw->type;
-    purge_kwmap();
+    purge_kwtable();
 
     token.line   = lexer->line;
     token.column = tscol; // lexer->column;

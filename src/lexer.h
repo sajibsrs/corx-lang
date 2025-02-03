@@ -156,28 +156,28 @@ typedef struct {
     int column;
 } Lexer;
 
-typedef struct KWMap {
+typedef struct KWTable {
     char token[32];
     TokenType type;
-    struct KWMap *next; // pointer for chaining
-} KWMap;
+    struct KWTable *next; // pointer for chaining
+} KWTable;
 
 /**
- * @brief Initialize keyword hashmap.
+ * @brief Initialize keyword hash-table.
  */
-void init_kwmap();
+void make_kwtable();
 
 /**
- * @brief Removes and cleanups hashmap.
+ * @brief Removes and cleanups hash-table.
  */
-void purge_kwmap();
+void purge_kwtable();
 
 /**
- * @brief Finds a keyword from the hashmap.
+ * @brief Finds a keyword from the hash-table.
  * @param key Key to search.
  * @return
  */
-KWMap *search_kwmap(const char *name);
+KWTable *search_kwtable(const char *name);
 
 /**
  * @brief Creates lexer and store source code to it's `buffer`.
