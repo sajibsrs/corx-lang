@@ -166,15 +166,15 @@ Parser *make_parser(const TokenList *list) {
 /**
  * @brief Create AST node.
  * @param type Node type.
- * @param str String value.
+ * @param value String value.
  * @return
  */
-Node *make_node(NodeType type, const char *str) {
+Node *make_node(NodeType type, const char *value) {
     Node *node = malloc(sizeof(Node));
     if (!node) errexit("make_node memory allocation");
 
     node->type  = type;
-    node->str   = str ? strdup(str) : NULL;
+    node->value   = value ? strdup(value) : NULL;
     node->nodes = NULL;
     node->count = 0;
 
@@ -780,7 +780,7 @@ void purge_node(Node *node) {
         purge_node(node->nodes[i]);
     }
     free(node->nodes);
-    free(node->str);
+    free(node->value);
     free(node);
 }
 

@@ -29,15 +29,15 @@ typedef enum {
 
 typedef struct Node {
     NodeType type;
-    char *str;
+    char *value;
     struct Node **nodes; // Child nodes
     int count;           // Children count
 } Node;
 
 typedef struct {
     const TokenList *list; // Token array
-    int pos;
-    Node *node; // Root node
+    int pos;               // Current position
+    Node *node;            // Root node
 } Parser;
 
 extern const char *ntypestr[];
