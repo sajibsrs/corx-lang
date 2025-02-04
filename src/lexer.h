@@ -177,7 +177,7 @@ void purge_kwtable();
  * @param key Key to search.
  * @return
  */
-KWTable *search_kwtable(const char *name);
+KWTable *search_keyword(const char *name);
 
 /**
  * @brief Creates lexer and store source code to it's `buffer`.
@@ -192,12 +192,6 @@ Lexer *make_lexer(const char *path);
  * @return
  */
 TokenList *scan(const char *src);
-
-/**
- * @brief Print formatted token to the terminal.
- * @param list
- */
-void print_tokenlist(const TokenList *list);
 
 /**
  * @brief Cleanup allocated for lexer and it's `buffer`.

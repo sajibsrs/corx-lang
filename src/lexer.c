@@ -145,7 +145,7 @@ const char *ttypestr[] = {
 // keyword hash-table
 KWTable *kwtable[TABLE_SIZE] = {NULL};
 
-void kwtable_add(TokenType type, const char *token); // forward declaration
+void add_keyword(TokenType type, const char *token); // forward declaration
 
 /**
  * @brief Initialize keyword hash-table.
@@ -156,66 +156,66 @@ void make_kwtable() {
     }
 
     // type modifiers
-    kwtable_add(T_TYPE, "type");
+    add_keyword(T_TYPE, "type");
 
     // async
-    kwtable_add(T_ASYNC, "async");
-    kwtable_add(T_WAIT, "wait");
+    add_keyword(T_ASYNC, "async");
+    add_keyword(T_WAIT, "wait");
 
     // type qualifiers
-    kwtable_add(T_CONST, "const");
-    kwtable_add(T_ATOMIC, "atomic");
+    add_keyword(T_CONST, "const");
+    add_keyword(T_ATOMIC, "atomic");
 
     // access specifier
-    kwtable_add(T_EXTERNAL, "external");
-    kwtable_add(T_INTERNAL, "internal");
-    kwtable_add(T_RESTRICT, "restrict");
+    add_keyword(T_EXTERNAL, "external");
+    add_keyword(T_INTERNAL, "internal");
+    add_keyword(T_RESTRICT, "restrict");
 
     // type specifiers
-    kwtable_add(T_INT, "int");
-    kwtable_add(T_FLOAT, "float");
+    add_keyword(T_INT, "int");
+    add_keyword(T_FLOAT, "float");
 
-    kwtable_add(T_BOOL, "bool");
-    kwtable_add(T_ENUM, "enum");
-    kwtable_add(T_STRUCT, "struct");
-    kwtable_add(T_CONTRACT, "contract");
-    kwtable_add(T_STRING, "string");
-    kwtable_add(T_CHAR, "char");
-    kwtable_add(T_VOID, "void");
+    add_keyword(T_BOOL, "bool");
+    add_keyword(T_ENUM, "enum");
+    add_keyword(T_STRUCT, "struct");
+    add_keyword(T_CONTRACT, "contract");
+    add_keyword(T_STRING, "string");
+    add_keyword(T_CHAR, "char");
+    add_keyword(T_VOID, "void");
 
     // conditions
-    kwtable_add(T_IF, "if");
-    kwtable_add(T_ELSE, "else");
-    kwtable_add(T_SWITCH, "switch");
-    kwtable_add(T_CASE, "case");
-    kwtable_add(T_DEFAULT, "default");
-    kwtable_add(T_BREAK, "break");
-    kwtable_add(T_CONTINUE, "continue");
+    add_keyword(T_IF, "if");
+    add_keyword(T_ELSE, "else");
+    add_keyword(T_SWITCH, "switch");
+    add_keyword(T_CASE, "case");
+    add_keyword(T_DEFAULT, "default");
+    add_keyword(T_BREAK, "break");
+    add_keyword(T_CONTINUE, "continue");
 
     // loops
-    kwtable_add(T_DO, "do");
-    kwtable_add(T_WHILE, "while");
-    kwtable_add(T_FOR, "for");
-    kwtable_add(T_FOREACH, "foreach");
-    kwtable_add(T_IN, "in");
+    add_keyword(T_DO, "do");
+    add_keyword(T_WHILE, "while");
+    add_keyword(T_FOR, "for");
+    add_keyword(T_FOREACH, "foreach");
+    add_keyword(T_IN, "in");
 
     // module
-    kwtable_add(T_MODULE, "module");
-    kwtable_add(T_IMPORT, "import");
-    kwtable_add(T_FROM, "from");
+    add_keyword(T_MODULE, "module");
+    add_keyword(T_IMPORT, "import");
+    add_keyword(T_FROM, "from");
 
     // function
-    kwtable_add(T_RETURN, "return");
+    add_keyword(T_RETURN, "return");
 
     // memory operations
-    kwtable_add(T_NEW, "new");
-    kwtable_add(T_NULL, "null");
-    kwtable_add(T_SIZEOF, "sizeof");
-    kwtable_add(T_THIS, "this");
-    kwtable_add(T_PURGE, "purge");
+    add_keyword(T_NEW, "new");
+    add_keyword(T_NULL, "null");
+    add_keyword(T_SIZEOF, "sizeof");
+    add_keyword(T_THIS, "this");
+    add_keyword(T_PURGE, "purge");
 
     // others
-    kwtable_add(T_ERROR, "error");
+    add_keyword(T_ERROR, "error");
 }
 
 /**
@@ -223,7 +223,7 @@ void make_kwtable() {
  * @param type Token type.
  * @param token Token string.
  */
-void kwtable_add(TokenType type, const char *token) {
+void add_keyword(TokenType type, const char *token) {
     unsigned idx   = hashfnv(token, TABLE_SIZE);
     KWTable *entry = malloc(sizeof(KWTable));
     if (!entry) {
@@ -245,7 +245,7 @@ void kwtable_add(TokenType type, const char *token) {
  * @param key Key to search.
  * @return
  */
-KWTable *search_kwtable(const char *key) {
+KWTable *search_keyword(const char *key) {
     unsigned idx  = hashfnv(key, TABLE_SIZE);
     KWTable *curr = kwtable[idx];
 
@@ -420,7 +420,7 @@ static Token identifier(Lexer *lexer) {
     token.str[idx] = '\0'; // null-terminate string
 
     // check if it's a keyword
-    KWTable *kw = search_kwtable(token.str);
+    KWTable *kw = search_keyword(token.str);
     if (kw) token.type = kw->type;
 
     token.line   = lexer->line;

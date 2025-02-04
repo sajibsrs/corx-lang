@@ -7,8 +7,8 @@
  * @param size Hash map size.
  * @return
  */
-unsigned int hashfnv(const char *str, const int size) {
-    unsigned int hash = 2166136261u; // FNV offset basis
+unsigned hashfnv(const char *str, const int size) {
+    unsigned hash = 2166136261u; // FNV offset basis
     while (*str) {
         hash ^= (unsigned char)(*str); // XOR with byte
         hash *= 16777619u;             // FNV prime
