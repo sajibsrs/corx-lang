@@ -37,14 +37,14 @@ void print_ast(const Node *node, int depth) {
 
     // Print node information
     printf(
-        " %-18s %-26s (%d child%s)\n", node->str ? node->str : "NULL", ntypestr[node->type],
-        node->count,
-        node->count == 1 ? "" : "ren" // Singular/plural
+        "%-8s %-18s %-26s (%d child%s)\n", node->dtype ? node->dtype : "null",
+        node->value ? node->value : "null", ntypestr[node->type], node->ccount,
+        node->ccount == 1 ? "" : "ren" // Singular/plural
     );
 
     // Recursively print children
-    for (int i = 0; i < node->count; i++) {
-        print_ast(node->nodes[i], depth + 1);
+    for (int i = 0; i < node->ccount; i++) {
+        print_ast(node->cnodes[i], depth + 1);
     }
 }
 
