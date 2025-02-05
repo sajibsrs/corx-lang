@@ -37,8 +37,11 @@ Node *parse_integer(Parser *parser);
 
 // Node type to string lookup-table.
 const char *ntypestr[] = {
-    [N_PROGRAM]     = "N_PROGRAM",     //
-    [N_FUNCTION]    = "N_FUNCTION",    //
+    [N_PROGRAM]     = "N_PROGRAM", //
+    [N_VAR_DECL]    = "N_VAR_DECL",
+    [N_VAR_DEF]     = "N_VAR_DEF",
+    [N_FUNC_DECL]   = "N_FUNC_DECL",   //
+    [N_FUNC_DEF]    = "N_FUNC_DEF",    //
     [N_RETURN]      = "N_RETURN",      //
     [N_UNARY]       = "N_UNARY",       //
     [N_BINARY]      = "N_BINARY",      //
@@ -46,7 +49,6 @@ const char *ntypestr[] = {
     [N_IDENTIFIER]  = "N_IDENTIFIER",  //
     [N_INTEGER]     = "N_INTEGER",     //
     [N_BLOCK]       = "N_BLOCK",       //
-    [N_DECLARATION] = "N_DECLARATION", //
     [N_EXPRESSION]  = "N_EXPRESSION",  //
     [N_CONDITIONAL] = "N_CONDITIONAL", //
     [N_IF]          = "N_IF",          //
@@ -173,10 +175,15 @@ Node *make_node(NodeType type, const char *value) {
     Node *node = malloc(sizeof(Node));
     if (!node) errexit("make_node memory allocation");
 
-    node->type  = type;
-    node->value   = value ? strdup(value) : NULL;
-    node->nodes = NULL;
-    node->count = 0;
+    node->type     = type;
+    node->dtype    = NULL;
+    node->value    = (value && *value) ? strdup(value) : NULL;
+    node->cnodes   = NULL;
+    node->inherits = NULL;
+    node->fulfills = NULL;
+    node->ccount   = 0;
+    node->icount   = 0;
+    node->fcount   = 0;
 
     return node;
 }
@@ -189,14 +196,40 @@ Node *make_node(NodeType type, const char *value) {
 void add_child(Node *parent, Node *child) {
     static const int CAPACITY = 4;
 
-    if (parent->count % CAPACITY == 0) {
-        int nsize     = (parent->count == 0) ? CAPACITY : parent->count * CAPACITY;
-        parent->nodes = (Node **)realloc(parent->nodes, sizeof(Node *) * nsize);
+    if (parent->ccount % CAPACITY == 0) {
+        int nsize      = (parent->ccount == 0) ? CAPACITY : parent->ccount + CAPACITY;
+        parent->cnodes = realloc(parent->cnodes, sizeof(Node *) * nsize);
 
-        if (!parent->nodes) errexit("add_child memory allocation");
+        if (!parent->cnodes) errexit("add_child memory allocation");
     }
 
-    parent->nodes[parent->count++] = child;
+    parent->cnodes[parent->ccount++] = child;
+}
+
+void add_inheritance(Node *current, Node *inherits) {
+    static const int CAPACITY = 4;
+
+    if (current->icount % CAPACITY == 0) {
+        int nsize         = (current->icount == 0) ? CAPACITY : current->icount + CAPACITY;
+        current->inherits = realloc(current->inherits, sizeof(Node *) * nsize);
+
+        if (!current->inherits) errexit("add_inheritance memory allocation");
+    }
+
+    current->inherits[current->icount++] = inherits;
+}
+
+void add_fulfillment(Node *current, Node *fulfills) {
+    static const int CAPACITY = 4;
+
+    if (current->fcount % CAPACITY == 0) {
+        int nsize         = (current->fcount == 0) ? CAPACITY : current->fcount + CAPACITY;
+        current->fulfills = realloc(current->fulfills, sizeof(Node *) * nsize);
+
+        if (!current->fulfills) errexit("add_inheritance memory allocation");
+    }
+
+    current->fulfills[current->fcount++] = fulfills;
 }
 
 /*********************************************
@@ -296,6 +329,16 @@ static Token peekfw(Parser *parser, int pos) {
 }
 
 /**
+ * @brief Look behind current token.
+ * @param parser
+ * @param pos
+ * @return
+ */
+static Token backtrack(Parser *parser, int pos) {
+    return parser->list->tokens[parser->pos - pos];
+}
+
+/**
  * @brief Consume next token and move forward.
  * @param parser
  * @return Consumed token.
@@ -331,14 +374,26 @@ Node *parse_decl(Parser *parser) {
         errexitinfo(parser, "expected a type");
     }
 
+    // TODO: Consume type
+
+    Node *dnode;
+
+    // TODO: Exit if not identifier
+
+    // TODO: Consume identifier
+
     // Ignore identifier and look forward
     Token lookahead = peekfw(parser, 3);
 
     if (lookahead.type == T_LPAREN) {
-        return parse_func_decl(parser);
+        dnode = parse_func_decl(parser);
     } else {
-        return parse_var_decl(parser);
+        dnode = parse_var_decl(parser);
     }
+
+    dnode->dtype = strdup(next.str);
+
+    return dnode;
 }
 
 /**
@@ -350,19 +405,21 @@ Node *parse_var_decl(Parser *parser) {
     advance(parser); // Consume 'type'
 
     Node *ident = parse_ident(parser);
-    Node *decl  = make_node(N_DECLARATION, "for-decl");
-    add_child(decl, ident);
+    Node *var   = make_node(N_VAR_DECL, ident->value);
+    // add_child(var, ident);
 
     // Handle assignment
     if (peek(parser).type == T_EQ) {
-        advance(parser);
+        var->type = N_VAR_DEF;
+
+        advance(parser); // Consume '='
 
         Node *expr = parse_expr(parser, 0);
-        add_child(decl, expr);
+        add_child(var, expr);
     }
     expect(parser, T_SCOLON, "expected ';' after declaration");
 
-    return decl;
+    return var;
 }
 
 /**
@@ -382,8 +439,8 @@ Node *parse_func_decl(Parser *parser) {
 
     expect(parser, T_RPAREN, "expected ')' after parameter list");
 
-    Node *func = make_node(N_FUNCTION, "function");
-    add_child(func, ident);
+    Node *func = make_node(N_FUNC_DECL, ident->value);
+    // add_child(func, ident);
 
     // Attach parameter list
     if (plist) add_child(func, plist);
@@ -392,6 +449,8 @@ Node *parse_func_decl(Parser *parser) {
 
     // Parse body
     if (next.type == T_LBRACE) {
+        func->type = N_FUNC_DEF;
+
         Node *body = parse_block(parser);
         add_child(func, body);
     }
@@ -415,31 +474,27 @@ Node *parse_param_list(Parser *parser) {
     // If there are no parameters
     if (next.type == T_RPAREN) return NULL;
 
-    // Handle int type
-    if (next.type == T_INT) {
-        Node *plist = make_node(N_PARAM_LIST, "parameters");
+    Node *plist = make_node(N_PARAM_LIST, "");
 
-        // Handle additional parameters
-        while (peek(parser).type != T_RPAREN) {
-            expect(parser, T_INT, "expected 'type' before param");
+    // Handle parameters
+    while (peek(parser).type != T_RPAREN) {
+        expect(parser, T_INT, "expected 'type' before param");
 
-            if (peek(parser).type == T_IDENT) {
-                Node *param = parse_ident(parser);
-                add_child(plist, param);
-            } else {
-                Node *param = make_node(N_TYPE, "unnamed param");
-                add_child(plist, param);
-            }
-
-            // Comsume comma ','
-            if (peek(parser).type == T_COMMA) advance(parser);
+        if (peek(parser).type == T_IDENT) {
+            Node *param  = parse_ident(parser);
+            param->dtype = "int";
+            add_child(plist, param);
+        } else {
+            Node *param  = make_node(N_IDENTIFIER, "");
+            param->dtype = "int";
+            add_child(plist, param);
         }
 
-        return plist;
+        // Comsume comma ','
+        if (peek(parser).type == T_COMMA) advance(parser);
     }
 
-    errexitinfo(parser, "invalid parameter-list syntax");
-    return NULL;
+    return plist;
 }
 
 /**
@@ -472,10 +527,10 @@ Node *parse_for_expr(Parser *parser) {
     // Parse loop body
     Node *body = parse_stmt(parser);
 
-    Node *fnode = make_node(N_FOR, "for-loop");
+    Node *fnode = make_node(N_FOR, "");
     add_child(fnode, init);
-    add_child(fnode, cond ? cond : make_node(N_EMPTY, "empty"));
-    add_child(fnode, iter ? iter : make_node(N_EMPTY, "empty"));
+    add_child(fnode, cond ? cond : make_node(N_EMPTY, ""));
+    add_child(fnode, iter ? iter : make_node(N_EMPTY, ""));
     add_child(fnode, body);
 
     return fnode;
@@ -494,7 +549,7 @@ Node *parse_for_init(Parser *parser) {
     if (next.type == T_SCOLON) {
         advance(parser);
 
-        return make_node(N_EMPTY, "empty");
+        return make_node(N_EMPTY, "");
     }
 
     // Parse declaration
@@ -510,7 +565,7 @@ Node *parse_for_init(Parser *parser) {
 
 Node *parse_block(Parser *parser) {
     expect(parser, T_LBRACE, "expected '{' before block");
-    Node *node = make_node(N_BLOCK, "block");
+    Node *node = make_node(N_BLOCK, "");
 
     while (peek(parser).type != T_RBRACE) {
         Node *stmt = parse_block_item(parser);
@@ -574,7 +629,7 @@ Node *parse_stmt(Parser *parser) {
         expect(parser, T_RPAREN, "expected ')' after if statement");
 
         Node *ibody = parse_stmt(parser);
-        Node *inode = make_node(N_IF, "if-stmt");
+        Node *inode = make_node(N_IF, "");
         add_child(inode, expr);
         add_child(inode, ibody);
 
@@ -585,7 +640,7 @@ Node *parse_stmt(Parser *parser) {
             advance(parser); // Consume 'else'
 
             Node *ebody = parse_stmt(parser);
-            Node *enode = make_node(N_ELSE, "else-stmt");
+            Node *enode = make_node(N_ELSE, "");
             add_child(enode, ebody);
             add_child(inode, enode);
         }
@@ -627,20 +682,20 @@ Node *parse_stmt(Parser *parser) {
 
     // Handle break statement
     else if (next.type == T_BREAK) {
-        Token tok = advance(parser);
-        return make_node(N_BREAK, tok.str);
+        advance(parser);
+        return make_node(N_BREAK, "");
     }
 
     // Handle continue statement
     else if (next.type == T_CONTINUE) {
-        Token tok = advance(parser);
-        return make_node(N_CONTINUE, tok.str);
+        advance(parser);
+        return make_node(N_CONTINUE, "");
     }
 
     // Handle null statement
     else if (next.type == T_SCOLON) {
         Token tok = advance(parser);
-        return make_node(N_EMPTY, tok.str);
+        return make_node(N_EMPTY, "");
     }
 
     // Handle other statements or report error
@@ -686,7 +741,7 @@ Node *parse_expr(Parser *parser, int prec) {
         Node *rightexpr = parse_expr(parser, precedence(next.type));
 
         // Create a conditional node
-        Node *node = make_node(N_CONDITIONAL, "cond-expr");
+        Node *node = make_node(N_CONDITIONAL, "");
         add_child(node, left);      // Condition
         add_child(node, leftexpr);  // True expression
         add_child(node, rightexpr); // False expression
@@ -748,7 +803,7 @@ Node *parse_factor(Parser *parser) {
  */
 Node *parse_ident(Parser *parser) {
     Token next = peek(parser);
-    advance(parser);
+    advance(parser); // Consume identifier
 
     return make_node(N_IDENTIFIER, next.str);
 }
@@ -776,10 +831,28 @@ Node *parse_integer(Parser *parser) {
 void purge_node(Node *node) {
     if (!node) return;
 
-    for (int i = 0; i < node->count; i++) {
-        purge_node(node->nodes[i]);
+    // Recursively purge child nodes
+    for (int i = 0; i < node->ccount; i++) {
+        purge_node(node->cnodes[i]);
     }
-    free(node->nodes);
+
+    // Recursively purge inheritance nodes
+    for (int i = 0; i < node->icount; i++) {
+        purge_node(node->inherits[i]);
+    }
+
+    // Recursively purge fulfillment nodes
+    for (int i = 0; i < node->fcount; i++) {
+        purge_node(node->fulfills[i]);
+    }
+
+    // Free the arrays
+    free(node->cnodes);
+    free(node->inherits);
+    free(node->fulfills);
+
+    // Free node values
+    free(node->dtype);
     free(node->value);
     free(node);
 }

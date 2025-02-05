@@ -6,7 +6,10 @@
 // Node types
 typedef enum {
     N_PROGRAM,
-    N_FUNCTION,
+    N_VAR_DECL,
+    N_VAR_DEF,
+    N_FUNC_DECL,
+    N_FUNC_DEF,
     N_RETURN,
     N_UNARY,
     N_BINARY,
@@ -14,24 +17,28 @@ typedef enum {
     N_IDENTIFIER,
     N_INTEGER,
     N_BLOCK,
-    N_DECLARATION,
     N_EXPRESSION,
     N_CONDITIONAL, //
-    N_IF,          // Represents an if statement
+    N_IF,          // If statement
     N_ELSE,        //
     N_FOR,         //
     N_BREAK,       //
     N_CONTINUE,    //
     N_PARAM_LIST,  //
     N_TYPE,        //
-    N_EMPTY,       // Represents an empty statement (;)
+    N_EMPTY,       // Empty statement (;)
 } NodeType;
 
 typedef struct Node {
     NodeType type;
+    char *dtype;
     char *value;
-    struct Node **nodes; // Child nodes
-    int count;           // Children count
+    struct Node **cnodes;   // Child nodes
+    struct Node **inherits; //
+    struct Node **fulfills; //
+    unsigned ccount;        // Child count
+    unsigned icount;        // Inheritance count
+    unsigned fcount;        // Fulfillment count
 } Node;
 
 typedef struct {
