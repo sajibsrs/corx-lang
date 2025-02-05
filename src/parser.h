@@ -15,7 +15,8 @@ typedef enum {
     N_BINARY,
     N_ASSIGNMENT,
     N_IDENTIFIER,
-    N_INTEGER,
+    N_NUMBER,
+    N_FLOAT,
     N_BLOCK,
     N_EXPRESSION,
     N_CONDITIONAL, //

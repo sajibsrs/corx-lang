@@ -29,7 +29,7 @@ Node *parse_block(Parser *parser);
 Node *parse_block_item(Parser *parser);
 
 Node *parse_ident(Parser *parser);
-Node *parse_integer(Parser *parser);
+Node *parse_number(Parser *parser);
 
 /*********************************************
  * Data Definitions
@@ -47,7 +47,7 @@ const char *ntypestr[] = {
     [N_BINARY]      = "N_BINARY",      //
     [N_ASSIGNMENT]  = "N_ASSIGNMENT",  //
     [N_IDENTIFIER]  = "N_IDENTIFIER",  //
-    [N_INTEGER]     = "N_INTEGER",     //
+    [N_NUMBER]      = "N_NUMBER",      //
     [N_BLOCK]       = "N_BLOCK",       //
     [N_EXPRESSION]  = "N_EXPRESSION",  //
     [N_CONDITIONAL] = "N_CONDITIONAL", //
@@ -760,17 +760,16 @@ Node *parse_expr(Parser *parser, int prec) {
 Node *parse_factor(Parser *parser) {
     Token next = peek(parser);
 
-    // Handle integer constants
-    if (next.type == T_NUMBER) {
-        return parse_integer(parser);
-
-    }
     // Handle identifier
-    else if (next.type == T_IDENT) {
-
+    if (next.type == T_IDENT) {
         return parse_ident(parser);
-
     }
+
+    // Handle integer constants
+    else if (next.type == T_NUMBER) {
+        return parse_number(parser);
+    }
+
     // Handle unary expression
     else if (isunop(next.type)) {
         advance(parser);
@@ -780,8 +779,8 @@ Node *parse_factor(Parser *parser) {
         add_child(unode, inode);
 
         return unode;
-
     }
+
     // Handle group expression
     else if (next.type == T_LPAREN) {
         advance(parser);
@@ -809,15 +808,15 @@ Node *parse_ident(Parser *parser) {
 }
 
 /**
- * @brief Parse integer.
+ * @brief Parse number.
  * @param parser
  * @return
  */
-Node *parse_integer(Parser *parser) {
+Node *parse_number(Parser *parser) {
     Token next = peek(parser);
     advance(parser);
 
-    return make_node(N_INTEGER, next.str);
+    return make_node(N_NUMBER, next.str);
 }
 
 /*********************************************
