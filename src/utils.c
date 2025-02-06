@@ -52,7 +52,7 @@ void print_ast(const Node *node, int depth) {
  * @brief Print formatted token to the terminal.
  * @param list
  */
-void print_tokenlist(const TokenList *list) {
+void print_toklist(const TokenList *list) {
     printf("Scanned %d tokens:\n\n", list->count);
 
     Token token;
