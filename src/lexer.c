@@ -139,7 +139,7 @@ const char *ttypestr[] = {
 
 typedef struct {
     const char *kw;
-    int id;
+    TokenType type;
 } KWElement;
 
 typedef struct {
@@ -153,15 +153,15 @@ static KWBucket kwtable[TABLE_SIZE] = {0};
 /**
  * @brief Adds new keyword entry to hash-table.
  * @param kw Keyword string.
- * @param id Token id.
+ * @param type Token type.
  */
-void add_keyword(const char *kw, int id) {
+void add_keyword(const char *kw, TokenType type) {
     unsigned idx  = hashfnv(kw, TABLE_SIZE);
     KWBucket *bkt = &kwtable[idx];
 
     if (bkt->count < MAX_CHAIN) {
-        bkt->elems[bkt->count].kw = kw;
-        bkt->elems[bkt->count].id = id;
+        bkt->elems[bkt->count].kw   = kw;
+        bkt->elems[bkt->count].type = type;
         bkt->count++;
     } else {
         printf("Warning: Hash table overflow at index %u\n", idx);
@@ -391,8 +391,8 @@ static Token identifier(Lexer *lexer) {
     token.str[idx] = '\0'; // null-terminate string
 
     // check if it's a keyword
-    KWElement *kw = search_keyword(token.str);
-    if (kw) token.type = kw->id;
+    KWElement *elem = search_keyword(token.str);
+    if (elem) token.type = elem->type;
 
     token.line   = lexer->line;
     token.column = tscol; // lexer->column;
