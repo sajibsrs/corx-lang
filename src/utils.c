@@ -1,5 +1,24 @@
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "utils.h"
+
+/**
+ * @brief Prints error message and exits.
+ * @param msg
+ */
+void errexit(const char *msg) {
+    fprintf(stderr, "Error: %s\n", msg);
+    exit(1);
+}
+
+/**
+ * @brief Prints error message.
+ * @param msg
+ */
+void errwarn(const char *msg) {
+    fprintf(stderr, "Error: %s\n", msg);
+}
 
 /**
  * @brief Returns hash for string (Fowler–Noll–Vo hash).
