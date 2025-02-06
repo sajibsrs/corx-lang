@@ -21,20 +21,14 @@ typedef enum {
     T_INTERNAL,
     T_RESTRICT,
 
-    // Type specifiers
-    T_INT,
-    T_FLOAT,
-
-    T_BOOL,     //
+    // Types
     T_ENUM,     //
     T_STRUCT,   //
     T_CONTRACT, //
+    T_IDENT,    // Identifier
     T_NUMBER,   // Numbers
     T_STRING,   // String literal
     T_CHAR,     // Character literal
-    T_VOID,     // Type non-value
-
-    T_IDENT, // Identifier
 
     // Conditions
     T_IF,      //
@@ -156,36 +150,6 @@ typedef struct {
     int column;
 } Lexer;
 
-typedef struct KWTable {
-    char token[32];
-    TokenType type;
-    struct KWTable *next; // pointer for chaining
-} KWTable;
-
-/**
- * @brief Initialize keyword hash-table.
- */
-void make_kwtable();
-
-/**
- * @brief Removes and cleanups hash-table.
- */
-void purge_kwtable();
-
-/**
- * @brief Finds a keyword from the hash-table.
- * @param key Key to search.
- * @return
- */
-KWTable *search_keyword(const char *name);
-
-/**
- * @brief Creates lexer and store source code to it's `buffer`.
- * @param path File name with path.
- * @return
- */
-Lexer *make_lexer(const char *path);
-
 /**
  * @brief Scan the source and return the tokens array.
  * @param src Sourcecode file path.
@@ -194,15 +158,9 @@ Lexer *make_lexer(const char *path);
 TokenList *scan(const char *src);
 
 /**
- * @brief Cleanup allocated for lexer and it's `buffer`.
- * @param lexer
- */
-void purge_lexer(Lexer *lexer);
-
-/**
  * @brief Cleanup allocated memory from `tokens`.
  * @param list
  */
-void purge_tokenlist(TokenList *list);
+void purge_toklist(TokenList *list);
 
 #endif

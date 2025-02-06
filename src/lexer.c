@@ -6,22 +6,20 @@
 #include "utils.h"
 #include "lexer.h"
 
-#define TABLE_SIZE 128 // Hash-table size
+#define TABLE_SIZE 256 // Hash-table size
+#define MAX_CHAIN 4    // Maximum
+
+void purge_lexer(Lexer *lexer);
 
 // Token type to token string lookup table.
 const char *ttypestr[] = {
-    // Type specifiers
-    [T_INT]   = "T_INT",
-    [T_FLOAT] = "T_FLOAT",
-
-    [T_BOOL]     = "T_BOOL",
     [T_ENUM]     = "T_ENUM",
     [T_STRUCT]   = "T_STRUCT",
     [T_CONTRACT] = "T_CONTRACT",
+    [T_IDENT]    = "T_IDENT",
     [T_NUMBER]   = "T_NUMBER",
     [T_STRING]   = "T_STRING",
     [T_CHAR]     = "T_CHAR",
-    [T_VOID]     = "T_VOID",
 
     // Type modifiers
     [T_TYPE] = "T_TYPE",
@@ -70,9 +68,6 @@ const char *ttypestr[] = {
     [T_SIZEOF] = "T_SIZEOF",
     [T_THIS]   = "T_THIS",
     [T_PURGE]  = "T_PURGE",
-
-    // Identifiers
-    [T_IDENT] = "T_IDENT",
 
     // Operators
     [T_EQ]        = "T_EQ",
@@ -142,136 +137,112 @@ const char *ttypestr[] = {
     [T_EOF]     = "T_EOF",
 };
 
-// keyword hash-table
-KWTable *kwtable[TABLE_SIZE] = {NULL};
+typedef struct {
+    const char *kw;
+    int id;
+} KWElement;
 
-void add_keyword(TokenType type, const char *token); // forward declaration
+typedef struct {
+    KWElement elems[MAX_CHAIN];
+    int count;
+} KWBucket;
+
+// keyword hash-table
+static KWBucket kwtable[TABLE_SIZE] = {0};
+
+/**
+ * @brief Adds new keyword entry to hash-table.
+ * @param kw Keyword string.
+ * @param id Token id.
+ */
+void add_keyword(const char *kw, int id) {
+    unsigned idx  = hashfnv(kw, TABLE_SIZE);
+    KWBucket *bkt = &kwtable[idx];
+
+    if (bkt->count < MAX_CHAIN) {
+        bkt->elems[bkt->count].kw = kw;
+        bkt->elems[bkt->count].id = id;
+        bkt->count++;
+    } else {
+        printf("Warning: Hash table overflow at index %u\n", idx);
+    }
+}
 
 /**
  * @brief Initialize keyword hash-table.
  */
 void make_kwtable() {
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        kwtable[i] = NULL; // make buckets empty
-    }
-
     // type modifiers
-    add_keyword(T_TYPE, "type");
+    add_keyword("type", T_TYPE);
 
     // async
-    add_keyword(T_ASYNC, "async");
-    add_keyword(T_WAIT, "wait");
+    add_keyword("async", T_ASYNC);
+    add_keyword("wait", T_WAIT);
 
     // type qualifiers
-    add_keyword(T_CONST, "const");
-    add_keyword(T_ATOMIC, "atomic");
+    add_keyword("const", T_CONST);
+    add_keyword("atomic", T_ATOMIC);
 
     // access specifier
-    add_keyword(T_EXTERNAL, "external");
-    add_keyword(T_INTERNAL, "internal");
-    add_keyword(T_RESTRICT, "restrict");
+    add_keyword("external", T_EXTERNAL);
+    add_keyword("internal", T_INTERNAL);
+    add_keyword("restrict", T_RESTRICT);
 
-    // type specifiers
-    add_keyword(T_INT, "int");
-    add_keyword(T_FLOAT, "float");
-
-    add_keyword(T_BOOL, "bool");
-    add_keyword(T_ENUM, "enum");
-    add_keyword(T_STRUCT, "struct");
-    add_keyword(T_CONTRACT, "contract");
-    add_keyword(T_STRING, "string");
-    add_keyword(T_CHAR, "char");
-    add_keyword(T_VOID, "void");
+    // types
+    add_keyword("enum", T_ENUM);
+    add_keyword("struct", T_STRUCT);
+    add_keyword("contract", T_CONTRACT);
 
     // conditions
-    add_keyword(T_IF, "if");
-    add_keyword(T_ELSE, "else");
-    add_keyword(T_SWITCH, "switch");
-    add_keyword(T_CASE, "case");
-    add_keyword(T_DEFAULT, "default");
-    add_keyword(T_BREAK, "break");
-    add_keyword(T_CONTINUE, "continue");
+    add_keyword("if", T_IF);
+    add_keyword("else", T_ELSE);
+    add_keyword("switch", T_SWITCH);
+    add_keyword("case", T_CASE);
+    add_keyword("default", T_DEFAULT);
+    add_keyword("break", T_BREAK);
+    add_keyword("continue", T_CONTINUE);
 
     // loops
-    add_keyword(T_DO, "do");
-    add_keyword(T_WHILE, "while");
-    add_keyword(T_FOR, "for");
-    add_keyword(T_FOREACH, "foreach");
-    add_keyword(T_IN, "in");
+    add_keyword("do", T_DO);
+    add_keyword("while", T_WHILE);
+    add_keyword("for", T_FOR);
+    add_keyword("foreach", T_FOREACH);
+    add_keyword("in", T_IN);
 
     // module
-    add_keyword(T_MODULE, "module");
-    add_keyword(T_IMPORT, "import");
-    add_keyword(T_FROM, "from");
+    add_keyword("module", T_MODULE);
+    add_keyword("import", T_IMPORT);
+    add_keyword("from", T_FROM);
 
     // function
-    add_keyword(T_RETURN, "return");
+    add_keyword("return", T_RETURN);
 
     // memory operations
-    add_keyword(T_NEW, "new");
-    add_keyword(T_NULL, "null");
-    add_keyword(T_SIZEOF, "sizeof");
-    add_keyword(T_THIS, "this");
-    add_keyword(T_PURGE, "purge");
+    add_keyword("new", T_NEW);
+    add_keyword("null", T_NULL);
+    add_keyword("sizeof", T_SIZEOF);
+    add_keyword("this", T_THIS);
+    add_keyword("purge", T_PURGE);
 
     // others
-    add_keyword(T_ERROR, "error");
-}
-
-/**
- * @brief Adds new keyword entry to hash-table.
- * @param type Token type.
- * @param token Token string.
- */
-void add_keyword(TokenType type, const char *token) {
-    unsigned idx   = hashfnv(token, TABLE_SIZE);
-    KWTable *entry = malloc(sizeof(KWTable));
-    if (!entry) {
-        perror("Memory allocation failed");
-        exit(1);
-    }
-
-    strncpy(entry->token, token, sizeof(entry->token) - 1);
-    entry->token[sizeof(entry->token) - 1] = '\0';
-
-    entry->type = type;
-
-    entry->next  = kwtable[idx]; // move current head
-    kwtable[idx] = entry;        // insert at head
+    add_keyword("error", T_ERROR);
 }
 
 /**
  * @brief Finds a keyword from the hash-table.
- * @param key Key to search.
+ * @param kw Key to search.
  * @return
  */
-KWTable *search_keyword(const char *key) {
-    unsigned idx  = hashfnv(key, TABLE_SIZE);
-    KWTable *curr = kwtable[idx];
+KWElement *search_keyword(const char *kw) {
+    unsigned idx  = hashfnv(kw, TABLE_SIZE);
+    KWBucket *bkt = &kwtable[idx];
 
-    while (curr) {
-        if (strcmp(curr->token, key) == 0) {
-            return curr;
+    for (int i = 0; i < bkt->count; i++) {
+        if (strcmp(bkt->elems[i].kw, kw) == 0) {
+            return &bkt->elems[i];
         }
-        curr = curr->next;
     }
-    return NULL;
-}
-
-/**
- * @brief Removes and cleanups hash-table.
- */
-void purge_kwtable() {
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        KWTable *curr = kwtable[i];
-
-        while (curr) {
-            KWTable *temp = curr;
-            curr          = curr->next;
-            free(temp);
-        }
-        kwtable[i] = NULL;
-    }
+    return NULL; // Not found
 }
 
 /**
@@ -420,8 +391,8 @@ static Token identifier(Lexer *lexer) {
     token.str[idx] = '\0'; // null-terminate string
 
     // check if it's a keyword
-    KWTable *kw = search_keyword(token.str);
-    if (kw) token.type = kw->type;
+    KWElement *kw = search_keyword(token.str);
+    if (kw) token.type = kw->id;
 
     token.line   = lexer->line;
     token.column = tscol; // lexer->column;
@@ -913,7 +884,7 @@ void purge_lexer(Lexer *lexer) {
  * @brief Cleanup allocated memory from `tokens`.
  * @param list
  */
-void purge_tokenlist(TokenList *list) {
+void purge_toklist(TokenList *list) {
     if (!list) return;
 
     free(list->tokens);
