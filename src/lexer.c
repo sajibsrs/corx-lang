@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -252,32 +253,22 @@ KWElement *search_keyword(const char *kw) {
  */
 Lexer *make_lexer(const char *path) {
     Lexer *lexer = malloc(sizeof(Lexer));
-    if (!lexer) {
-        perror("Memory allocation error");
-        exit(1);
-    }
+    if (!lexer) errexit("lexer allocation failed");
 
+    struct stat st;
+    if (stat(path, &st) == -1) errexit("failed to get stats");
+
+    long fsize    = st.st_size;
+    lexer->column = 1;
     lexer->pos    = 0;
     lexer->line   = 1;
-    lexer->column = 1;
 
     FILE *file = fopen(path, "r");
-    if (!file) {
-        perror("Error opening file");
-        exit(1);
-    }
-
-    // get length of the file
-    fseek(file, 0, SEEK_END);
-    long fsize = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    if (!file) errexit("failed to open file");
 
     // allocate memory for the file
     lexer->buffer = malloc(fsize + 1);
-    if (!lexer->buffer) {
-        perror("Memory allocation error");
-        exit(1);
-    }
+    if (!lexer->buffer) errexit("buffer allocation failed");
 
     // read the file into buffer
     fread(lexer->buffer, 1, fsize, file);
@@ -829,10 +820,7 @@ TokenList *scan(const char *src) {
 
     // Allocate memory for token list
     Token *arr = malloc(isize * sizeof(Token));
-    if (!arr) {
-        perror("Memory allocation error");
-        exit(1);
-    }
+    if (!arr) ("memory allocation error");
 
     do {
         token      = next(lexer);
@@ -841,10 +829,7 @@ TokenList *scan(const char *src) {
         if (idx >= csize) {
             csize *= 2;
             arr = realloc(arr, csize * sizeof(Token));
-            if (!arr) {
-                perror("Memory allocation error");
-                exit(1);
-            }
+            if (!arr) errexit("memory allocation error");
         }
     } while (token.type != T_EOF);
 
@@ -852,16 +837,10 @@ TokenList *scan(const char *src) {
 
     // shrink to fit exact amount of tokens
     arr = realloc(arr, idx * sizeof(Token));
-    if (!arr) {
-        perror("Memory reallocation error");
-        exit(1);
-    }
+    if (!arr) errexit("memory reallocation error");
 
     TokenList *list = malloc(sizeof(TokenList));
-    if (!list) {
-        perror("Memory reallocation error");
-        exit(1);
-    }
+    if (!list) errexit("memory reallocation error");
 
     list->tokens = arr;
     list->count  = idx;
