@@ -2,33 +2,19 @@ int main() {
     //---------------------------
     // Test function declaration
     //---------------------------
-    int fun_one(int a, int b);
+    float fun_one(int a, int b);
     int fun_two(int, int x, int y);
     int fun_three();
 
     //---------------------------
     // Test variable declaration
     //---------------------------
-    int a      = 5 * 2 - 3;                   // Multiplication and subtraction
-    int b      = (a % 3) + 4;                 // Modulus and addition
-    int sum    = a + b * 2;                   // Combination of addition and multiplication
-    int i      = (b > 5) ? a : b;             // Ternary expression
-    int k      = (sum / 2) + 1;               // Division and addition
-    int result = (k > i) ? (k - i) : (i - k); // Another ternary expression
-
-    //----------------------------------
-    // TODO: Bitwise operation examples
-    //----------------------------------
-    // int j = (sum & 1) ? sum - 1 : sum + 1; // Bitwise AND with conditional
-    // int m = (k << 2) - j;                  // Left shift and subtraction
-    // int x = m ^ k;                         // Bitwise XOR
-    // int y = ~x & 0xF;                      // Bitwise NOT and AND mask
-
-    //--------------------------
-    // TODO: Test function calls
-    //--------------------------
-    // result = fun_one(a, b);
-    // sum = fun_two(result, x, y);
+    char a    = 5 * 2 - 3;
+    int b      = (a % 3) + 4;
+    int sum    = a + b * 2;
+    int i      = (b > 5) ? a : b;
+    int k      = (sum / 2) + 1;
+    int result = (k > i) ? (k - i) : (i - k);
 
     //-------------------------
     // If-else structure
@@ -73,21 +59,6 @@ int main() {
         m   = m + 1;
     }
 
-    //-------------------------
-    // TODO: While loop test
-    //-------------------------
-    // while (i < 5) {
-    //     sum = sum + i;
-    //     i = i + 1;
-    // }
-
-    //--------------------------
-    // TODO: Do-while loop test
-    //--------------------------
-    // do {
-    //     sum = sum - 1;
-    // } while (sum > 10);
-
     //--------------------------
     // More ternary expressions
     //--------------------------
@@ -109,20 +80,6 @@ int main() {
     }
 
     //-------------------------
-    // TODO: Switch-case test
-    //-------------------------
-    // switch (sum) {
-    //     case 5:
-    //         sum = sum + 10;
-    //         break;
-    //     case 10:
-    //         sum = sum - 3;
-    //         break;
-    //     default:
-    //         sum = sum * 2;
-    // }
-
-    //-------------------------
     // Null statement
     //-------------------------
     ;
@@ -130,17 +87,12 @@ int main() {
     //-------------------------
     // Nested ternary for complexity
     //-------------------------
-    i = (j > 0) ? ((j > 10) ? j - 1 : j + 2) : (j - 2);
-
-    //-------------------------
-    // TODO: Function call inside an expression
-    //-------------------------
-    // result = fun_three() + fun_one(a, b);
+    i = (b > 0) ? ((b > 10) ? b - 1 : b + 2) : (b - 2);
 
     //-------------------------
     // Final computation
     //-------------------------
-    sum = sum + i + j + x + result;
+    sum = sum + i + k + result;
 
     //-------------------------
     // Return the final result
