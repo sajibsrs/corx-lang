@@ -161,6 +161,6 @@ TokenList *scan(const char *src);
  * @brief Cleanup allocated memory from `tokens`.
  * @param list
  */
-void purge_toklist(TokenList *list);
+void purge_tlist(TokenList *list);
 
 #endif

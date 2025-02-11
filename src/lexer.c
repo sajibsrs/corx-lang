@@ -314,7 +314,7 @@ static char peek(Lexer *lexer) {
  * @param lexer
  * @return
  */
-static char peeknext(Lexer *lexer) {
+static char peekfw(Lexer *lexer) {
     return lexer->buffer[lexer->pos + 2];
 }
 
@@ -323,7 +323,7 @@ static char peeknext(Lexer *lexer) {
  * It keeps doing so until other character is found.
  * @param lexer
  */
-static void skipblank(Lexer *lexer) {
+static void skip_blank(Lexer *lexer) {
     char cin = current(lexer);
     while (isblank(cin)) {
         advance(lexer, 1, true);
@@ -508,7 +508,7 @@ static void comment(Lexer *lexer) {
  * @return
  */
 static Token next(Lexer *lexer) {
-    skipblank(lexer);
+    skip_blank(lexer);
 
     char cin = current(lexer);
 
@@ -546,13 +546,13 @@ static Token next(Lexer *lexer) {
      *********************************************/
 
     // "<<="
-    if (cin == '<' && peek(lexer) == '<' && peeknext(lexer) == '=') {
+    if (cin == '<' && peek(lexer) == '<' && peekfw(lexer) == '=') {
         advance(lexer, 3, true);
         return (Token){T_LSHIFTEQ, "<<=", lexer->line, lexer->column - 3};
     }
 
     // ">>="
-    if (cin == '>' && peek(lexer) == '>' && peeknext(lexer) == '=') {
+    if (cin == '>' && peek(lexer) == '>' && peekfw(lexer) == '=') {
         advance(lexer, 3, true);
         return (Token){T_RSHIFTEQ, ">>=", lexer->line, lexer->column - 3};
     }
@@ -863,7 +863,7 @@ void purge_lexer(Lexer *lexer) {
  * @brief Cleanup allocated memory from `tokens`.
  * @param list
  */
-void purge_toklist(TokenList *list) {
+void purge_tlist(TokenList *list) {
     if (!list) return;
 
     free(list->tokens);
