@@ -10,6 +10,6 @@ void errwarn(const char *msg);
 unsigned hashfnv(const char *str, const int size);
 
 void print_ast(Node *node, int indent);
-void print_toklist(const TokenList *list);
+void print_tlist(const TokenList *list);
 
 #endif

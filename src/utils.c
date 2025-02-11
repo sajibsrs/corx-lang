@@ -426,7 +426,7 @@ unsigned hashfnv(const char *str, const int size) {
  * @brief Print formatted token to the terminal.
  * @param list
  */
-void print_toklist(const TokenList *list) {
+void print_tlist(const TokenList *list) {
     printf("Scanned %d tokens:\n\n", list->count);
 
     Token token;
