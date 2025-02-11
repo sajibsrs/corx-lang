@@ -1,15 +1,25 @@
+int x   = 1 + 2;
+float h = 20;
+
+int func(int x) {
+    return x * 0 + 2;
+}
+
 int main() {
+
+    func(10);
+
     //---------------------------
     // Test function declaration
     //---------------------------
     float fun_one(int a, int b);
-    int fun_two(int, int x, int y);
+    int fun_two(int b, int x, int y);
     int fun_three();
 
     //---------------------------
     // Test variable declaration
     //---------------------------
-    char a    = 5 * 2 - 3;
+    char a     = 5 * 2 - 3;
     int b      = (a % 3) + 4;
     int sum    = a + b * 2;
     int i      = (b > 5) ? a : b;
