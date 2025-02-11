@@ -820,7 +820,7 @@ TokenList *scan(const char *src) {
 
     // Allocate memory for token list
     Token *arr = malloc(isize * sizeof(Token));
-    if (!arr) ("memory allocation error");
+    if (!arr) errexit("memory allocation error");
 
     do {
         token      = next(lexer);
