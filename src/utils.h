@@ -1,13 +1,15 @@
-#ifndef _UTILS_H_
-#define _UTILS_H_
+#ifndef _UTILS_H
+#define _UTILS_H
 
 #include "lexer.h"
 #include "parser.h"
 
 void errexit(const char *msg);
 void errwarn(const char *msg);
-unsigned int hashfnv(const char *str, const int size);
-void print_ast(const Node *node, int depth);
+
+unsigned hashfnv(const char *str, const int size);
+
+void print_ast(Node *node, int indent);
 void print_toklist(const TokenList *list);
 
 #endif
