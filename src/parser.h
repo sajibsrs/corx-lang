@@ -71,6 +71,7 @@ typedef enum {
 // Base node structure.
 typedef struct Node {
     NodeType type;
+    int line;
 } Node;
 
 // Program node.
@@ -183,6 +184,7 @@ typedef struct {
 typedef struct {
     const TokenList *list; // Token array
     int pos;               // Current position
+    Token current;         // Current token
     Node *node;            // Root node
 } Parser;
 
