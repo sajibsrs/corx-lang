@@ -271,7 +271,10 @@ static Token backtrack(Parser *parser, int pos) {
  */
 static Token advance(Parser *parser) {
     Token *arr = parser->list->tokens;
-    return arr[++parser->pos];
+    Token pos  = arr[++parser->pos];
+
+    parser->current = pos;
+    return pos;
 }
 
 /**
@@ -356,6 +359,7 @@ Node *parse_var_decl(Parser *parser, Token type, Token name) {
     if (!var) errexit("Memory allocation failed for VarNode");
 
     var->base.type = NODE_VAR_DECL;
+    var->base.line = parser->current.line;
     var->type      = strdup(type.str); // Duplicate string if necessary
     var->name      = strdup(name.str);
     var->init      = NULL;
@@ -427,6 +431,7 @@ Node *parse_func_decl(Parser *parser, Token rtype, Token name) {
     if (!fn) errexit("Memory allocation failed for FuncNode");
 
     fn->base.type = NODE_FUNC_DECL;
+    fn->base.line = parser->current.line;
     fn->type      = strdup(rtype.str);
     fn->name      = strdup(name.str);
     fn->params    = params;
@@ -446,10 +451,13 @@ Node *parse_func_decl(Parser *parser, Token rtype, Token name) {
 Node *parse_params(Parser *parser, Token type, Token name) {
     VarNode *param = malloc(sizeof(VarNode));
     if (!param) errexit("Memory allocation failed for parameter");
+
     param->base.type = NODE_VAR_DECL; // You may define a separate NODE_PARAMETER if desired
+    param->base.line = parser->current.line;
     param->type      = strdup(type.str);
     param->name      = strdup(name.str);
     param->init      = NULL; // Parameters do not have initializers
+
     return (Node *)param;
 }
 
@@ -460,10 +468,12 @@ Node *parse_params(Parser *parser, Token type, Token name) {
  */
 Node *parse_block(Parser *parser) {
     expect(parser, T_LBRACE, "Expected '{' to start block");
-    BlockNode *block = malloc(sizeof(BlockNode));
 
+    BlockNode *block = malloc(sizeof(BlockNode));
     if (!block) errexit("Memory allocation failed for BlockNode");
+
     block->base.type = NODE_BLOCK;
+    block->base.line = parser->current.line;
     block->icount    = 0;
 
     int capacity = 2, count = 0;
@@ -478,11 +488,8 @@ Node *parse_block(Parser *parser) {
         if (count >= capacity) {
             capacity *= 2;
             Node **new_items = realloc(items, capacity * sizeof(Node *));
-            if (!new_items) {
-                free(items);
-                free(block);
-                errexit("Memory reallocation failed in parse_block");
-            }
+            if (!new_items) errexit("Memory reallocation failed in parse_block");
+
             items = new_items;
         }
         items[count++] = item;
@@ -522,9 +529,10 @@ Node *parse_block_item(Parser *parser) {
 Node *parse_stmt(Parser *parser) {
     Token token    = peek(parser);
     StmtNode *stmt = malloc(sizeof(StmtNode));
-
     if (!stmt) errexit("Memory allocation failed for StmtNode");
+
     stmt->base.type = NODE_STATEMENT;
+    stmt->base.line = parser->current.line;
 
     // Check for function call statement: identifier followed by '('
     if (token.type == T_IDENT && peekfw(parser).type == T_LPAREN) {
@@ -693,7 +701,8 @@ Node *parse_for_init(Parser *parser, Token type, Token name) {
     if (!var) errexit("Memory allocation failed for VarNode (for initializer)");
 
     var->base.type = NODE_VAR_DECL;
-    var->type      = strdup(type.str);
+    var->base.line = parser->current.line;
+    var->type      = strdup(type.str); // TODO:
     var->name      = strdup(name.str);
     var->init      = NULL;
 
@@ -727,6 +736,7 @@ Node *parse_expr(Parser *parser, int prec) {
         if (!anode) errexit("Memory allocation failed for assignment ExprNode");
 
         anode->base.type        = NODE_EXPRESSION;
+        anode->base.line        = parser->current.line;
         anode->type             = EXPR_ASSIGNMENT;
         anode->u.assignment.lhs = left;
         anode->u.assignment.rhs = right;
@@ -745,6 +755,7 @@ Node *parse_expr(Parser *parser, int prec) {
         if (!enode) errexit("Memory allocation failed for binary ExprNode");
 
         enode->base.type      = NODE_EXPRESSION;
+        enode->base.line      = parser->current.line;
         enode->type           = EXPR_BINARY;
         enode->u.binary.op    = token_to_binop(optoken.type);
         enode->u.binary.left  = left;
@@ -766,6 +777,7 @@ Node *parse_expr(Parser *parser, int prec) {
         if (!enode) errexit("Memory allocation failed for conditional ExprNode");
 
         enode->base.type                = NODE_EXPRESSION;
+        enode->base.line                = parser->current.line;
         enode->type                     = EXPR_CONDITIONAL;
         enode->u.conditional.condition  = left;
         enode->u.conditional.true_expr  = true_expr;
@@ -792,6 +804,7 @@ Node *parse_factor(Parser *parser) {
         if (!enode) errexit("Memory allocation failed for variable expression");
 
         enode->base.type = NODE_EXPRESSION;
+        enode->base.line = parser->current.line;
         enode->type      = EXPR_VAR;
         enode->u.name    = strdup(next.str);
 
@@ -805,6 +818,7 @@ Node *parse_factor(Parser *parser) {
         if (!enode) errexit("Memory allocation failed for constant expression");
 
         enode->base.type = NODE_EXPRESSION;
+        enode->base.line = parser->current.line;
         enode->type      = EXPR_CONSTANT;
         enode->u.value   = atoi(next.str);
 
@@ -819,6 +833,7 @@ Node *parse_factor(Parser *parser) {
         if (!enode) errexit("Memory allocation failed for unary expression");
 
         enode->base.type       = NODE_EXPRESSION;
+        enode->base.line       = parser->current.line;
         enode->type            = EXPR_UNARY;
         enode->u.unary.op      = token_to_unop(op.type);
         enode->u.unary.operand = operand;
@@ -880,6 +895,7 @@ Node *parse_func_call(Parser *parser, Token funcToken) {
     if (!expr) errexit("Memory allocation failed for function call expression");
 
     expr->base.type = NODE_EXPRESSION;
+    expr->base.line = parser->current.line;
     expr->type      = EXPR_CALL;
 
     // Build the callee expression node (a variable node) for the function name.
@@ -887,6 +903,7 @@ Node *parse_func_call(Parser *parser, Token funcToken) {
     if (!callee) errexit("Memory allocation failed for function call callee");
 
     callee->base.type = NODE_EXPRESSION;
+    callee->base.line = parser->current.line;
     callee->type      = EXPR_VAR;
     callee->u.name    = strdup(funcToken.str);
 
