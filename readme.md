@@ -3,14 +3,16 @@
 
 "Trust the programmer" - `corx`
 
-**# This project aims to create a fully hand-crafted compiler, written from scratch.**
+> [!NOTE]
+> This project aims to create a fully hand-crafted compiler, written from scratch.
 
 ![corx programming language](./corx-lang.png)
 
 ## # About `corx`
  `corx` is a simple, efficient programming language designed for systems-level programming with a focus on manual memory management and minimalistic syntax. With `corx`, you have full control over system resources, offering maximum performance and clarity, without the overhead of complex language features. Whether you're developing performance-critical applications or need a low-level language with modern features like contract-based design, `corx` is built to meet those needs.
 
-Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how `corx` can help you write clean, efficient, and performance-driven code.
+> [!TIP]
+> Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how `corx` can help you write clean, efficient, and performance-driven code.
 
 ## # Status
 ### 1. Lexer : complete(initial)
@@ -40,5 +42,7 @@ Explore the [documentation](https://sajibsrs.github.io/corx-lang/) and learn how
 ### 7. Documentation
 
 ---
-**Note:** `corx` is currently under development. Its syntax and grammar are being finalized. The language design is still in progress, and a compiler has not yet been implemented.
+
+> [!WARNING]
+> `corx` is currently under development. Its syntax and grammar are being finalized. The language design is still in progress, and a compiler has not yet been implemented.
 
