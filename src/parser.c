@@ -9,22 +9,33 @@
  * Declarations
  *********************************************/
 
-static Token peek(Parser *parser);
-static Token peekfw(Parser *parser);
-static Token advance(Parser *parser);
+static inline int precedence(TokType type);
+static inline bool isbinop(TokType type);
+static inline bool isunop(TokType type);
+static inline bool isasnop(TokType type);
 
-Node *parse_program(Parser *parser);
-Node *parse_block(Parser *parser);
-Node *parse_block_item(Parser *parser);
-Node *parse_declaration(Parser *parser, Token type, Token name);
-Node *parse_var_decl(Parser *parser, Token type, Token name);
-Node *parse_func_decl(Parser *parser, Token type, Token name);
-Node *parse_func_call(Parser *parser, Token funcToken);
-Node *parse_params(Parser *parser, Token type, Token name);
-Node *parse_for_init(Parser *parser, Token type, Token name);
-Node *parse_stmt(Parser *parser);
-Node *parse_expr(Parser *parser, int prec);
-Node *parse_factor(Parser *parser);
+UnOpr toktoun(TokType type);
+BinOpr toktobin(TokType type);
+
+static void errexitinfo(Parser *prs, const char *msg);
+
+static Token peek(Parser *prs);
+static Token peekfw(Parser *prs);
+static Token advance(Parser *prs);
+
+Node *parse_program(Parser *prs);
+Node *parse_block(Parser *prs);
+Node *parse_block_item(Parser *prs);
+Node *parse_declaration(Parser *prs, Token type, Token token);
+Node *parse_var_decl(Parser *prs, Token type, Token token);
+Node *parse_func_decl(Parser *prs, Token type, Token token);
+Node *parse_func_call(Parser *prs, Token token);
+Node *parse_params(Parser *prs, Token type, Token token);
+Node *parse_for_init(Parser *prs, Token type, Token token);
+Node *parse_do_while(Parser *prs);
+Node *parse_stmt(Parser *prs);
+Node *parse_expr(Parser *prs, int prec);
+Node *parse_factor(Parser *prs);
 
 /*********************************************
  * Data Definitions
@@ -58,7 +69,7 @@ static const int prectable[] = {
  * @param type
  * @return
  */
-static inline int precedence(TokenType type) {
+static inline int precedence(TokType type) {
     int len = sizeof(prectable) / sizeof(prectable[0]);
     return (type < len) ? prectable[type] : 0;
 }
@@ -69,15 +80,15 @@ static inline int precedence(TokenType type) {
 
 /**
  * @brief Prints error message with current token line and column information and exits.
- * @param parser
+ * @param prs
  * @param msg
  */
-static void errexitinfo(Parser *parser, const char *msg) {
-    Token next = peek(parser);
+static void errexitinfo(Parser *prs, const char *msg) {
+    Token next = peek(prs);
 
     fprintf(
         stderr, "Error: %s at token '%s' (ln: %d, column: %d)\n", //
-        msg, next.str, next.line, next.column
+        msg, next.str, next.line, next.col
     );
     exit(1);
 }
@@ -86,21 +97,21 @@ static void errexitinfo(Parser *parser, const char *msg) {
  * @brief Compare expected token type against next token type. Consume on
  * success and exit on failure.
  *
- * @param parser Parser to check.
+ * @param prs Parser to check.
  * @param type Expected token type.
  * @param msg Error message to be displayed.
  */
-Token expect(Parser *parser, TokenType type, const char *msg) {
-    Token next = peek(parser);
+Token expect(Parser *prs, TokType type, const char *msg) {
+    Token next = peek(prs);
     if (next.type != type) {
         fprintf(
             stderr, "%s at token '%s' (ln: %d, column: %d)\n", //
-            msg, next.str, next.line, next.column
+            msg, next.str, next.line, next.col
         );
         exit(1);
     }
 
-    return advance(parser);
+    return advance(prs);
 }
 
 /*********************************************
@@ -112,7 +123,7 @@ Token expect(Parser *parser, TokenType type, const char *msg) {
  * @param list Token list source.
  * @return
  */
-Parser *make_parser(const TokenList *list) {
+Parser *make_parser(const TokList *list) {
     Parser *parser = malloc(sizeof(Parser));
     if (!parser) errexit("make_parser allocation failed");
 
@@ -132,7 +143,7 @@ Parser *make_parser(const TokenList *list) {
  * @param type
  * @return
  */
-static inline bool isbinop(TokenType type) {
+static inline bool isbinop(TokType type) {
     switch (type) {
     case T_PLUS:     // "+"
     case T_MINUS:    // "-"
@@ -159,7 +170,7 @@ static inline bool isbinop(TokenType type) {
  * @param type
  * @return
  */
-static inline bool isunop(TokenType type) {
+static inline bool isunop(TokType type) {
     switch (type) {
     case T_AMPERSAND: // "&"
     case T_ASTERISK:  // "*"
@@ -178,7 +189,7 @@ static inline bool isunop(TokenType type) {
  * @param type
  * @return
  */
-static inline bool isasnop(TokenType type) {
+static inline bool isasnop(TokType type) {
     switch (type) {
     case T_EQ:        // "="
     case T_PLUSEQ:    // "+="
@@ -197,7 +208,7 @@ static inline bool isasnop(TokenType type) {
 }
 
 // Lookup table for binary operators.
-static const BinaryOperator token_binop_table[] = {
+static const BinOpr toktobin_table[] = {
     [T_PLUS]     = BIN_ADD,  //
     [T_MINUS]    = BIN_SUB,  //
     [T_ASTERISK] = BIN_MUL,  //
@@ -213,7 +224,7 @@ static const BinaryOperator token_binop_table[] = {
 };
 
 // Lookup table for unary operators.
-static const UnaryOperator token_unop_table[] = {
+static const UnOpr toktoun_table[] = {
     [T_MINUS] = UN_MINUS, //
     [T_PLUS]  = UN_PLUS,  //
     [T_TILDE] = UN_COMPL, //
@@ -221,14 +232,24 @@ static const UnaryOperator token_unop_table[] = {
     // Other tokens default to 0 (UN_INVALID)
 };
 
-BinaryOperator token_to_binop(TokenType type) {
+/**
+ * @brief Converts token to binary operator.
+ * @param type
+ * @return
+ */
+BinOpr toktobin(TokType type) {
     // TODO: Bound check
-    return token_binop_table[type];
+    return toktobin_table[type];
 }
 
-UnaryOperator token_to_unop(TokenType type) {
+/**
+ * @brief Converts token to unary operator.
+ * @param type
+ * @return
+ */
+UnOpr toktoun(TokType type) {
     // TODO: Bound check
-    return token_unop_table[type];
+    return toktoun_table[type];
 }
 
 /*********************************************
@@ -237,74 +258,74 @@ UnaryOperator token_to_unop(TokenType type) {
 
 /**
  * @brief Peek next token without consumption.
- * @param parser
+ * @param prs
  * @return
  */
-static Token peek(Parser *parser) {
-    return parser->list->tokens[parser->pos + 1];
+static Token peek(Parser *prs) {
+    return prs->list->tokens[prs->pos + 1];
 }
 
 /**
  * @brief Peek forward, one token ahead of 'peek' and two token ahead of
  * the current token, without consumption.
- * @param parser Pointer to current parser.
+ * @param prs Pointer to current parser.
  * @return
  */
-static Token peekfw(Parser *parser) {
-    return parser->list->tokens[parser->pos + 2];
+static Token peekfw(Parser *prs) {
+    return prs->list->tokens[prs->pos + 2];
 }
 
 /**
  * @brief Look one token behind of the current token.
- * @param parser
+ * @param prs
  * @param pos
  * @return
  */
-static Token backtrack(Parser *parser, int pos) {
-    return parser->list->tokens[parser->pos - pos];
+static Token backtrack(Parser *prs, int pos) {
+    return prs->list->tokens[prs->pos - pos];
 }
 
 /**
  * @brief Consume next token and move parsers current position forward.
- * @param parser
+ * @param prs
  * @return Consumed token.
  */
-static Token advance(Parser *parser) {
-    Token *arr = parser->list->tokens;
-    Token pos  = arr[++parser->pos];
+static Token advance(Parser *prs) {
+    Token *arr = prs->list->tokens;
+    Token pos  = arr[++prs->pos];
 
-    parser->current = pos;
+    prs->token = pos;
     return pos;
 }
 
 /**
  * @brief Parses the program.
- * @param parser
+ * @param prs
  * @return
  */
-Node *parse_program(Parser *parser) {
-    ProgNode *program = malloc(sizeof(ProgNode));
-    if (!program) errexit("Memory allocation failed for ProgNode");
+Node *parse_program(Parser *prs) {
+    ProgNode *prog = malloc(sizeof(ProgNode));
+    if (!prog) errexit("Memory allocation failed for ProgNode");
 
-    program->base.type = NODE_PROGRAM;
-    program->icount    = 0;
+    prog->base.type = NODE_PROGRAM;
+    prog->icount    = 0;
 
-    int capacity   = 2;
-    program->items = malloc(capacity * sizeof(Node *));
-    if (!program->items) errexit("Memory allocation failed for program items");
+    int capacity = 2;
+    prog->items  = malloc(capacity * sizeof(Node *));
+    if (!prog->items) errexit("Memory allocation failed for program items");
 
-    Token next = peek(parser);
+    Token next = peek(prs);
     while (next.type != T_EOF) {
         Node *decl = NULL;
 
         if (next.type == T_IDENT) {
             // We assume a declaration starts with two consecutive identifiers:
             // one for the type and one for the variable or function name
-            advance(parser);              // Consume first identifier (assumed type)
-            Token name = advance(parser); // Consume second identifier (name)
+            advance(prs);              // Consume first identifier (assumed type)
+            Token name = advance(prs); // Consume second identifier (name)
 
             // Call parse_declaration with the type token and name token
-            decl = parse_declaration(parser, next, name);
+            decl = parse_declaration(prs, next, name);
         } else {
             errexit("Invalid declaration in global scope");
         }
@@ -312,95 +333,95 @@ Node *parse_program(Parser *parser) {
         if (!decl) errexit("Invalid declaration in global scope");
 
         // Resize items array if needed
-        if (program->icount >= capacity) {
+        if (prog->icount >= capacity) {
             capacity *= 2;
-            Node **new_items = realloc(program->items, capacity * sizeof(Node *));
+            Node **new_items = realloc(prog->items, capacity * sizeof(Node *));
             if (!new_items) {
-                free(program->items);
+                free(prog->items);
                 errexit("Memory allocation failed during resize in parse_program");
             }
-            program->items = new_items;
+            prog->items = new_items;
         }
-        program->items[program->icount++] = decl;
-        next                              = peek(parser);
+        prog->items[prog->icount++] = decl;
+        next                        = peek(prs);
     }
 
-    return (Node *)program;
+    return (Node *)prog;
 }
 
 /**
  * @brief Parses declarations.
- * @param parser
+ * @param prs
  * @param type Data type.
  * @param name Identifier.
  * @return
  */
-Node *parse_declaration(Parser *parser, Token type, Token name) {
+Node *parse_declaration(Parser *prs, Token type, Token name) {
     if (type.type != T_IDENT || name.type != T_IDENT) {
-        errexitinfo(parser, "Incorrect token types in declaration");
+        errexitinfo(prs, "Incorrect token types in declaration");
     }
 
-    if (peek(parser).type == T_LPAREN) {
-        return parse_func_decl(parser, type, name);
+    if (peek(prs).type == T_LPAREN) {
+        return parse_func_decl(prs, type, name);
     }
 
-    return parse_var_decl(parser, type, name);
+    return parse_var_decl(prs, type, name);
 }
 
 /**
  * @brief Parses variable declarations.
- * @param parser
+ * @param prs
  * @param type Data type.
  * @param name Identifier.
  * @return
  */
-Node *parse_var_decl(Parser *parser, Token type, Token name) {
+Node *parse_var_decl(Parser *prs, Token type, Token name) {
     VarNode *var = malloc(sizeof(VarNode));
     if (!var) errexit("Memory allocation failed for VarNode");
 
     var->base.type = NODE_VAR_DECL;
-    var->base.line = parser->current.line;
-    var->type      = strdup(type.str); // Duplicate string if necessary
+    var->base.line = prs->token.line;
+    var->dtype     = strdup(type.str); // Duplicate string if necessary
     var->name      = strdup(name.str);
     var->init      = NULL;
 
     // Optional initializer:
-    if (peek(parser).type == T_EQ) {
-        advance(parser); // Consume '='
+    if (peek(prs).type == T_EQ) {
+        advance(prs); // Consume '='
         // Use parse_expr (not parse_expr) to correctly parse the initializer
-        var->init = parse_expr(parser, 0);
-        if (!var->init) errexitinfo(parser, "Failed to parse initializer expression");
+        var->init = parse_expr(prs, 0);
+        if (!var->init) errexitinfo(prs, "Failed to parse initializer expression");
     }
 
-    expect(parser, T_SCOLON, "Expected ';' after variable declaration");
+    expect(prs, T_SCOLON, "Expected ';' after variable declaration");
     return (Node *)var;
 }
 
 /**
  * @brief Parses function declarations.
- * @param parser
+ * @param prs
  * @param rtype Return type.
  * @param name Identifier.
  * @return
  */
-Node *parse_func_decl(Parser *parser, Token rtype, Token name) {
-    expect(parser, T_LPAREN, "Expected '(' after function name");
+Node *parse_func_decl(Parser *prs, Token rtype, Token name) {
+    expect(prs, T_LPAREN, "Expected '(' after function name");
 
     Node **params = malloc(2 * sizeof(Node *));
     if (!params) errexit("Memory allocation failed for function parameters");
 
     int pcount = 0, capacity = 2;
-    Token next = peek(parser);
+    Token next = peek(prs);
 
     if (next.type == T_IDENT && strcmp(next.str, "void") == 0) {
         // Parameter list is 'void'; consume it.
-        advance(parser);
+        advance(prs);
     } else {
-        while (peek(parser).type != T_RPAREN) {
+        while (peek(prs).type != T_RPAREN) {
 
-            Token param_type = expect(parser, T_IDENT, "Expected parameter type");
-            Token param_name = expect(parser, T_IDENT, "Expected parameter identifier");
-            Node *param      = parse_params(parser, param_type, param_name);
+            Token param_type = expect(prs, T_IDENT, "Expected parameter type");
+            Token param_name = expect(prs, T_IDENT, "Expected parameter identifier");
+            Node *param      = parse_params(prs, param_type, param_name);
 
             if (pcount >= capacity) {
                 capacity *= 2;
@@ -413,26 +434,26 @@ Node *parse_func_decl(Parser *parser, Token rtype, Token name) {
             }
             params[pcount++] = param;
 
-            if (peek(parser).type == T_COMMA) advance(parser); // Consume ','
+            if (peek(prs).type == T_COMMA) advance(prs); // Consume ','
             else break;
         }
     }
-    expect(parser, T_RPAREN, "Expected ')' after parameter list");
+    expect(prs, T_RPAREN, "Expected ')' after parameter list");
 
     Node *body = NULL;
 
-    if (peek(parser).type == T_LBRACE) {
-        body = parse_block(parser);
+    if (peek(prs).type == T_LBRACE) {
+        body = parse_block(prs);
     } else {
-        expect(parser, T_SCOLON, "Expected ';' after function declaration");
+        expect(prs, T_SCOLON, "Expected ';' after function declaration");
     }
 
     FuncNode *fn = malloc(sizeof(FuncNode));
     if (!fn) errexit("Memory allocation failed for FuncNode");
 
     fn->base.type = NODE_FUNC_DECL;
-    fn->base.line = parser->current.line;
-    fn->type      = strdup(rtype.str);
+    fn->base.line = prs->token.line;
+    fn->dtype     = strdup(rtype.str);
     fn->name      = strdup(name.str);
     fn->params    = params;
     fn->pcount    = pcount;
@@ -443,18 +464,18 @@ Node *parse_func_decl(Parser *parser, Token rtype, Token name) {
 
 /**
  * @brief Parses parameters.
- * @param parser
+ * @param prs
  * @param type Data type.
  * @param name Identifier.
  * @return
  */
-Node *parse_params(Parser *parser, Token type, Token name) {
+Node *parse_params(Parser *prs, Token type, Token name) {
     VarNode *param = malloc(sizeof(VarNode));
     if (!param) errexit("Memory allocation failed for parameter");
 
     param->base.type = NODE_VAR_DECL; // You may define a separate NODE_PARAMETER if desired
-    param->base.line = parser->current.line;
-    param->type      = strdup(type.str);
+    param->base.line = prs->token.line;
+    param->dtype     = strdup(type.str);
     param->name      = strdup(name.str);
     param->init      = NULL; // Parameters do not have initializers
 
@@ -463,25 +484,25 @@ Node *parse_params(Parser *parser, Token type, Token name) {
 
 /**
  * @brief Parses blocks.
- * @param parser
+ * @param prs
  * @return
  */
-Node *parse_block(Parser *parser) {
-    expect(parser, T_LBRACE, "Expected '{' to start block");
+Node *parse_block(Parser *prs) {
+    expect(prs, T_LBRACE, "Expected '{' to start block");
 
     BlockNode *block = malloc(sizeof(BlockNode));
     if (!block) errexit("Memory allocation failed for BlockNode");
 
     block->base.type = NODE_BLOCK;
-    block->base.line = parser->current.line;
+    block->base.line = prs->token.line;
     block->icount    = 0;
 
     int capacity = 2, count = 0;
     Node **items = malloc(capacity * sizeof(Node *));
     if (!items) errexit("Memory allocation failed in parse_block");
 
-    while (peek(parser).type != T_RBRACE && peek(parser).type != T_EOF) {
-        Node *item = parse_block_item(parser);
+    while (peek(prs).type != T_RBRACE && peek(prs).type != T_EOF) {
+        Node *item = parse_block_item(prs);
 
         if (!item) errexit("Failed to parse block item");
 
@@ -494,7 +515,7 @@ Node *parse_block(Parser *parser) {
         }
         items[count++] = item;
     }
-    expect(parser, T_RBRACE, "Expected '}' at end of block");
+    expect(prs, T_RBRACE, "Expected '}' at end of block");
 
     block->items  = items;
     block->icount = count;
@@ -504,43 +525,43 @@ Node *parse_block(Parser *parser) {
 
 /**
  * @brief Parses block items.
- * @param parser
+ * @param prs
  * @return
  */
-Node *parse_block_item(Parser *parser) {
-    Token next = peek(parser);
+Node *parse_block_item(Parser *prs) {
+    Token next = peek(prs);
 
     // If the next two tokens are both identifiers, assume a declaration
-    if (next.type == T_IDENT && peekfw(parser).type == T_IDENT) {
-        Token type = advance(parser); // Consume type
-        Token name = advance(parser); // Consume name
+    if (next.type == T_IDENT && peekfw(prs).type == T_IDENT) {
+        Token type = advance(prs); // Consume type
+        Token name = advance(prs); // Consume name
 
-        return parse_declaration(parser, type, name);
+        return parse_declaration(prs, type, name);
     }
 
-    return parse_stmt(parser);
+    return parse_stmt(prs);
 }
 
 /**
  * @brief Parses statements.
- * @param parser
+ * @param prs
  * @return
  */
-Node *parse_stmt(Parser *parser) {
-    Token token    = peek(parser);
+Node *parse_stmt(Parser *prs) {
+    Token token    = peek(prs);
     StmtNode *stmt = malloc(sizeof(StmtNode));
     if (!stmt) errexit("Memory allocation failed for StmtNode");
 
     stmt->base.type = NODE_STATEMENT;
-    stmt->base.line = parser->current.line;
+    stmt->base.line = prs->token.line;
 
     // Check for function call statement: identifier followed by '('
-    if (token.type == T_IDENT && peekfw(parser).type == T_LPAREN) {
-        Token funcToken = advance(parser); // Consume function name
-        Node *callExpr  = parse_func_call(parser, funcToken);
+    if (token.type == T_IDENT && peekfw(prs).type == T_LPAREN) {
+        Token funcToken = advance(prs); // Consume function name
+        Node *callExpr  = parse_func_call(prs, funcToken);
 
         // Enforce that a semicolon terminates the function call statement
-        expect(parser, T_SCOLON, "Expected ';' after function call statement");
+        expect(prs, T_SCOLON, "Expected ';' after function call statement");
 
         stmt->type          = STMT_CALL;
         stmt->u.simple.expr = callExpr;
@@ -549,11 +570,11 @@ Node *parse_stmt(Parser *parser) {
     }
 
     // Handle assignment statement: identifier followed by '='
-    else if (token.type == T_IDENT && peekfw(parser).type == T_EQ) {
-        Token var_token = advance(parser); // Consume identifier
-        advance(parser);                   // Consume '='
-        Node *rhs = parse_expr(parser, 0);
-        expect(parser, T_SCOLON, "Expected ';' after assignment");
+    else if (token.type == T_IDENT && peekfw(prs).type == T_EQ) {
+        Token var_token = advance(prs); // Consume identifier
+        advance(prs);                   // Consume '='
+        Node *rhs = parse_expr(prs, 0);
+        expect(prs, T_SCOLON, "Expected ';' after assignment");
         stmt->type             = STMT_ASSIGNMENT;
         stmt->u.assignment.lhs = strdup(var_token.str);
         stmt->u.assignment.rhs = rhs;
@@ -562,23 +583,23 @@ Node *parse_stmt(Parser *parser) {
 
     // Handle return statement
     else if (token.type == T_RETURN) {
-        advance(parser); // Consume 'return'
+        advance(prs); // Consume 'return'
         stmt->type          = STMT_RETURN;
-        stmt->u.simple.expr = (peek(parser).type != T_SCOLON) ? parse_expr(parser, 0) : NULL;
-        expect(parser, T_SCOLON, "Expected ';' after return statement");
+        stmt->u.simple.expr = (peek(prs).type != T_SCOLON) ? parse_expr(prs, 0) : NULL;
+        expect(prs, T_SCOLON, "Expected ';' after return statement");
     }
 
     // Handle if statement
     else if (token.type == T_IF) {
-        advance(parser); // Consume 'if'
-        expect(parser, T_LPAREN, "Expected '(' after if");
-        stmt->u.if_stmt.condition = parse_expr(parser, 0);
-        expect(parser, T_RPAREN, "Expected ')' after if condition");
-        stmt->u.if_stmt.then_stmt = parse_stmt(parser);
+        advance(prs); // Consume 'if'
+        expect(prs, T_LPAREN, "Expected '(' after if");
+        stmt->u.if_stmt.condition = parse_expr(prs, 0);
+        expect(prs, T_RPAREN, "Expected ')' after if condition");
+        stmt->u.if_stmt.then_stmt = parse_stmt(prs);
 
-        if (peek(parser).type == T_ELSE) {
-            advance(parser); // Consume 'else'
-            stmt->u.if_stmt.else_stmt = parse_stmt(parser);
+        if (peek(prs).type == T_ELSE) {
+            advance(prs); // Consume 'else'
+            stmt->u.if_stmt.else_stmt = parse_stmt(prs);
         } else {
             stmt->u.if_stmt.else_stmt = NULL;
         }
@@ -587,68 +608,68 @@ Node *parse_stmt(Parser *parser) {
 
     // Handle compound statement (block)
     else if (token.type == T_LBRACE) {
-        stmt->u.simple.expr = parse_block(parser);
+        stmt->u.simple.expr = parse_block(prs);
         stmt->type          = STMT_COMPOUND;
     }
 
     // Handle while statement
     else if (token.type == T_WHILE) {
-        advance(parser); // Consume 'while'
-        expect(parser, T_LPAREN, "Expected '(' after while");
-        stmt->u.while_stmt.condition = parse_expr(parser, 0);
-        expect(parser, T_RPAREN, "Expected ')' after while condition");
-        stmt->u.while_stmt.body = parse_stmt(parser);
+        advance(prs); // Consume 'while'
+        expect(prs, T_LPAREN, "Expected '(' after while");
+        stmt->u.while_stmt.condition = parse_expr(prs, 0);
+        expect(prs, T_RPAREN, "Expected ')' after while condition");
+        stmt->u.while_stmt.body = parse_stmt(prs);
         stmt->type              = STMT_WHILE;
     }
 
     // Handle do-while statement
     else if (token.type == T_DO) {
-        advance(parser); // Consume 'do'
-        stmt->u.while_stmt.body = parse_stmt(parser);
-        expect(parser, T_WHILE, "Expected 'while' after do");
-        expect(parser, T_LPAREN, "Expected '(' after while in do-while");
-        stmt->u.while_stmt.condition = parse_expr(parser, 0);
-        expect(parser, T_RPAREN, "Expected ')' after condition in do-while");
-        expect(parser, T_SCOLON, "Expected ';' after do-while");
+        advance(prs); // Consume 'do'
+        stmt->u.while_stmt.body = parse_stmt(prs);
+        expect(prs, T_WHILE, "Expected 'while' after do");
+        expect(prs, T_LPAREN, "Expected '(' after while in do-while");
+        stmt->u.while_stmt.condition = parse_expr(prs, 0);
+        expect(prs, T_RPAREN, "Expected ')' after condition in do-while");
+        expect(prs, T_SCOLON, "Expected ';' after do-while");
         stmt->type = STMT_DO_WHILE;
     }
 
     // Handle for statement.
     else if (token.type == T_FOR) {
-        advance(parser); // Consume 'for'
-        expect(parser, T_LPAREN, "Expected '(' after for");
+        advance(prs); // Consume 'for'
+        expect(prs, T_LPAREN, "Expected '(' after for");
 
         Node *init      = NULL;
         Node *condition = NULL;
         Node *post      = NULL;
-        Token next      = peek(parser);
+        Token next      = peek(prs);
 
         if (next.type != T_SCOLON) {
-            Token lookahead = peekfw(parser);
+            Token lookahead = peekfw(prs);
 
             if (next.type == T_IDENT && lookahead.type == T_IDENT) {
-                Token typeTok = advance(parser); // Consume type identifier
-                Token nameTok = advance(parser); // Consume variable name
-                init          = parse_for_init(parser, typeTok, nameTok);
+                Token typeTok = advance(prs); // Consume type identifier
+                Token nameTok = advance(prs); // Consume variable name
+                init          = parse_for_init(prs, typeTok, nameTok);
             } else {
-                init = parse_expr(parser, 0);
+                init = parse_expr(prs, 0);
             }
         }
-        expect(parser, T_SCOLON, "Expected ';' after for initializer");
+        expect(prs, T_SCOLON, "Expected ';' after for initializer");
 
-        next = peek(parser);
+        next = peek(prs);
         if (next.type != T_SCOLON) {
-            condition = parse_expr(parser, 0);
+            condition = parse_expr(prs, 0);
         }
-        expect(parser, T_SCOLON, "Expected ';' after for condition");
+        expect(prs, T_SCOLON, "Expected ';' after for condition");
 
-        next = peek(parser);
+        next = peek(prs);
         if (next.type != T_RPAREN) {
-            post = parse_expr(parser, 0);
+            post = parse_expr(prs, 0);
         }
-        expect(parser, T_RPAREN, "Expected ')' after for clauses");
+        expect(prs, T_RPAREN, "Expected ')' after for clauses");
 
-        Node *body                 = parse_stmt(parser);
+        Node *body                 = parse_stmt(prs);
         stmt->u.for_stmt.init      = init;
         stmt->u.for_stmt.condition = condition;
         stmt->u.for_stmt.post      = post;
@@ -660,29 +681,29 @@ Node *parse_stmt(Parser *parser) {
 
     // Handle break statement
     else if (token.type == T_BREAK) {
-        advance(parser);
+        advance(prs);
         stmt->type = STMT_BREAK;
-        expect(parser, T_SCOLON, "Expected ';' after break");
+        expect(prs, T_SCOLON, "Expected ';' after break");
     }
 
     // Handle continue statement
     else if (token.type == T_CONTINUE) {
-        advance(parser);
+        advance(prs);
         stmt->type = STMT_CONTINUE;
-        expect(parser, T_SCOLON, "Expected ';' after continue");
+        expect(prs, T_SCOLON, "Expected ';' after continue");
     }
 
     // Handle null statement
     else if (token.type == T_SCOLON) {
-        advance(parser);
+        advance(prs);
         stmt->type = STMT_NULL;
         // Note: We now return a null statement node, which will be printed.
     }
 
     // Otherwise, treat as an expression statement
     else {
-        stmt->u.simple.expr = parse_expr(parser, 0);
-        expect(parser, T_SCOLON, "Expected ';' after expression statement");
+        stmt->u.simple.expr = parse_expr(prs, 0);
+        expect(prs, T_SCOLON, "Expected ';' after expression statement");
         stmt->type = STMT_EXPRESSION;
     }
 
@@ -691,25 +712,25 @@ Node *parse_stmt(Parser *parser) {
 
 /**
  * @brief Parses for loop initializers.
- * @param parser
+ * @param prs
  * @param type Data type.
  * @param name Identifier.
  * @return
  */
-Node *parse_for_init(Parser *parser, Token type, Token name) {
+Node *parse_for_init(Parser *prs, Token type, Token name) {
     VarNode *var = malloc(sizeof(VarNode));
     if (!var) errexit("Memory allocation failed for VarNode (for initializer)");
 
     var->base.type = NODE_VAR_DECL;
-    var->base.line = parser->current.line;
-    var->type      = strdup(type.str); // TODO:
+    var->base.line = prs->token.line;
+    var->dtype     = strdup(type.str); // TODO:
     var->name      = strdup(name.str);
     var->init      = NULL;
 
-    if (peek(parser).type == T_EQ) {
-        advance(parser); // Consume '='
-        var->init = parse_expr(parser, 0);
-        if (!var->init) errexitinfo(parser, "Failed to parse initializer expression in for-loop");
+    if (peek(prs).type == T_EQ) {
+        advance(prs); // Consume '='
+        var->init = parse_expr(prs, 0);
+        if (!var->init) errexitinfo(prs, "Failed to parse initializer expression in for-loop");
     }
 
     // Do not expect a semicolon here
@@ -718,25 +739,25 @@ Node *parse_for_init(Parser *parser, Token type, Token name) {
 
 /**
  * @brief Parses expressions.
- * @param parser
+ * @param prs
  * @param prec Minimum precedence.
  * @return
  */
-Node *parse_expr(Parser *parser, int prec) {
-    Node *left = parse_factor(parser);
-    Token next = peek(parser);
+Node *parse_expr(Parser *prs, int prec) {
+    Node *left = parse_factor(prs);
+    Token next = peek(prs);
 
     // Check for assignment operator (lowest precedence, e.g., precedence value 1)
     if (next.type == T_EQ && prec <= 1) {
-        advance(parser);                     // Consume '='.
-        Node *right = parse_expr(parser, 1); // Recursively parse right-hand side
+        advance(prs);                     // Consume '='.
+        Node *right = parse_expr(prs, 1); // Recursively parse right-hand side
 
         // Assignment node
         ExprNode *anode = malloc(sizeof(ExprNode));
         if (!anode) errexit("Memory allocation failed for assignment ExprNode");
 
         anode->base.type        = NODE_EXPRESSION;
-        anode->base.line        = parser->current.line;
+        anode->base.line        = prs->token.line;
         anode->type             = EXPR_ASSIGNMENT;
         anode->u.assignment.lhs = left;
         anode->u.assignment.rhs = right;
@@ -747,37 +768,37 @@ Node *parse_expr(Parser *parser, int prec) {
     // Process binary operators using precedence climbing
     while (isbinop(next.type) && precedence(next.type) >= prec) {
         Token optoken = next;
-        advance(parser); // Consume operator
-        Node *right = parse_expr(parser, precedence(optoken.type) + 1);
+        advance(prs); // Consume operator
+        Node *right = parse_expr(prs, precedence(optoken.type) + 1);
 
         // Expression node
         ExprNode *enode = malloc(sizeof(ExprNode));
         if (!enode) errexit("Memory allocation failed for binary ExprNode");
 
         enode->base.type      = NODE_EXPRESSION;
-        enode->base.line      = parser->current.line;
+        enode->base.line      = prs->token.line;
         enode->type           = EXPR_BINARY;
-        enode->u.binary.op    = token_to_binop(optoken.type);
+        enode->u.binary.op    = toktobin(optoken.type);
         enode->u.binary.left  = left;
         enode->u.binary.right = right;
         left                  = (Node *)enode;
-        next                  = peek(parser);
+        next                  = peek(prs);
     }
 
     // Handle ternary conditional operator: condition ? true_expr : false_expr
     if (next.type == T_QMARK) {
-        advance(parser); // Consume '?'
+        advance(prs); // Consume '?'
 
-        Node *true_expr = parse_expr(parser, 0);
-        expect(parser, T_COLON, "Expected ':' in ternary operator");
-        Node *false_expr = parse_expr(parser, 0);
+        Node *true_expr = parse_expr(prs, 0);
+        expect(prs, T_COLON, "Expected ':' in ternary operator");
+        Node *false_expr = parse_expr(prs, 0);
 
         // Expression node
         ExprNode *enode = malloc(sizeof(ExprNode));
         if (!enode) errexit("Memory allocation failed for conditional ExprNode");
 
         enode->base.type                = NODE_EXPRESSION;
-        enode->base.line                = parser->current.line;
+        enode->base.line                = prs->token.line;
         enode->type                     = EXPR_CONDITIONAL;
         enode->u.conditional.condition  = left;
         enode->u.conditional.true_expr  = true_expr;
@@ -789,22 +810,53 @@ Node *parse_expr(Parser *parser, int prec) {
 }
 
 /**
- * @brief Parses factors.
- * @param parser
+ * @brief Parses do-while loop.
+ * @param prs
  * @return
  */
-Node *parse_factor(Parser *parser) {
-    Token next = peek(parser);
+Node *parse_do_while(Parser *prs) {
+    StmtNode *stmt = malloc(sizeof(StmtNode));
+    if (!stmt) errexit("Memory allocation failed for StmtNode");
+
+    stmt->base.type = NODE_STATEMENT;
+    stmt->base.line = prs->node->line;
+    stmt->type      = STMT_DO_WHILE;
+
+    advance(prs); // Consume 'do'
+    // Parse the loop body
+    stmt->u.while_stmt.body = parse_stmt(prs);
+
+    // Expect 'while' and '('
+    expect(prs, T_WHILE, "Expected 'while' after do");
+    expect(prs, T_LPAREN, "Expected '(' after while");
+
+    // Parse the condition
+    stmt->u.while_stmt.condition = parse_expr(prs, 0);
+
+    // Expect ')' and ';'
+    expect(prs, T_RPAREN, "Expected ')' after condition");
+    expect(prs, T_SCOLON, "Expected ';' after do-while");
+
+    return (Node *)stmt;
+}
+
+/**
+ * @brief Parses factors.
+ * @param prs
+ * @return
+ */
+Node *parse_factor(Parser *prs) {
+    Token next = peek(prs);
 
     if (next.type == T_IDENT) {
-        advance(parser); // Consume the identifier
+        advance(prs); // Consume the identifier
 
         // Return a variable expression
         ExprNode *enode = malloc(sizeof(ExprNode));
         if (!enode) errexit("Memory allocation failed for variable expression");
 
         enode->base.type = NODE_EXPRESSION;
-        enode->base.line = parser->current.line;
+        enode->base.line = prs->token.line;
         enode->type      = EXPR_VAR;
         enode->u.name    = strdup(next.str);
 
@@ -812,13 +864,13 @@ Node *parse_factor(Parser *parser) {
     }
 
     if (next.type == T_NUMBER) {
-        advance(parser); // Consume number
+        advance(prs); // Consume number
 
         ExprNode *enode = malloc(sizeof(ExprNode));
         if (!enode) errexit("Memory allocation failed for constant expression");
 
         enode->base.type = NODE_EXPRESSION;
-        enode->base.line = parser->current.line;
+        enode->base.line = prs->token.line;
         enode->type      = EXPR_CONSTANT;
         enode->u.value   = atoi(next.str);
 
@@ -826,50 +878,50 @@ Node *parse_factor(Parser *parser) {
     }
 
     if (isunop(next.type)) {
-        Token op      = advance(parser); // Consume unary operator
-        Node *operand = parse_factor(parser);
+        Token op      = advance(prs); // Consume unary operator
+        Node *operand = parse_factor(prs);
 
         ExprNode *enode = malloc(sizeof(ExprNode));
         if (!enode) errexit("Memory allocation failed for unary expression");
 
         enode->base.type       = NODE_EXPRESSION;
-        enode->base.line       = parser->current.line;
+        enode->base.line       = prs->token.line;
         enode->type            = EXPR_UNARY;
-        enode->u.unary.op      = token_to_unop(op.type);
+        enode->u.unary.op      = toktoun(op.type);
         enode->u.unary.operand = operand;
 
         return (Node *)enode;
     }
 
     if (next.type == T_LPAREN) {
-        advance(parser); // Consume '('
+        advance(prs); // Consume '('
 
-        Node *expr = parse_expr(parser, 0);
-        expect(parser, T_RPAREN, "Expected ')' after expression");
+        Node *expr = parse_expr(prs, 0);
+        expect(prs, T_RPAREN, "Expected ')' after expression");
 
         return expr;
     }
 
-    errexitinfo(parser, "Invalid factor syntax");
+    errexitinfo(prs, "Invalid factor syntax");
     return NULL;
 }
 
 /**
- * @brief
- * @param parser
- * @param funcToken
+ * @brief Parses function call.
+ * @param prs
+ * @param token
  * @return
  */
-Node *parse_func_call(Parser *parser, Token funcToken) {
+Node *parse_func_call(Parser *prs, Token token) {
     // Expect '(' after function name.
-    expect(parser, T_LPAREN, "Expected '(' after function name in function call");
+    expect(prs, T_LPAREN, "Expected '(' after function name in function call");
 
     int capacity = 2, arg_count = 0;
     Node **args = malloc(capacity * sizeof(Node *));
     if (!args) errexit("Memory allocation failed for function call arguments");
 
     // Parse argument list until ')'
-    while (peek(parser).type != T_RPAREN) {
+    while (peek(prs).type != T_RPAREN) {
         if (arg_count >= capacity) {
             capacity *= 2;
             Node **new_args = realloc(args, capacity * sizeof(Node *));
@@ -880,22 +932,22 @@ Node *parse_func_call(Parser *parser, Token funcToken) {
             }
             args = new_args;
         }
-        args[arg_count++] = parse_expr(parser, 0);
+        args[arg_count++] = parse_expr(prs, 0);
 
-        if (peek(parser).type == T_COMMA) {
-            advance(parser); // Consume comma.
+        if (peek(prs).type == T_COMMA) {
+            advance(prs); // Consume comma.
         } else {
             break;
         }
     }
-    expect(parser, T_RPAREN, "Expected ')' after function call arguments");
+    expect(prs, T_RPAREN, "Expected ')' after function call arguments");
 
     // Create an expression node for the function call
     ExprNode *expr = malloc(sizeof(ExprNode));
     if (!expr) errexit("Memory allocation failed for function call expression");
 
     expr->base.type = NODE_EXPRESSION;
-    expr->base.line = parser->current.line;
+    expr->base.line = prs->token.line;
     expr->type      = EXPR_CALL;
 
     // Build the callee expression node (a variable node) for the function name.
@@ -903,9 +955,9 @@ Node *parse_func_call(Parser *parser, Token funcToken) {
     if (!callee) errexit("Memory allocation failed for function call callee");
 
     callee->base.type = NODE_EXPRESSION;
-    callee->base.line = parser->current.line;
+    callee->base.line = prs->token.line;
     callee->type      = EXPR_VAR;
-    callee->u.name    = strdup(funcToken.str);
+    callee->u.name    = strdup(token.str);
 
     expr->u.call.callee = (Node *)callee;
     expr->u.call.args   = args;
@@ -917,6 +969,17 @@ Node *parse_func_call(Parser *parser, Token funcToken) {
 /*********************************************
  * Cleanup Functions
  *********************************************/
+
+/**
+ * @brief Cleans up memory allocated for parser.
+ * @param prs
+ */
+void purge_parser(Parser *prs) {
+    if (!prs) return;
+
+    purge_node(prs->node);
+    free(prs);
+}
 
 /**
  * @brief Cleans up memory for node and its sub-nodes.
@@ -938,7 +1001,7 @@ void purge_node(Node *node) {
 
     case NODE_VAR_DECL: {
         VarNode *var = (VarNode *)node;
-        if (var->type) free(var->type);
+        if (var->dtype) free(var->dtype);
         if (var->name) free(var->name);
         purge_node(var->init);
         free(var);
@@ -947,7 +1010,7 @@ void purge_node(Node *node) {
 
     case NODE_FUNC_DECL: {
         FuncNode *fn = (FuncNode *)node;
-        if (fn->type) free(fn->type);
+        if (fn->dtype) free(fn->dtype);
         if (fn->name) free(fn->name);
         for (int i = 0; i < fn->pcount; i++) {
             purge_node(fn->params[i]);
@@ -1066,15 +1129,4 @@ void purge_node(Node *node) {
 
     default: free(node); break;
     }
-}
-
-/**
- * @brief Cleans up memory allocated for parser.
- * @param parser
- */
-void purge_parser(Parser *parser) {
-    if (!parser) return;
-
-    purge_node(parser->node);
-    free(parser);
 }

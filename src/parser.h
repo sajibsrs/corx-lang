@@ -49,7 +49,7 @@ typedef enum {
     UN_PLUS,  // +
     UN_MINUS, // -
     UN_NOT,   // !
-} UnaryOperator;
+} UnOpr;
 
 // Defines binary operators.
 typedef enum {
@@ -66,7 +66,7 @@ typedef enum {
     BIN_LTEQ,
     BIN_GT,
     BIN_GTEQ,
-} BinaryOperator;
+} BinOpr;
 
 // Base node structure.
 typedef struct Node {
@@ -83,16 +83,16 @@ typedef struct {
 
 // Variable node.
 typedef struct {
-    Node base;  // Base node
-    char *type; // Data type
-    char *name; // Identifier
-    Node *init; // Optional initializer
+    Node base;   // Base node
+    char *dtype; // Data type
+    char *name;  // Identifier
+    Node *init;  // Optional initializer
 } VarNode;
 
 // Function node.
 typedef struct {
     Node base;     // Base node type.
-    char *type;    // Return type
+    char *dtype;   // Return type
     char *name;    // Identifier
     Node **params; // Parameters
     int pcount;    // Parameter count
@@ -151,12 +151,12 @@ typedef struct {
         char *name; // Variable name
 
         struct {
-            UnaryOperator op;
+            UnOpr op;
             Node *operand;
         } unary;
 
         struct {
-            BinaryOperator op;
+            BinOpr op;
             Node *left;
             Node *right;
         } binary;
@@ -180,18 +180,21 @@ typedef struct {
     } u;
 } ExprNode;
 
+void purge_node(Node *node);
+
 // Parser.
 typedef struct {
-    const TokenList *list; // Token array
-    int pos;               // Current position
-    Token current;         // Current token
-    Node *node;            // Root node
+    const TokList *list; // Token array
+    int pos;             // Current position
+    Token token;         // Current token
+    Node *node;          // Root node
 } Parser;
 
 extern const char *ntypestr[];
 
-Parser *make_parser(const TokenList *list);
+Parser *make_parser(const TokList *list);
 Node *parse_program(Parser *parser);
+
 void purge_parser(Parser *parser);
 
 #endif
