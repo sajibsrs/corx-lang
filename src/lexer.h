@@ -127,27 +127,27 @@ typedef enum {
     T_UNKNOWN, // Unknown token
     T_INVALID, //
     T_EOF,     // End of file
-} TokenType;
+} TokType;
 
 extern const char *ttypestr[];
 
 typedef struct {
-    TokenType type;
+    TokType type;
     char str[64];
     int line;
-    int column;
+    int col;
 } Token;
 
 typedef struct {
     Token *tokens;
     int count;
-} TokenList;
+} TokList;
 
 typedef struct {
     char *buffer;
     int pos;
     int line;
-    int column;
+    int col;
 } Lexer;
 
 /**
@@ -155,12 +155,12 @@ typedef struct {
  * @param src Sourcecode file path.
  * @return
  */
-TokenList *scan(const char *src);
+TokList *scan(const char *src);
 
 /**
  * @brief Cleanup allocated memory from `tokens`.
  * @param list
  */
-void purge_tlist(TokenList *list);
+void purge_tlist(TokList *list);
 
 #endif
