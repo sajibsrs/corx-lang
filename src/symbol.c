@@ -57,7 +57,7 @@ bool hasaction(Symbol *symbol, unsigned action) {
  * @brief Creates a symbol table.
  * @return Pointer to the new symbol table.
  */
-SymTab *make_symtbl() {
+SymTab *make_symtab() {
     SymTab *table = malloc(sizeof(SymTab));
     if (!table) errexit("memory allocation error");
 
@@ -74,7 +74,7 @@ SymTab *make_symtbl() {
 /**
  * @brief Resizes the symbol table when load factor is exceeded.
  */
-void resize_symtbl(SymTab *table) {
+void resize_symtab(SymTab *table) {
     unsigned new_size = table->size * 2; // Double size
 
     SymNode **new_buckets = calloc(new_size, sizeof(SymNode *));
@@ -134,8 +134,8 @@ Symbol *make_symbol(
  * @param symbol Symbol to add.
  */
 void add_symbol(SymTab *table, Symbol *symbol) {
-    if ((float)table->count / table->size >= INITIAL_SIZE) {
-        resize_symtbl(table);
+    if (table->count >= INITIAL_SIZE) {
+        resize_symtab(table);
     }
 
     unsigned index = hashfnv(symbol->name, table->size);
@@ -173,7 +173,7 @@ Symbol *search_symbol(SymTab *table, const char *name, int current_scope) {
  * @brief Initialize symbol table.
  * @param table
  */
-void init_symtbl(SymTab *table) {
+void init_symtab(SymTab *table) {
     Symbol *intsym = make_symbol("int", SG_TYPE, SA_DEC, 0, 0, NULL);
     add_symbol(table, intsym);
     intsym->type = intsym;
@@ -207,7 +207,7 @@ void init_symtbl(SymTab *table) {
  * @brief Frees the entire symbol table.
  * @param table Symbol table to free.
  */
-void purge_symtbl(SymTab *table) {
+void purge_symtab(SymTab *table) {
     if (!table) return;
 
     for (unsigned i = 0; i < table->size; i++) {

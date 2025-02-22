@@ -69,11 +69,11 @@ void setaction(Symbol *symbol, unsigned action);
 bool hasmodspec(Symbol *symbol, unsigned check);
 bool hasaction(Symbol *symbol, unsigned action);
 
-SymTab *make_symtbl();
+SymTab *make_symtab();
 
-void init_symtbl(SymTab *table);
-void purge_symtbl(SymTab *table);
-void resize_symtbl(SymTab *table);
+void init_symtab(SymTab *table);
+void purge_symtab(SymTab *table);
+void resize_symtab(SymTab *table);
 
 Symbol *make_symbol(
     const char *name, SymGrp group, SymAct action, unsigned modspec, int scope, Symbol *type
