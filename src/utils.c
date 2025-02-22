@@ -9,7 +9,7 @@
  * @param op
  * @return
  */
-const char *binop_str(BinaryOperator op) {
+const char *binop_str(BinOpr op) {
     switch (op) {
     case BIN_ADD:  return "+";
     case BIN_SUB:  return "-";
@@ -33,7 +33,7 @@ const char *binop_str(BinaryOperator op) {
  * @param op
  * @return
  */
-const char *unop_str(UnaryOperator op) {
+const char *unop_str(UnOpr op) {
     switch (op) {
     case UN_COMPL: return "~";
     case UN_PLUS:  return "+";
@@ -60,7 +60,7 @@ void print_param(Node *node) {
 
     if (node->type == NODE_VAR_DECL) {
         VarNode *var = (VarNode *)node;
-        printf("%s %s", var->type ? var->type : "<unknown>", var->name ? var->name : "<unnamed>");
+        printf("%s %s", var->dtype ? var->dtype : "<unknown>", var->name ? var->name : "<unnamed>");
 
         if (var->init) {
             printf(" = ");
@@ -95,7 +95,7 @@ void print_ast(Node *node, int indent) {
 
         print_indent(indent);
         printf(
-            "<NODE_VAR_DECL>: %s %s", var->type ? var->type : "<unknown>",
+            "<NODE_VAR_DECL>: %s %s", var->dtype ? var->dtype : "<unknown>",
             var->name ? var->name : "<unnamed>"
         );
 
@@ -112,7 +112,7 @@ void print_ast(Node *node, int indent) {
 
         print_indent(indent);
         printf(
-            "<NODE_FUNC_DECL>: %s %s(", fn->type ? fn->type : "<unknown>",
+            "<NODE_FUNC_DECL>: %s %s(", fn->dtype ? fn->dtype : "<unknown>",
             fn->name ? fn->name : "<unnamed>"
         );
 
@@ -426,7 +426,7 @@ unsigned hashfnv(const char *str, const int size) {
  * @brief Print formatted token to the terminal.
  * @param list
  */
-void print_tlist(const TokenList *list) {
+void print_tlist(const TokList *list) {
     printf("Scanned %d tokens:\n\n", list->count);
 
     Token token;
@@ -435,7 +435,7 @@ void print_tlist(const TokenList *list) {
         token = list->tokens[i];
         printf(
             "%-16s %-10s typ:%-4d lin:%-4d col:%d\n", //
-            ttypestr[token.type], token.str, token.type, token.line, token.column
+            ttypestr[token.type], token.str, token.type, token.line, token.col
         );
     }
 }
