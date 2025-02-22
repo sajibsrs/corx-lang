@@ -5,7 +5,7 @@
 #include "symbol.h"
 
 typedef struct Analyzer {
-    SymTab *symtbl; // Symbol table
+    SymTab *symtab; // Symbol table
     int line;       // Current line in the source
     bool err;       // Error flag
     Symbol *sym;    // Current symbol

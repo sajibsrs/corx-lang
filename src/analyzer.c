@@ -110,7 +110,7 @@ static bool is_comparable(Symbol *t1, Symbol *t2) {
  * @return Pointer to the symbol for "bool".
  */
 static Symbol *get_bool_type(Analyzer *anz) {
-    return search_symbol(anz->symtbl, "bool", 0);
+    return search_symbol(anz->symtab, "bool", 0);
 }
 
 /**
@@ -125,10 +125,10 @@ static Symbol *get_bool_type(Analyzer *anz) {
  */
 static Symbol *numeric_promotion(Analyzer *a, Symbol *s1, Symbol *s2) {
     if (strcmp(s1->name, "float") == 0 || strcmp(s2->name, "float") == 0) {
-        return search_symbol(a->symtbl, "float", 0);
+        return search_symbol(a->symtab, "float", 0);
     }
 
-    return search_symbol(a->symtbl, "int", 0);
+    return search_symbol(a->symtab, "int", 0);
 }
 
 /**
@@ -288,11 +288,11 @@ Analyzer *make_analyzer() {
     Analyzer *anz = malloc(sizeof(Analyzer));
     if (!anz) errexit("make_analyzer allocation failed");
 
-    anz->symtbl = make_symtbl();
+    anz->symtab = make_symtab();
     anz->line   = 0;
     anz->err    = false;
 
-    init_symtbl(anz->symtbl);
+    init_symtab(anz->symtab);
     return anz;
 }
 
@@ -357,7 +357,7 @@ static void resolve_node(Analyzer *anz, Node *node) {
  * @param var Pointer to the variable declaration node.
  */
 static void resolve_var_decl(Analyzer *anz, VarNode *var) {
-    Symbol *vtype = search_symbol(anz->symtbl, var->dtype, 0);
+    Symbol *vtype = search_symbol(anz->symtab, var->dtype, 0);
     if (!anz) {
         fprintf(stderr, "Error (line %d): Unknown type '%s'\n", var->base.line, var->dtype);
         anz->err = true;
@@ -366,12 +366,12 @@ static void resolve_var_decl(Analyzer *anz, VarNode *var) {
 
     printf(
         "Variable (%s) resolves to type (%s) (scope %d)\n", var->name, vtype->name,
-        anz->symtbl->scope
+        anz->symtab->scope
     );
 
-    char *name = make_unique(var->name, anz->symtbl->scope);
+    char *name = make_unique(var->name, anz->symtab->scope);
 
-    Symbol *dup = search_symbol(anz->symtbl, name, anz->symtbl->scope);
+    Symbol *dup = search_symbol(anz->symtab, name, anz->symtab->scope);
     if (dup) {
         fprintf(
             stderr, "Error (line %d): Redeclaration of variable '%s'\n", var->base.line, var->name
@@ -380,8 +380,8 @@ static void resolve_var_decl(Analyzer *anz, VarNode *var) {
         return;
     }
 
-    Symbol *sym = make_symbol(name, SG_VAR, SA_DEC, 0, anz->symtbl->scope, vtype);
-    add_symbol(anz->symtbl, sym);
+    Symbol *sym = make_symbol(name, SG_VAR, SA_DEC, 0, anz->symtab->scope, vtype);
+    add_symbol(anz->symtab, sym);
 
     if (var->init) {
         Symbol *init_type = resolve_expression(anz, var->init);
@@ -416,14 +416,14 @@ static void resolve_var_decl(Analyzer *anz, VarNode *var) {
  * @param fn Pointer to the function declaration node.
  */
 static void resolve_func(Analyzer *anz, FuncNode *fn) {
-    Symbol *rtype = search_symbol(anz->symtbl, fn->dtype, 0);
+    Symbol *rtype = search_symbol(anz->symtab, fn->dtype, 0);
     if (!rtype) {
         fprintf(stderr, "Error (line %d): Unknown return type '%s'\n", fn->base.line, fn->dtype);
         anz->err = true;
         return;
     }
 
-    Symbol *ex_decl = search_symbol(anz->symtbl, fn->name, anz->symtbl->scope);
+    Symbol *ex_decl = search_symbol(anz->symtab, fn->name, anz->symtab->scope);
     if (ex_decl) {
         fprintf(
             stderr, "Error (line %d): Redeclaration of function '%s'\n", fn->base.line, fn->name
@@ -433,10 +433,10 @@ static void resolve_func(Analyzer *anz, FuncNode *fn) {
     }
 
     Symbol *fsym = make_symbol(fn->name, SG_FUNC, SA_DEC, 0, 0, rtype);
-    add_symbol(anz->symtbl, fsym);
+    add_symbol(anz->symtab, fsym);
 
     anz->sym = fsym;
-    scope_enter(anz->symtbl);
+    scope_enter(anz->symtab);
 
     for (int i = 0; i < fn->pcount; i++) {
         if (fn->params[i]->type != NODE_VAR_DECL) {
@@ -452,7 +452,7 @@ static void resolve_func(Analyzer *anz, FuncNode *fn) {
         resolve_block(anz, (BlockNode *)fn->body);
     }
 
-    scope_exit(anz->symtbl);
+    scope_exit(anz->symtab);
     anz->sym = NULL;
 }
 
@@ -466,7 +466,7 @@ static void resolve_func(Analyzer *anz, FuncNode *fn) {
  * @param param Pointer to the parameter node.
  */
 static void resolve_param(Analyzer *anz, VarNode *param) {
-    Symbol *ptype = search_symbol(anz->symtbl, param->dtype, 0);
+    Symbol *ptype = search_symbol(anz->symtab, param->dtype, 0);
     if (!ptype) {
         fprintf(
             stderr, "Error (line %d): Unknown parameter type '%s'\n", param->base.line, param->dtype
@@ -475,9 +475,9 @@ static void resolve_param(Analyzer *anz, VarNode *param) {
         return;
     }
 
-    char *uname = make_unique(param->name, anz->symtbl->scope);
+    char *uname = make_unique(param->name, anz->symtab->scope);
 
-    Symbol *duplicate = search_symbol(anz->symtbl, uname, anz->symtbl->scope);
+    Symbol *duplicate = search_symbol(anz->symtab, uname, anz->symtab->scope);
     if (duplicate) {
         fprintf(
             stderr, "Error (line %d): Duplicate parameter '%s'\n", param->base.line, param->name
@@ -487,11 +487,11 @@ static void resolve_param(Analyzer *anz, VarNode *param) {
         return;
     }
 
-    Symbol *psym = make_symbol(uname, SG_PARAM, SA_DEC, 0, anz->symtbl->scope, ptype);
-    add_symbol(anz->symtbl, psym);
+    Symbol *psym = make_symbol(uname, SG_PARAM, SA_DEC, 0, anz->symtab->scope, ptype);
+    add_symbol(anz->symtab, psym);
 
     printf(
-        "Resolved param type %s for '%s' (scope %d)\n", ptype->name, param->name, anz->symtbl->scope
+        "Resolved param type %s for '%s' (scope %d)\n", ptype->name, param->name, anz->symtab->scope
     );
 }
 
@@ -535,7 +535,7 @@ static void resolve_statement(Analyzer *anz, StmtNode *stmt) {
  * @param stmt Pointer to the assignment statement node.
  */
 static void resolve_assignment(Analyzer *anz, StmtNode *stmt) {
-    Symbol *lhs = resolve_variable(anz->symtbl, stmt->u.assignment.lhs, anz->symtbl->scope);
+    Symbol *lhs = resolve_variable(anz->symtab, stmt->u.assignment.lhs, anz->symtab->scope);
     if (!lhs) {
         fprintf(
             stderr, "Error (line %d): Undeclared variable '%s'\n", anz->line, stmt->u.assignment.lhs
@@ -563,12 +563,12 @@ static void resolve_assignment(Analyzer *anz, StmtNode *stmt) {
  * @param block Pointer to the BlockNode.
  */
 static void resolve_block(Analyzer *anz, BlockNode *block) {
-    scope_enter(anz->symtbl);
+    scope_enter(anz->symtab);
 
     for (int i = 0; i < block->icount; i++) {
         resolve_node(anz, block->items[i]);
     }
-    scope_exit(anz->symtbl);
+    scope_exit(anz->symtab);
 }
 
 /*********************************************
@@ -604,7 +604,7 @@ static void resolve_if(Analyzer *anz, StmtNode *stmt) {
  * @param stmt Pointer to the for loop statement node.
  */
 static void resolve_for(Analyzer *anz, StmtNode *stmt) {
-    scope_enter(anz->symtbl);
+    scope_enter(anz->symtab);
 
     if (stmt->u.for_stmt.init) resolve_node(anz, stmt->u.for_stmt.init);
 
@@ -615,7 +615,7 @@ static void resolve_for(Analyzer *anz, StmtNode *stmt) {
         }
     }
     resolve_node(anz, stmt->u.for_stmt.body);
-    scope_exit(anz->symtbl);
+    scope_exit(anz->symtab);
 }
 
 /**
@@ -671,11 +671,11 @@ static Symbol *resolve_expression(Analyzer *anz, Node *node) {
 static Symbol *resolve_expr_node(Analyzer *anz, ExprNode *expr) {
     switch (expr->type) {
     case EXPR_CONSTANT: {
-        Symbol *int_type = search_symbol(anz->symtbl, "int", 0);
+        Symbol *int_type = search_symbol(anz->symtab, "int", 0);
 
         printf(
             "Constant (%d) resolves to type (%s) (scope %d)\n", expr->u.value, int_type->name,
-            anz->symtbl->scope
+            anz->symtab->scope
         );
 
         return int_type;
@@ -699,7 +699,7 @@ static Symbol *resolve_expr_node(Analyzer *anz, ExprNode *expr) {
  * @return Pointer to the symbol for the variable.
  */
 static Symbol *resolve_var_expr(Analyzer *anz, ExprNode *expr) {
-    Symbol *sym = resolve_variable(anz->symtbl, expr->u.name, anz->symtbl->scope);
+    Symbol *sym = resolve_variable(anz->symtab, expr->u.name, anz->symtab->scope);
     if (!sym) {
         fprintf(stderr, "Error (line %d): Undeclared variable '%s'\n", anz->line, expr->u.name);
         anz->err = true;
@@ -862,12 +862,12 @@ static Symbol *resolve_call_expr(Analyzer *anz, ExprNode *expr) {
 
     // TODO: Add support for function call
 
-    Symbol *callee = search_symbol(anz->symtbl, exp->u.name, anz->symtbl->scope);
+    Symbol *callee = search_symbol(anz->symtab, exp->u.name, anz->symtab->scope);
     if (!callee || callee->group != SG_FUNC) {
         fprintf(stderr, "Error (line %d): Undeclared function '%s'\n", anz->line, exp->u.name);
         anz->err = true;
     }
-    return callee ? callee : search_symbol(anz->symtbl, "int", 0);
+    return callee ? callee : search_symbol(anz->symtab, "int", 0);
 }
 
 /*********************************************
@@ -949,7 +949,7 @@ static void resolve_while(Analyzer *anz, StmtNode *stmt) {
  */
 void purge_analyzer(Analyzer *anz) {
     if (anz) {
-        purge_symtbl(anz->symtbl);
+        purge_symtab(anz->symtab);
         free(anz);
     }
 }
