@@ -97,7 +97,7 @@ popcorn : popcorn(float temp, int time) {
 popcorn : %popcorn() {}
 
 # contract fulfillment
-popcorn : bool make() {
+popcorn : make() {
     if (this->temp >= 180.0) {
         return true;
     } else {
