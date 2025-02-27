@@ -14,8 +14,8 @@ static inline bool isbinop(TokType type);
 static inline bool isunop(TokType type);
 static inline bool isasnop(TokType type);
 
-UnOpr toktoun(TokType type);
-BinOpr toktobin(TokType type);
+UnOps toktoun(TokType type);
+BinOps toktobin(TokType type);
 
 static void errexitinfo(Parser *prs, const char *msg);
 
@@ -208,7 +208,7 @@ static inline bool isasnop(TokType type) {
 }
 
 // Lookup table for binary operators.
-static const BinOpr toktobin_table[] = {
+static const BinOps toktobin_table[] = {
     [T_PLUS]     = BIN_ADD,  //
     [T_MINUS]    = BIN_SUB,  //
     [T_ASTERISK] = BIN_MUL,  //
@@ -224,7 +224,7 @@ static const BinOpr toktobin_table[] = {
 };
 
 // Lookup table for unary operators.
-static const UnOpr toktoun_table[] = {
+static const UnOps toktoun_table[] = {
     [T_MINUS] = UN_MINUS, //
     [T_PLUS]  = UN_PLUS,  //
     [T_TILDE] = UN_COMPL, //
@@ -237,7 +237,7 @@ static const UnOpr toktoun_table[] = {
  * @param type
  * @return
  */
-BinOpr toktobin(TokType type) {
+BinOps toktobin(TokType type) {
     // TODO: Bound check
     return toktobin_table[type];
 }
@@ -247,7 +247,7 @@ BinOpr toktobin(TokType type) {
  * @param type
  * @return
  */
-UnOpr toktoun(TokType type) {
+UnOps toktoun(TokType type) {
     // TODO: Bound check
     return toktoun_table[type];
 }
@@ -877,6 +877,20 @@ Node *parse_factor(Parser *prs) {
         return (Node *)enode;
     }
 
+    if (next.type == T_STRING) {
+        advance(prs); // Consume string literal
+
+        ExprNode *snode = malloc(sizeof(ExprNode));
+        if (!snode) errexit("Memory allocation failed for StrNode");
+
+        snode->base.type = NODE_EXPRESSION;
+        snode->base.line = next.line;
+        snode->type      = EXPR_STRING;
+        snode->u.str     = next.str;
+
+        return (Node *)snode;
+    }
+
     if (isunop(next.type)) {
         Token op      = advance(prs); // Consume unary operator
         Node *operand = parse_factor(prs);
@@ -1081,6 +1095,10 @@ void purge_node(Node *node) {
         switch (expr->type) {
         case EXPR_CONSTANT:
             // No dynamic memory in a constant.
+            break;
+
+        case EXPR_STRING:
+            if (expr->u.str) free(expr->u.str);
             break;
 
         case EXPR_VAR:

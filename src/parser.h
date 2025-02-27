@@ -35,6 +35,7 @@ typedef enum {
 // Defines statement types.
 typedef enum {
     EXPR_CONSTANT,
+    EXPR_STRING, // String literal
     EXPR_VAR,
     EXPR_UNARY,
     EXPR_BINARY,
@@ -49,7 +50,7 @@ typedef enum {
     UN_PLUS,  // +
     UN_MINUS, // -
     UN_NOT,   // !
-} UnOpr;
+} UnOps;
 
 // Defines binary operators.
 typedef enum {
@@ -66,7 +67,7 @@ typedef enum {
     BIN_LTEQ,
     BIN_GT,
     BIN_GTEQ,
-} BinOpr;
+} BinOps;
 
 // Base node structure.
 typedef struct Node {
@@ -149,14 +150,15 @@ typedef struct {
     union {
         int value;  // Constant value
         char *name; // Variable name
+        char *str;  // String literal value
 
         struct {
-            UnOpr op;
+            UnOps op;
             Node *operand;
         } unary;
 
         struct {
-            BinOpr op;
+            BinOps op;
             Node *left;
             Node *right;
         } binary;
