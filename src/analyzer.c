@@ -28,7 +28,7 @@ static Symbol *resolve_var_expr(Analyzer *anz, ExprNode *expr);
 static Symbol *resolve_unary_expr(Analyzer *anz, ExprNode *expr);
 static Symbol *resolve_call_expr(Analyzer *anz, ExprNode *expr);
 static Symbol *resolve_conditional_expr(Analyzer *anz, ExprNode *expr);
-static Symbol *resolve_variable(SymTab *table, const char *name, int scope);
+static Symbol *resolve_variable(SymTab *table, char *name, int scope);
 
 static bool is_same_type(Symbol *t1, Symbol *t2);
 static bool is_arithmetic(Symbol *type);
@@ -40,8 +40,6 @@ static bool is_compatible(Symbol *t1, Symbol *t2);
 
 static Symbol *get_bool_type(Analyzer *type);
 static Symbol *numeric_promotion(Analyzer *anz, Symbol *s1, Symbol *s2);
-
-static inline char *make_unique(const char *name, int scope);
 
 /*********************************************
  * Helper Functions
@@ -205,9 +203,9 @@ void is_assignable(SymTab *table, Symbol *lhs, Symbol *rhs, int line) {
  * @param scope The starting scope level.
  * @return Pointer to the found symbol or NULL if not found.
  */
-static Symbol *resolve_variable(SymTab *table, const char *name, int scope) {
+static Symbol *resolve_variable(SymTab *table, char *name, int scope) {
     for (int s = scope; s >= 0; s--) {
-        char *uname = make_unique(name, s);
+        char *uname = sym_uname(name, s);
         Symbol *sym = search_symbol(table, uname, s);
         free(uname);
         if (sym) return sym;
@@ -251,26 +249,6 @@ void scope_exit(SymTab *table) {
         }
     }
     table->scope--;
-}
-
-/**
- * @brief Generates a unique name based on the given name and scope.
- *
- * Allocates a new string in the format "name.scope".
- *
- * @param name The base name.
- * @param scope The scope level.
- * @return Pointer to the unique name. Must be freed by the caller.
- */
-static inline char *make_unique(const char *name, int scope) {
-    char *uname = malloc(32);
-    if (!uname) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
-    }
-
-    snprintf(uname, 32, "%s.%d", name, scope);
-    return uname;
 }
 
 /*********************************************
@@ -369,7 +347,7 @@ static void resolve_var_decl(Analyzer *anz, VarNode *var) {
         anz->symtab->scope
     );
 
-    char *name = make_unique(var->name, anz->symtab->scope);
+    char *name = sym_uname(var->name, anz->symtab->scope);
 
     Symbol *dup = search_symbol(anz->symtab, name, anz->symtab->scope);
     if (dup) {
@@ -423,8 +401,8 @@ static void resolve_func(Analyzer *anz, FuncNode *fn) {
         return;
     }
 
-    Symbol *ex_decl = search_symbol(anz->symtab, fn->name, anz->symtab->scope);
-    if (ex_decl) {
+    Symbol *existing = search_symbol(anz->symtab, fn->name, anz->symtab->scope);
+    if (existing) {
         fprintf(
             stderr, "Error (line %d): Redeclaration of function '%s'\n", fn->base.line, fn->name
         );
@@ -433,6 +411,8 @@ static void resolve_func(Analyzer *anz, FuncNode *fn) {
     }
 
     Symbol *fsym = make_symbol(fn->name, SG_FUNC, SA_DEC, 0, 0, rtype);
+    fsym->params = NULL; // Initialize parameters array
+    fsym->pcount = 0;    // Initialize parameter count
     add_symbol(anz->symtab, fsym);
 
     anz->sym = fsym;
@@ -475,8 +455,7 @@ static void resolve_param(Analyzer *anz, VarNode *param) {
         return;
     }
 
-    char *uname = make_unique(param->name, anz->symtab->scope);
-
+    char *uname       = sym_uname(param->name, anz->symtab->scope);
     Symbol *duplicate = search_symbol(anz->symtab, uname, anz->symtab->scope);
     if (duplicate) {
         fprintf(
@@ -487,9 +466,15 @@ static void resolve_param(Analyzer *anz, VarNode *param) {
         return;
     }
 
+    // Add parameter type to the function's symbol
+    anz->sym->params = realloc(anz->sym->params, (anz->sym->pcount + 1) * sizeof(Symbol *));
+    anz->sym->params[anz->sym->pcount] = ptype;
+    anz->sym->pcount++;
+
     Symbol *psym = make_symbol(uname, SG_PARAM, SA_DEC, 0, anz->symtab->scope, ptype);
     add_symbol(anz->symtab, psym);
 
+    free(uname);
     printf(
         "Resolved param type %s for '%s' (scope %d)\n", ptype->name, param->name, anz->symtab->scope
     );
@@ -519,6 +504,7 @@ static void resolve_statement(Analyzer *anz, StmtNode *stmt) {
     case STMT_WHILE:      resolve_while(anz, stmt); break;
     case STMT_DO_WHILE:   resolve_do_while(anz, stmt); break;
     case STMT_COMPOUND:   resolve_block(anz, (BlockNode *)stmt->u.simple.expr); break;
+    case STMT_CALL:       resolve_call_expr(anz, (ExprNode *)stmt->u.simple.expr); break;
     default:
         fprintf(stderr, "Unhandled statement type: %d\n", stmt->type);
         errexit("Unsupported statement");
@@ -671,21 +657,38 @@ static Symbol *resolve_expression(Analyzer *anz, Node *node) {
 static Symbol *resolve_expr_node(Analyzer *anz, ExprNode *expr) {
     switch (expr->type) {
     case EXPR_CONSTANT: {
-        Symbol *int_type = search_symbol(anz->symtab, "int", 0);
+        const char *dtype = NULL;
+        Symbol *dsym      = NULL;
 
-        printf(
-            "Constant (%d) resolves to type (%s) (scope %d)\n", expr->u.value, int_type->name,
-            anz->symtab->scope
-        );
+        switch (expr->u.con.ctype) {
+        case CT_INT:    dtype = "int"; break;
+        case CT_FLOAT:  dtype = "float"; break;
+        case CT_CHAR:   dtype = "char"; break;
+        case CT_STRING: dtype = "string"; break;
+        default:
+            fprintf(
+                stderr, "Unknown constant type: %d at line %d", expr->u.con.ctype, expr->base.line
+            );
+            return NULL;
+        }
 
-        return int_type;
+        dsym = search_symbol(anz->symtab, dtype, 0);
+        if (!dsym) {
+            fprintf(stderr, "Undefined type: %s at line %d", dtype, expr->base.line);
+            return NULL;
+        }
+        fprintf(stderr, " has type %s\n", dsym->name);
+
+        return dsym;
     }
     case EXPR_VAR:         return resolve_var_expr(anz, expr);
     case EXPR_UNARY:       return resolve_unary_expr(anz, expr);
     case EXPR_BINARY:      return resolve_binary_expr(anz, expr);
     case EXPR_CONDITIONAL: return resolve_conditional_expr(anz, expr);
     case EXPR_CALL:        return resolve_call_expr(anz, expr);
-    default:               fprintf(stderr, "Unhandled expression type: %d\n", expr->type); return NULL;
+    default:
+        fprintf(stderr, "Unhandled expression type: %d at line %d", expr->type, expr->base.line);
+        return NULL;
     }
 }
 
@@ -856,18 +859,45 @@ static Symbol *resolve_call_expr(Analyzer *anz, ExprNode *expr) {
     if (!exp || exp->type != EXPR_VAR) {
         fprintf(stderr, "Error (line %d): Invalid function call\n", anz->line);
         anz->err = true;
-
         return NULL;
     }
-
-    // TODO: Add support for function call
 
     Symbol *callee = search_symbol(anz->symtab, exp->u.name, anz->symtab->scope);
     if (!callee || callee->group != SG_FUNC) {
         fprintf(stderr, "Error (line %d): Undeclared function '%s'\n", anz->line, exp->u.name);
         anz->err = true;
+        return NULL;
     }
-    return callee ? callee : search_symbol(anz->symtab, "int", 0);
+
+    // Check argument count
+    if (callee->pcount != expr->u.call.acount) {
+        fprintf(
+            stderr, "Error (line %d): Function '%s' expects %d arguments but got %d\n", anz->line,
+            exp->u.name, callee->pcount, expr->u.call.acount
+        );
+        anz->err = true;
+    }
+
+    // Check each argument's type against the corresponding parameter
+    for (int i = 0; i < expr->u.call.acount; i++) {
+        if (i >= callee->pcount) break; // Avoid overflow if too many args
+        Node *arg       = expr->u.call.args[i];
+        Symbol *argtype = resolve_expression(anz, arg);
+        if (!argtype) {
+            anz->err = true;
+            continue;
+        }
+        Symbol *paramtype = callee->params[i];
+        if (!is_compatible(paramtype, argtype)) {
+            fprintf(
+                stderr, "Error (line %d): Argument %d type mismatch (expected %s, got %s)\n",
+                anz->line, i + 1, paramtype->name, argtype->name
+            );
+            anz->err = true;
+        }
+    }
+
+    return callee->type;
 }
 
 /*********************************************
