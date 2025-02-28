@@ -9,7 +9,7 @@
  * @param op
  * @return
  */
-const char *binop_str(BinOpr op) {
+const char *binop_str(BinOps op) {
     switch (op) {
     case BIN_ADD:  return "+";
     case BIN_SUB:  return "-";
@@ -33,7 +33,7 @@ const char *binop_str(BinOpr op) {
  * @param op
  * @return
  */
-const char *unop_str(UnOpr op) {
+const char *unop_str(UnOps op) {
     switch (op) {
     case UN_COMPL: return "~";
     case UN_PLUS:  return "+";
@@ -318,10 +318,15 @@ void print_ast(Node *node, int indent) {
 
     case NODE_EXPRESSION: {
         ExprNode *expr = (ExprNode *)node;
-
         switch (expr->type) {
         case EXPR_CONSTANT: {
-            printf("%d", expr->u.value);
+            switch (expr->u.con.ctype) {
+            case CT_INT:    printf("%d", expr->u.con.u.ival); break;
+            case CT_FLOAT:  printf("%f", expr->u.con.u.fval); break;
+            case CT_CHAR:   printf("%c", expr->u.con.u.cval); break;
+            case CT_STRING: printf("%s", expr->u.con.u.sval); break;
+            default:        printf("<unknown>");
+            }
             break;
         }
 
