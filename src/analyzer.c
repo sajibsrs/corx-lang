@@ -677,7 +677,6 @@ static Symbol *resolve_expr_node(Analyzer *anz, ExprNode *expr) {
             fprintf(stderr, "Undefined type: %s at line %d", dtype, expr->base.line);
             return NULL;
         }
-        fprintf(stderr, " has type %s\n", dsym->name);
 
         return dsym;
     }
@@ -881,17 +880,20 @@ static Symbol *resolve_call_expr(Analyzer *anz, ExprNode *expr) {
     // Check each argument's type against the corresponding parameter
     for (int i = 0; i < expr->u.call.acount; i++) {
         if (i >= callee->pcount) break; // Avoid overflow if too many args
-        Node *arg       = expr->u.call.args[i];
-        Symbol *argtype = resolve_expression(anz, arg);
-        if (!argtype) {
+
+        Node *arg      = expr->u.call.args[i];
+        Symbol *argsym = resolve_expression(anz, arg);
+
+        if (!argsym) {
             anz->err = true;
             continue;
         }
+
         Symbol *paramtype = callee->params[i];
-        if (!is_compatible(paramtype, argtype)) {
+        if (!is_compatible(paramtype, argsym->type)) {
             fprintf(
                 stderr, "Error (line %d): Argument %d type mismatch (expected %s, got %s)\n",
-                anz->line, i + 1, paramtype->name, argtype->name
+                anz->line, i + 1, paramtype->name, argsym->type->name
             );
             anz->err = true;
         }
