@@ -3,6 +3,13 @@
 
 #include "lexer.h"
 
+typedef enum {
+    CT_INT,   // Integer constant (e.g., 42)
+    CT_FLOAT, // Floating-point constant (e.g., 3.14)
+    CT_CHAR,  // Character constant (e.g., 'A')
+    CT_STRING // String literal (e.g., "hello")
+} ConstType;
+
 // Defines node types.
 typedef enum {
     NODE_PROGRAM,
@@ -34,8 +41,7 @@ typedef enum {
 
 // Defines statement types.
 typedef enum {
-    EXPR_CONSTANT,
-    EXPR_STRING, // String literal
+    EXPR_CONSTANT, // All constants (int, float, string, etc.)
     EXPR_VAR,
     EXPR_UNARY,
     EXPR_BINARY,
@@ -70,7 +76,7 @@ typedef enum {
 } BinOps;
 
 // Base node structure.
-typedef struct Node {
+typedef struct {
     NodeType type;
     int line;
 } Node;
@@ -148,9 +154,17 @@ typedef struct {
     ExprType type;
 
     union {
-        int value;  // Constant value
         char *name; // Variable name
-        char *str;  // String literal value
+
+        struct {             // For constant value
+            ConstType ctype; // Type of the constant
+            union {
+                int ival;   // Integer
+                float fval; // Float
+                char cval;  // Character
+                char *sval; // String (stored in data section)
+            } u;
+        } con;
 
         struct {
             UnOps op;
