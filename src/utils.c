@@ -321,11 +321,11 @@ void print_ast(Node *node, int indent) {
         switch (expr->type) {
         case EXPR_CONSTANT: {
             switch (expr->u.con.ctype) {
-            case CT_INT:    printf("%d", expr->u.con.u.ival); break;
-            case CT_FLOAT:  printf("%f", expr->u.con.u.fval); break;
-            case CT_CHAR:   printf("%c", expr->u.con.u.cval); break;
-            case CT_STRING: printf("%s", expr->u.con.u.sval); break;
-            default:        printf("<unknown>");
+            case CT_INT:    printf("<CT_INT>: %d", expr->u.con.u.ival); break;
+            case CT_FLOAT:  printf("<CT_FLOAT>: %f", expr->u.con.u.fval); break;
+            case CT_CHAR:   printf("<CT_CHAR>: %c", expr->u.con.u.cval); break;
+            case CT_STRING: printf("<CT_STRING>: %s", expr->u.con.u.sval); break;
+            default:        printf("<unknown type>");
             }
             break;
         }
