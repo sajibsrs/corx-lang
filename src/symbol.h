@@ -3,17 +3,17 @@
 
 #include "lexer.h"
 
-// Symbol group ( e.g. SG_TYPE, SG_VAR )
+// Symbol group (e.g., SG_TYPE, SG_VAR)
 typedef enum {
-    SG_TYPE,     // Data type
-    SG_VAR,      // Variable
-    SG_FUNC,     // Function
-    SG_METHOD,   // Method
-    SG_PARAM,    // Parameters
-    SG_CONTRACT, //
-    SG_STRUCT,   //
-    SG_ENUM,     //
-    SG_POINTER,  //
+    SG_TYPE,   // Data type
+    SG_VAR,    // Variable
+    SG_FUNC,   // Function
+    SG_METHOD, // Method
+    SG_PARAM,  // Parameters
+    SG_CONTRACT,
+    SG_STRUCT,
+    SG_ENUM,
+    SG_POINTER,
 } SymGrp;
 
 // Symbol action
@@ -21,7 +21,7 @@ typedef enum {
     SA_DEC = 1 << 0, // Declaration
     SA_DEF = 1 << 1, // Definition
     SA_INV = 1 << 2, // Invocation
-    SA_REF = 1 << 3, // Reference / Usage
+    SA_REF = 1 << 3, // Reference/Usage
 } SymAct;
 
 // Combined modifiers and specifiers flags
@@ -34,12 +34,14 @@ typedef enum {
 } SymMsp;
 
 typedef struct Symbol {
-    char *name;          // Symbol name (string)
-    SymGrp group;        // Symbol group
-    SymAct action;       // Symbol action flags
-    unsigned modspec;    // Symbol modifier and specifier flags
-    int scope;           // Scope level
-    struct Symbol *type; // Type of the symbol (e.g. "int", "float")
+    char *name;             // Symbol name (string)
+    SymGrp group;           // Symbol group
+    SymAct action;          // Symbol action flags
+    unsigned modspec;       // Modifier/specifier flags
+    int scope;              // Scope level
+    struct Symbol *type;    // Type of the symbol (e.g., "int", "float")
+    struct Symbol **params; // Array of parameter types (for functions)
+    int pcount;             // Number of parameters (for functions)
 } Symbol;
 
 typedef struct SymNode {
@@ -74,6 +76,8 @@ SymTab *make_symtab();
 void init_symtab(SymTab *table);
 void purge_symtab(SymTab *table);
 void resize_symtab(SymTab *table);
+
+char *sym_uname(char *name, int scope);
 
 Symbol *make_symbol(
     const char *name, SymGrp group, SymAct action, unsigned modspec, int scope, Symbol *type

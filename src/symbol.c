@@ -12,6 +12,26 @@
  *********************************************/
 
 /**
+ * @brief Generates a unique name based on the given name and scope.
+ *
+ * Allocates a new string in the format "name.scope".
+ *
+ * @param name The base name.
+ * @param scope The scope level.
+ * @return Pointer to the unique name. Must be freed by the caller.
+ */
+char *sym_uname(char *name, int scope) {
+    char *uname = malloc(32);
+    if (!uname) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+
+    snprintf(uname, 32, "%s.%d", name, scope);
+    return uname;
+}
+
+/**
  * @brief Sets the given flags.
  * @param symbol
  * @param newflag
@@ -155,12 +175,12 @@ void add_symbol(SymTab *table, Symbol *symbol) {
  * @param scope Current scope.
  * @return Pointer to the found symbol, or NULL if not found.
  */
-Symbol *search_symbol(SymTab *table, const char *name, int current_scope) {
-    for (int scope = current_scope; scope >= 0; scope--) {
+Symbol *search_symbol(SymTab *table, const char *name, int scope) {
+    for (int scp = scope; scp >= 0; scp--) {
         unsigned index = hashfnv(name, table->size);
         SymNode *node  = table->buckets[index];
         while (node) {
-            if (strcmp(node->symbol->name, name) == 0 && node->symbol->scope == scope) {
+            if (strcmp(node->symbol->name, name) == 0 && node->symbol->scope == scp) {
                 return node->symbol;
             }
             node = node->next;
@@ -197,6 +217,13 @@ void init_symtab(SymTab *table) {
     Symbol *boolsym = make_symbol("bool", SG_TYPE, SA_DEC, 0, 0, NULL);
     add_symbol(table, boolsym);
     boolsym->type = boolsym;
+
+    // Define c 'printf' with one 'char*' parameter
+    Symbol *cprintf    = make_symbol("printf", SG_FUNC, SA_DEC, 0, 0, intsym);
+    cprintf->params    = malloc(sizeof(Symbol *)); // Allocate for 1 parameter
+    cprintf->params[0] = strsym;                   // First param is 'char*'
+    cprintf->pcount    = 1;                        // One parameter
+    add_symbol(table, cprintf);
 }
 
 /*********************************************
