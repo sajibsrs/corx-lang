@@ -12,7 +12,7 @@ typedef struct Analyzer {
 } Analyzer;
 
 Analyzer *make_analyzer();
-
+Symbol *resolve_variable(SymTab *table, char *name, int scope);
 void resolve_program(Analyzer *analyzer, Node *node);
 void purge_analyzer(Analyzer *analyzer);
 

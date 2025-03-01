@@ -28,7 +28,6 @@ static Symbol *resolve_var_expr(Analyzer *anz, ExprNode *expr);
 static Symbol *resolve_unary_expr(Analyzer *anz, ExprNode *expr);
 static Symbol *resolve_call_expr(Analyzer *anz, ExprNode *expr);
 static Symbol *resolve_conditional_expr(Analyzer *anz, ExprNode *expr);
-static Symbol *resolve_variable(SymTab *table, char *name, int scope);
 
 static bool is_same_type(Symbol *t1, Symbol *t2);
 static bool is_arithmetic(Symbol *type);
@@ -203,7 +202,7 @@ void is_assignable(SymTab *table, Symbol *lhs, Symbol *rhs, int line) {
  * @param scope The starting scope level.
  * @return Pointer to the found symbol or NULL if not found.
  */
-static Symbol *resolve_variable(SymTab *table, char *name, int scope) {
+Symbol *resolve_variable(SymTab *table, char *name, int scope) {
     for (int s = scope; s >= 0; s--) {
         char *uname = sym_uname(name, s);
         Symbol *sym = search_symbol(table, uname, s);
@@ -232,22 +231,7 @@ void scope_enter(SymTab *table) {
  * @param table Pointer to the symbol table.
  */
 void scope_exit(SymTab *table) {
-    for (unsigned i = 0; i < table->size; i++) {
-        SymNode **ptr = &table->buckets[i];
-
-        while (*ptr) {
-            if ((*ptr)->symbol->scope == table->scope) {
-                SymNode *temp = *ptr;
-                *ptr          = temp->next;
-                free(temp->symbol->name);
-                free(temp->symbol);
-                free(temp);
-                table->count--;
-            } else {
-                ptr = &(*ptr)->next;
-            }
-        }
-    }
+    // TODO: Mark inactive if needed
     table->scope--;
 }
 
@@ -347,8 +331,7 @@ static void resolve_var_decl(Analyzer *anz, VarNode *var) {
         anz->symtab->scope
     );
 
-    char *name = sym_uname(var->name, anz->symtab->scope);
-
+    char *name  = sym_uname(var->name, anz->symtab->scope);
     Symbol *dup = search_symbol(anz->symtab, name, anz->symtab->scope);
     if (dup) {
         fprintf(
