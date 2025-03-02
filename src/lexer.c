@@ -353,8 +353,8 @@ static Token number(Lexer *lexer) {
 
     token.str[idx] = '\0';
 
-    token.line   = lexer->line;
-    token.col = tscol;
+    token.line = lexer->line;
+    token.col  = tscol;
 
     return token;
 }
@@ -385,8 +385,8 @@ static Token identifier(Lexer *lexer) {
     KWElement *elem = search_keyword(token.str);
     if (elem) token.type = elem->type;
 
-    token.line   = lexer->line;
-    token.col = tscol; // lexer->col;
+    token.line = lexer->line;
+    token.col  = tscol; // lexer->col;
 
     return token;
 }
@@ -421,8 +421,8 @@ static Token string(Lexer *lexer) {
         token.str[0] = '\0'; // empty str
     }
 
-    token.line   = lexer->line;
-    token.col = tscol;
+    token.line = lexer->line;
+    token.col  = tscol;
 
     return token;
 }
@@ -459,8 +459,8 @@ static Token character(Lexer *lexer) {
         token.str[0] = '\0';
     }
 
-    token.line   = lexer->line;
-    token.col = lexer->col - 1;
+    token.line = lexer->line;
+    token.col  = lexer->col - 1;
 
     return token;
 }
@@ -579,6 +579,18 @@ static Token next(Lexer *lexer) {
     if (cin == '>' && peek(lexer) == '=') {
         advance(lexer, 2, true); // consume '>='
         return (Token){T_GTEQ, ">=", lexer->line, lexer->col - 2};
+    }
+
+    // "++"
+    if (cin == '+' && peek(lexer) == '+') {
+        advance(lexer, 2, true);
+        return (Token){T_INCR, "++", lexer->line, lexer->col - 2};
+    }
+
+    // "--"
+    if (cin == '-' && peek(lexer) == '-') {
+        advance(lexer, 2, true);
+        return (Token){T_DECR, "--", lexer->line, lexer->col - 2};
     }
 
     // "+="

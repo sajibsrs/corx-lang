@@ -88,6 +88,8 @@ typedef enum {
     T_NTEQ,      // '!='
     T_GTEQ,      // '>='
     T_LTEQ,      // '<='
+    T_INCR,      // '++'
+    T_DECR,      // '--'
     T_PLUSEQ,    // '+='
     T_MINUSEQ,   // '-='
     T_DIVEQ,     // '/='
