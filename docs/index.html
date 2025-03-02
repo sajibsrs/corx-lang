@@ -94,9 +94,9 @@ popcorn : popcorn(float temp, int time) {
 }
 
 # destructor
-popcorn : %popcorn() {}
+popcorn : ~popcorn() {}
 
-# contract fulfillment by implementing methods
+# contract fulfillment
 popcorn : make() {
     if (this->temp >= 180.0) {
         return true;
@@ -108,8 +108,7 @@ popcorn : make() {
 popcorn *pcorn = new popcorn(200.0, 5);
 bool popped = pcorn->make();
 
-print(pcorn->temp);         # should print '3'
-printn(popped);             # should print 'true' or '1'
+print(popped);             # should print 'true'
 
 purge pcorn;
         </code></pre>
