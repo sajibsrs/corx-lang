@@ -22,13 +22,20 @@ typedef enum {
     T_RESTRICT,
 
     // Types
+    T_INT,      //
+    T_FLOAT,    //
+    T_CHAR,     //
+    T_STRING,   //
     T_ENUM,     //
     T_STRUCT,   //
     T_CONTRACT, //
-    T_IDENT,    // Identifier
-    T_NUMBER,   // Numbers
-    T_STRING,   // String literal
-    T_CHAR,     // Character literal
+    T_IDENT,    //
+
+    // Values
+    T_INT_LIT,    //
+    T_FLOAT_LIT,  //
+    T_CHAR_LIT,   //
+    T_STRING_LIT, //
 
     // Conditions
     T_IF,      //
@@ -37,15 +44,15 @@ typedef enum {
     T_CASE,    //
     T_DEFAULT, //
 
-    T_BREAK,
-    T_CONTINUE,
+    T_BREAK,    //
+    T_CONTINUE, //
 
     // Loops
-    T_DO,
-    T_WHILE,
-    T_FOR,
-    T_FOREACH,
-    T_IN,
+    T_DO,      //
+    T_WHILE,   //
+    T_FOR,     //
+    T_FOREACH, //
+    T_IN,      //
 
     // Module
     T_MODULE, // Group
@@ -53,14 +60,14 @@ typedef enum {
     T_FROM,   //
 
     // Function
-    T_RETURN,
+    T_RETURN, //
 
     // Memory operations
-    T_NEW,
-    T_NULL, // Pointer non-value
-    T_SIZEOF,
-    T_THIS,
-    T_PURGE,
+    T_NEW,    //
+    T_NULL,   // Pointer non-value
+    T_SIZEOF, //
+    T_THIS,   //
+    T_PURGE,  //
 
     // Operations
     T_EQ,        // '='
@@ -88,8 +95,6 @@ typedef enum {
     T_NTEQ,      // '!='
     T_GTEQ,      // '>='
     T_LTEQ,      // '<='
-    T_INCR,      // '++'
-    T_DECR,      // '--'
     T_PLUSEQ,    // '+='
     T_MINUSEQ,   // '-='
     T_DIVEQ,     // '/='
@@ -127,7 +132,6 @@ typedef enum {
 
     T_ERROR,   //
     T_UNKNOWN, // Unknown token
-    T_INVALID, //
     T_EOF,     // End of file
 } TokType;
 
@@ -135,13 +139,13 @@ extern const char *ttypestr[];
 
 typedef struct {
     TokType type;
-    char str[64];
+    char *value;
     int line;
     int col;
 } Token;
 
 typedef struct {
-    Token *tokens;
+    Token **tokens;
     int count;
 } TokList;
 
@@ -151,6 +155,8 @@ typedef struct {
     int line;
     int col;
 } Lexer;
+
+extern const char *ttypestr[];
 
 /**
  * @brief Scan the source and return the tokens array.
@@ -163,6 +169,7 @@ TokList *scan(const char *src);
  * @brief Cleanup allocated memory from `tokens`.
  * @param list
  */
-void purge_tlist(TokList *list);
+void purge_toklist(TokList *list);
+void print_toklist(const TokList *list);
 
 #endif
