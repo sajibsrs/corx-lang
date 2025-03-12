@@ -13,13 +13,19 @@ typedef enum {
     T_WAIT,  //
 
     // Type qualifiers
-    T_CONST,  //
-    T_ATOMIC, //
+    T_CONST,    //
+    T_VOLATILE, //
+    T_ATOMIC,   //
 
     // Access specifiers
-    T_EXTERNAL,
-    T_INTERNAL,
-    T_RESTRICT,
+    T_PUBLIC,
+    T_PROTECTED,
+    T_PRIVATE,
+
+    // Storage class
+    T_STATIC,
+    T_EXTERN,
+    T_THREAD,
 
     // Types
     T_INT,      //

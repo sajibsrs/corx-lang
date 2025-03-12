@@ -37,13 +37,19 @@ const char *ttypestr[] = {
     [T_WAIT]  = "T_WAIT",
 
     // Type qualifiers
-    [T_CONST]  = "T_CONST",
-    [T_ATOMIC] = "T_ATOMIC",
+    [T_CONST]    = "T_CONST",
+    [T_VOLATILE] = "T_VOLATILE",
+    [T_ATOMIC]   = "T_ATOMIC",
 
     // Access specifiers
-    [T_EXTERNAL] = "T_EXTERNAL",
-    [T_INTERNAL] = "T_INTERNAL",
-    [T_RESTRICT] = "T_RESTRICT",
+    [T_PUBLIC]    = "T_PUBLIC",
+    [T_PROTECTED] = "T_PROTECTED",
+    [T_PRIVATE]   = "T_PRIVATE",
+
+    // Storage class
+    [T_STATIC] = "T_STATIC",
+    [T_EXTERN] = "T_EXTERN",
+    [T_THREAD] = "T_THREAD",
 
     // Conditions
     [T_IF]      = "T_IF",
@@ -188,12 +194,18 @@ void make_kwtable() {
 
     // type qualifiers
     add_keyword("const", T_CONST);
+    add_keyword("volatile", T_VOLATILE);
     add_keyword("atomic", T_ATOMIC);
 
     // access specifier
-    add_keyword("external", T_EXTERNAL);
-    add_keyword("internal", T_INTERNAL);
-    add_keyword("restrict", T_RESTRICT);
+    add_keyword("public", T_PUBLIC);
+    add_keyword("protected", T_PROTECTED);
+    add_keyword("private", T_PRIVATE);
+
+    // storage class
+    add_keyword("static", T_STATIC);
+    add_keyword("extern", T_EXTERN);
+    add_keyword("thread", T_THREAD);
 
     // types
     add_keyword("int", T_INT);
