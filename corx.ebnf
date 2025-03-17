@@ -46,10 +46,6 @@ block_item
     | declaration
     ;
 
-declaration
-    = type_specifier identifier [ "=" expression ]
-    ;
-
 statement
     = "return" expression ";"
     | expression ";"
