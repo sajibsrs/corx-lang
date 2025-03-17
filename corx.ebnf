@@ -1,5 +1,5 @@
 program
-    = { function_declaration }
+    = { declaration }
     ;
 
 declaration
@@ -8,15 +8,33 @@ declaration
     ;
 
 variable_declaration
-    = "int" identifier [ "=" expression ] ";"
+    = { specifier } identifier [ "=" expression ] ";"
     ;
 
 function_declaration
-    = "int" identifier "(" param_list ")" ( block | ";" )
+    = { specifier } identifier "(" param_list ")" ( block | ";" )
+    ;
+
+declarator
+    = "*" declarator
+    | direct_declarator
+    ;
+
+direct_declarator
+    = simple_declarator [ declarator_suffix ]
+    ;
+
+declarator_suffix
+    = param_list
+    | { "[" constant "]"}
     ;
 
 param_list
-    = "void" | "int" identifier { "," "int" identifier }
+    = "void" | type_specifier identifier { "," "int" identifier }
+    ;
+
+simple_declarator
+    = identifier | "(" declarator ")"
     ;
 
 block
@@ -29,7 +47,7 @@ block_item
     ;
 
 declaration
-    = "int" identifier [ "=" expression ]
+    = type_specifier identifier [ "=" expression ]
     ;
 
 statement
@@ -68,66 +86,47 @@ argument_list
     = expression { "," expression }
     ;
 
-modifier_specifier
-    = type_modifier
-    | type_specifier
-    | access_specifier
+member_specifier
+    = access_specifier
+    | specifier
+    ;
+
+specifier
+    =  type_specifier
+    | storage_class
+    | type_qualifier
     ;
 
 access_specifier
-    = "external"
-    | "internal"
-    | "restrict"
+    = "public" | "protected" | "private"
     ;
 
-type_modifier
-    = "const"
-    | "static"
-    | "atomic"
+type_qualifier
+    = "const" | "atomic"
+    ;
+
+storage_class
+    = "extern" | "static" | "thread"
     ;
 
 type_specifier
-    = "int"
+    = "int" | "float" | "char" | "string" | "void"
     ;
 
 assignment_operator
-    = "="
-    | "+="
-    | "-="
-    | "*="
-    | "/="
-    | "%="
-    | "<<="
-    | ">>="
-    | "&="
-    | "^="
-    | "|="
+    = "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "&=" | "^=" | "|="
     ;
 
 binary_operator
-    = "-"
-    | "+"
-    | "*"
-    | "/"
-    | "%"
-    | "&&"
-    | "||"
-    | "=="
-    | "!="
-    | "<"
-    | "<="
-    | ">"
-    | ">="
-    | "="
+    = "-" | "+" | "*" | "/" | "%" | "&&" | "||" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "="
     ;
 
 unary_operator
-    = "&"
-    | "*"
-    | "+"
-    | "-"
-    | "~"
-    | "!"
+    = "&" | "*" | "+" | "-" | "~" | "!"
+    ;
+
+constant
+    = "int" | "float" | "char" | "string"
     ;
 
 identifier
