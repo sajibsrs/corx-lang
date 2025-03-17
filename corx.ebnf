@@ -15,6 +15,31 @@ function_declaration
     = { specifier } identifier "(" param_list ")" ( block | ";" )
     ;
 
+interface_declaration
+    = "interface" identifier [ ":" identifier_list ] [ "{" { member_func_declaration } "}" ] ";"
+    ;
+
+class_declaration
+    = "class" identifier [ ":" identifier_list ] [ "{" { member_declaration } "}" ] [ identifier_list ] ";"
+    ;
+
+identifier_list
+    = identifier { "," identifier }
+    ;
+
+member_declaration
+    = member_var_declaration
+    | member_func_declaration
+    ;
+
+member_var_declaration
+    = { member_specifier } identifier [ "=" expression ] ";"
+    ;
+
+member_func_declaration
+    = { member_specifier } identifier "(" param_list ")" ";"
+    ;
+
 declarator
     = "*" declarator
     | direct_declarator
@@ -30,7 +55,7 @@ declarator_suffix
     ;
 
 param_list
-    = "void" | type_specifier identifier { "," "int" identifier }
+    = "void" | type_specifier identifier { "," type_specifier identifier }
     ;
 
 simple_declarator
