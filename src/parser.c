@@ -251,9 +251,6 @@ static DeclInfo process_declarator(Parser *prs, Type *base_type) {
  *********************************************/
 
 static Decl *parse_declaration(Parser *prs) {
-    Token *next = peek(prs);
-    StgClass sc = SC_NONE;
-
     // Parse base type
     Type *base_type = parse_type_specifier(prs);
 
@@ -266,7 +263,7 @@ static Decl *parse_declaration(Parser *prs) {
     decl->base.line = decl_info.type->base.line;
     decl->name      = decl_info.name;
     decl->type      = decl_info.type;
-    decl->storage   = sc;
+    decl->storage   = SC_NONE;
 
     if (decl_info.type->kind == TY_FUNC) {
         // Create parameters
