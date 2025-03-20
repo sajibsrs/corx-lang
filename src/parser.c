@@ -14,8 +14,8 @@ static int precedence(TokType type);
 
 static Type *parse_type_specifier(Parser *prs);
 static TypeKind tok_to_type_kind(TokType type);
-static StorageClass tok_to_sc(TokType type);
-static DeclaratorInfo process_declarator(Parser *prs, Type *base_type);
+static StgClass tok_to_sc(TokType type);
+static DeclInfo process_declarator(Parser *prs, Type *base_type);
 static Decl *parse_declaration(Parser *prs);
 static ConstType tok_to_const_type(TokType type);
 
@@ -164,7 +164,7 @@ static Type *parse_type_specifier(Parser *prs) {
  * Declarator Processing
  *********************************************/
 
-static DeclaratorInfo process_declarator(Parser *prs, Type *base_type) {
+static DeclInfo process_declarator(Parser *prs, Type *base_type) {
     // Handle pointers
     if (peek(prs) && peek(prs)->type == T_ASTERISK) {
         advance(prs);
@@ -179,13 +179,13 @@ static DeclaratorInfo process_declarator(Parser *prs, Type *base_type) {
     // Handle grouping parentheses
     if (peek(prs) && peek(prs)->type == T_LPAREN) {
         advance(prs);
-        DeclaratorInfo inner = process_declarator(prs, base_type);
+        DeclInfo inner = process_declarator(prs, base_type);
         expect(prs, T_RPAREN, "Expected ')' after declarator");
         return inner;
     }
 
     // Handle identifier (must come after pointers/grouping)
-    DeclaratorInfo info = {0};
+    DeclInfo info = {0};
     if (peek(prs) && peek(prs)->type == T_IDENT) {
         info.name = peek(prs)->value ? strdup(peek(prs)->value) : NULL;
         info.type = base_type;
@@ -204,8 +204,8 @@ static DeclaratorInfo process_declarator(Parser *prs, Type *base_type) {
 
         while (peek(prs) && peek(prs)->type != T_RPAREN) {
             // Parse parameter type
-            Type *param_base          = parse_type_specifier(prs);
-            DeclaratorInfo param_info = process_declarator(prs, param_base);
+            Type *param_base    = parse_type_specifier(prs);
+            DeclInfo param_info = process_declarator(prs, param_base);
 
             if (param_info.type->kind == TY_FUNC) {
                 fprintf(
@@ -251,14 +251,14 @@ static DeclaratorInfo process_declarator(Parser *prs, Type *base_type) {
  *********************************************/
 
 static Decl *parse_declaration(Parser *prs) {
-    Token *next     = peek(prs);
-    StorageClass sc = SC_NONE;
+    Token *next = peek(prs);
+    StgClass sc = SC_NONE;
 
     // Parse base type
     Type *base_type = parse_type_specifier(prs);
 
     // Process declarator
-    DeclaratorInfo decl_info = process_declarator(prs, base_type);
+    DeclInfo decl_info = process_declarator(prs, base_type);
 
     // Build declaration
     Decl *decl      = malloc(sizeof(Decl));
@@ -565,7 +565,7 @@ static bool isacctok(TokType type) {
     return type == T_STATIC || type == T_EXTERN;
 }
 
-static StorageClass tok_to_sc(TokType type) {
+static StgClass tok_to_sc(TokType type) {
     switch (type) {
     case T_STATIC: return SC_STATIC;
     case T_EXTERN: return SC_EXTERN;

@@ -12,6 +12,8 @@ typedef struct Stmt Stmt;
 typedef struct Expr Expr;
 typedef struct Block Block;
 typedef struct Program Program;
+typedef struct DeclInfo DeclInfo;
+typedef struct Parser Parser;
 
 /* -------------------- Base AST Structure -------------------- */
 typedef enum {
@@ -54,17 +56,18 @@ struct Type {
 };
 
 /* -------------------- Declarations -------------------- */
+
 typedef enum {
     SC_NONE,
     SC_STATIC,
     SC_EXTERN,
-} StorageClass;
+} StgClass;
 
 struct Decl {
     Node base;
     char *name;
     Type *type;
-    StorageClass storage;
+    StgClass storage;
     union {
         struct { // Function
             Decl **params;
@@ -216,13 +219,13 @@ struct Program {
 };
 
 /* -------------------- Parser State -------------------- */
-typedef struct {
+struct Parser {
     const TokList *list;
     int pos;
     Token *current;
-} Parser;
+};
 
-typedef struct DeclaratorInfo {
+struct DeclInfo {
     char *name;
     Type *type;
     struct { // For function parameters
@@ -230,7 +233,7 @@ typedef struct DeclaratorInfo {
         Type **types;
         unsigned count;
     } params;
-} DeclaratorInfo;
+};
 
 // Parser interface
 Parser *make_parser(const TokList *list);
