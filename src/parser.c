@@ -492,6 +492,7 @@ static Expr *create_call_expr(Expr *func, Expr **args, unsigned arg_count, int l
 
 static TypeKind tok_to_type_kind(TokType type) {
     switch (type) {
+    case T_VOID:   return TY_VOID;
     case T_INT:    return TY_INT;
     case T_FLOAT:  return TY_FLOAT;
     case T_CHAR:   return TY_CHAR;
@@ -555,7 +556,7 @@ static bool isasnop(TokType type) {
 }
 
 static bool istypetok(TokType type) {
-    return type == T_INT || type == T_FLOAT || type == T_CHAR || type == T_STRING;
+    return type == T_INT || type == T_FLOAT || type == T_CHAR || type == T_STRING || type == T_VOID;
 }
 
 static bool isacctok(TokType type) {
@@ -896,6 +897,7 @@ static void print_expr(Expr *expr, int indent) {
 
 static const char *typekind_str(TypeKind kind) {
     switch (kind) {
+    case TY_VOID:   return "void";
     case TY_INT:    return "int";
     case TY_FLOAT:  return "float";
     case TY_CHAR:   return "char";

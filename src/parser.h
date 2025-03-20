@@ -32,6 +32,7 @@ struct Node {
 
 /* -------------------- Type System -------------------- */
 typedef enum {
+    TY_VOID,
     TY_INT,
     TY_FLOAT,
     TY_CHAR,
