@@ -225,9 +225,11 @@ typedef struct {
 typedef struct DeclaratorInfo {
     char *name;
     Type *type;
-    char **param_names; // For function parameters
-    Type **param_types;
-    unsigned param_count;
+    struct { // For function parameters
+        char **names;
+        Type **types;
+        unsigned count;
+    } params;
 } DeclaratorInfo;
 
 // Parser interface

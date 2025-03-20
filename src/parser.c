@@ -238,9 +238,9 @@ static DeclaratorInfo process_declarator(Parser *prs, Type *base_type) {
         func_type->param_count = param_count;
 
         // Update declarator info
-        info.type        = func_type;
-        info.param_names = param_names;
-        info.param_count = param_count;
+        info.type         = func_type;
+        info.params.names = param_names;
+        info.params.count = param_count;
     }
 
     return info;
@@ -252,9 +252,7 @@ static DeclaratorInfo process_declarator(Parser *prs, Type *base_type) {
 
 static Decl *parse_declaration(Parser *prs) {
     Token *next     = peek(prs);
-    StorageClass sc = SC_NONE; // Parse storage class
-
-    // TODO: Handle storage class
+    StorageClass sc = SC_NONE;
 
     // Parse base type
     Type *base_type = parse_type_specifier(prs);
@@ -272,17 +270,17 @@ static Decl *parse_declaration(Parser *prs) {
 
     if (decl_info.type->kind == TY_FUNC) {
         // Create parameters
-        decl->params = malloc(decl_info.param_count * sizeof(Decl *));
-        for (unsigned i = 0; i < decl_info.param_count; i++) {
+        decl->params = malloc(decl_info.params.count * sizeof(Decl *));
+        for (unsigned i = 0; i < decl_info.params.count; i++) {
             Decl *param      = malloc(sizeof(Decl));
             param->base.type = NODE_DECL;
             param->base.line = decl_info.type->base.line;
-            param->name      = decl_info.param_names ? decl_info.param_names[i] : NULL;
-            param->type      = decl_info.param_types ? decl_info.param_types[i] : NULL;
+            param->name      = decl_info.params.names ? decl_info.params.names[i] : NULL;
+            param->type      = decl->type->params ? decl->type->params[i] : NULL;
             param->storage   = SC_NONE;
             decl->params[i]  = param;
         }
-        decl->param_count = decl_info.param_count;
+        decl->param_count = decl_info.params.count;
 
         // Parse function body
         if (peek(prs)->type == T_LBRACE) {
@@ -599,7 +597,7 @@ Program *parse_program(Parser *prs) {
  *********************************************/
 void purge_stmt(Stmt *stmt);
 void purge_block(Block *block);
-void purge_decl(Decl *decl) ;
+void purge_decl(Decl *decl);
 
 void purge_expr(Expr *expr) {
     if (!expr) return;
