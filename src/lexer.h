@@ -28,14 +28,16 @@ typedef enum {
     T_THREAD,
 
     // Types
-    T_INT,      //
-    T_FLOAT,    //
-    T_CHAR,     //
-    T_STRING,   //
-    T_ENUM,     //
-    T_STRUCT,   //
-    T_CONTRACT, //
-    T_IDENT,    //
+    T_VOID,      //
+    T_INT,       //
+    T_FLOAT,     //
+    T_CHAR,      //
+    T_STRING,    //
+    T_ENUM,      //
+    T_STRUCT,    //
+    T_INTERFACE, //
+    T_CLASS,     //
+    T_IDENT,     //
 
     // Values
     T_INT_LIT,    //

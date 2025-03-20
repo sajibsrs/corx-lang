@@ -14,13 +14,13 @@ void purge_lexer(Lexer *lexer);
 
 // Token type to token string lookup table.
 const char *ttypestr[] = {
-    [T_ENUM]     = "T_ENUM",
-    [T_STRUCT]   = "T_STRUCT",
-    [T_CONTRACT] = "T_CONTRACT",
-    [T_IDENT]    = "T_IDENT",
+    [T_ENUM]   = "T_ENUM",
+    [T_STRUCT] = "T_STRUCT",
+    [T_IDENT]  = "T_IDENT",
 
     // Type modifiers
     [T_TYPE]   = "T_TYPE",
+    [T_VOID]   = "T_VOID",
     [T_INT]    = "T_INT",
     [T_FLOAT]  = "T_FLOAT",
     [T_CHAR]   = "T_CHAR",
@@ -169,7 +169,7 @@ static KWBucket kwtable[TABLE_SIZE] = {0};
  * @param type Token type.
  */
 void add_keyword(const char *kw, TokType type) {
-    unsigned idx  = hashfnv(kw, TABLE_SIZE);
+    int idx       = hashfnv(kw, TABLE_SIZE);
     KWBucket *bkt = &kwtable[idx];
 
     if (bkt->count < MAX_CHAIN) {
@@ -208,13 +208,15 @@ void make_kwtable() {
     add_keyword("thread", T_THREAD);
 
     // types
+    add_keyword("void", T_VOID);
     add_keyword("int", T_INT);
     add_keyword("float", T_FLOAT);
     add_keyword("char", T_CHAR);
     add_keyword("string", T_STRING);
     add_keyword("enum", T_ENUM);
     add_keyword("struct", T_STRUCT);
-    add_keyword("contract", T_CONTRACT);
+    add_keyword("interface", T_INTERFACE);
+    add_keyword("class", T_CLASS);
 
     // conditions
     add_keyword("if", T_IF);
@@ -257,7 +259,7 @@ void make_kwtable() {
  * @return
  */
 KWElement *search_keyword(const char *kw) {
-    unsigned idx  = hashfnv(kw, TABLE_SIZE);
+    int idx       = hashfnv(kw, TABLE_SIZE);
     KWBucket *bkt = &kwtable[idx];
 
     for (int i = 0; i < bkt->count; i++) {
