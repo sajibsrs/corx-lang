@@ -1,216 +1,239 @@
-#ifndef _PARSER_H
-#define _PARSER_H
+#ifndef PARSER_H
+#define PARSER_H
 
 #include "lexer.h"
+#include <stdlib.h>
 
-typedef enum {
-    CT_INT,   // Integer constant (e.g., 42)
-    CT_FLOAT, // Floating-point constant (e.g., 3.14)
-    CT_CHAR,  // Character constant (e.g., 'A')
-    CT_STRING // String literal (e.g., "hello")
-} ConstType;
+/* -------------------- Pre declaration -------------------- */
+typedef struct Node Node;
+typedef struct Type Type;
+typedef struct Decl Decl;
+typedef struct Stmt Stmt;
+typedef struct Expr Expr;
+typedef struct Block Block;
+typedef struct Program Program;
 
-// Defines node types.
+/* -------------------- Base AST Structure -------------------- */
 typedef enum {
     NODE_PROGRAM,
-    NODE_VAR_DECL,
-    NODE_FUNC_DECL,
+    NODE_DECL,
     NODE_BLOCK,
-    NODE_BLOCK_ITEM,
-    NODE_FOR_INIT,
-    NODE_EXPRESSION,
-    NODE_STATEMENT,
+    NODE_STMT,
+    NODE_EXPR,
     NODE_TYPE,
 } NodeType;
 
-// Defines statement types.
+struct Node {
+    NodeType type;
+    int line;
+};
+
+/* -------------------- Type System -------------------- */
+typedef enum {
+    TY_INT,
+    TY_FLOAT,
+    TY_CHAR,
+    TY_STRING,
+    TY_PTR,
+    TY_FUNC,
+} TypeKind;
+
+struct Type {
+    Node base;
+    TypeKind kind;
+    union {
+        struct { // TY_PTR
+            Type *inner;
+        };
+        struct { // TY_FUNC
+            Type *ret;
+            Type **params;
+            unsigned param_count;
+        };
+    };
+};
+
+/* -------------------- Declarations -------------------- */
+typedef enum {
+    SC_NONE,
+    SC_STATIC,
+    SC_EXTERN,
+} StorageClass;
+
+struct Decl {
+    Node base;
+    char *name;
+    Type *type;
+    StorageClass storage;
+    union {
+        struct { // Function
+            Decl **params;
+            Block *body;
+            unsigned param_count;
+        };
+        struct { // Variable
+            Expr *init;
+        };
+    };
+};
+
+/* -------------------- Statements -------------------- */
 typedef enum {
     STMT_RETURN,
-    STMT_EXPRESSION,
-    STMT_ASSIGNMENT,
-    STMT_CALL,
     STMT_IF,
-    STMT_COMPOUND,
-    STMT_BREAK,
-    STMT_CONTINUE,
     STMT_WHILE,
     STMT_DO_WHILE,
     STMT_FOR,
-    STMT_NULL,
+    STMT_BREAK,
+    STMT_CONTINUE,
+    STMT_COMPOUND,
+    STMT_EXPR
 } StmtType;
 
-// Defines statement types.
+struct Stmt {
+    Node base;
+    StmtType stmt_type;
+    union {
+        struct { // Return
+            Expr *expr;
+        } _return;
+        struct { // If
+            Expr *cond;
+            Stmt *then;
+            Stmt *else_;
+        } _if;
+        struct { // While/DoWhile
+            Expr *cond;
+            Stmt *body;
+        } _while;
+        struct { // For
+            Decl *init;
+            Expr *cond;
+            Expr *post;
+            Stmt *body;
+        } _for;
+        struct { // Compound
+            Block *block;
+        } compound;
+        Expr *expr; // Expression statement
+    };
+};
+
+/* -------------------- Expressions -------------------- */
 typedef enum {
-    EXPR_CONSTANT, // All constants (int, float, string, etc.)
+    EXPR_CONST,
     EXPR_VAR,
     EXPR_UNARY,
     EXPR_BINARY,
-    EXPR_CONDITIONAL,
-    EXPR_ASSIGNMENT,
     EXPR_CALL,
+    EXPR_ASSIGN,
+    EXPR_TERNARY
 } ExprType;
 
-// Defines unary operators.
 typedef enum {
-    UN_COMPL, // ~
-    UN_PLUS,  // +
-    UN_MINUS, // -
-    UN_NOT,   // !
-} UnOps;
+    CONST_INT,
+    CONST_FLOAT,
+    CONST_STR,
+} ConstType;
 
-// Defines binary operators.
+// Binary operators
 typedef enum {
-    BIN_ADD,
-    BIN_SUB,
-    BIN_MUL,
-    BIN_DIV,
-    BIN_MOD,
-    BIN_AND,
-    BIN_OR,
-    BIN_EQ,
-    BIN_NEQ,
-    BIN_LT,
-    BIN_LTEQ,
-    BIN_GT,
-    BIN_GTEQ,
-} BinOps;
+    BOP_ADD,  // +
+    BOP_SUB,  // -
+    BOP_MUL,  // *
+    BOP_DIV,  // /
+    BOP_MOD,  // %
+    BOP_AND,  // &&
+    BOP_OR,   // ||
+    BOP_EQ,   // ==
+    BOP_NEQ,  // !=
+    BOP_LT,   // <
+    BOP_LTEQ, // <=
+    BOP_GT,   // >
+    BOP_GTEQ, // >=
+} BinOp;
 
-// Base node structure.
-typedef struct {
-    NodeType type;
-    int line;
-} Node;
+typedef enum {
+    UOP_NEG,
+    UOP_NOT,
+    UOP_ADDR,
+    UOP_DEREF,
+} UnOp;
 
-// Program node.
-typedef struct {
-    Node base;
-    Node **items;
-    int icount;
-} ProgNode;
-
-// Variable node.
-typedef struct {
-    Node base;   // Base node
-    char *dtype; // Data type
-    char *name;  // Identifier
-    Node *init;  // Optional initializer
-} VarNode;
-
-// Function node.
-typedef struct {
-    Node base;     // Base node type.
-    char *dtype;   // Return type
-    char *name;    // Identifier
-    Node **params; // Parameters
-    int pcount;    // Parameter count
-    Node *body;    // optional block
-} FuncNode;
-
-// Block node.
-typedef struct {
-    Node base;
-    Node **items;
-    int icount;
-} BlockNode;
-
-// Statement node.
-typedef struct {
-    Node base;
-    StmtType type;
-
-    union {
-        struct {
-            Node *expr; // return, expression statement, or function call statement
-        } simple;
-
-        struct {
-            char *lhs; // Variable
-            Node *rhs; // Value
-        } assignment;
-
-        struct {
-            Node *condition;
-            Node *then_stmt;
-            Node *else_stmt;
-        } if_stmt;
-
-        struct {
-            Node *init;
-            Node *condition;
-            Node *post;
-            Node *body;
-        } for_stmt;
-
-        struct {
-            Node *condition;
-            Node *body;
-        } while_stmt;
-    } u;
-} StmtNode;
-
-// Expression node.
-typedef struct {
+struct Expr {
     Node base;
     ExprType type;
-
     union {
-        char *name; // Variable name
-
-        struct {             // For constant value
-            ConstType ctype; // Type of the constant
+        struct { // Constant
+            ConstType type;
             union {
-                int ival;   // Integer
-                float fval; // Float
-                char cval;  // Character
-                char *sval; // String (stored in data section)
-            } u;
-        } con;
-
-        struct {
-            UnOps op;
-            Node *operand;
+                int ival;
+                double fval;
+                char *sval;
+            };
+        } constant;
+        struct { // Variable
+            char *name;
+        } variable;
+        struct { // Unary
+            UnOp op;
+            Expr *expr;
         } unary;
-
-        struct {
-            BinOps op;
-            Node *left;
-            Node *right;
+        struct { // Binary
+            BinOp op;
+            Expr *left;
+            Expr *right;
         } binary;
-
-        struct {
-            Node *condition;
-            Node *true_expr;
-            Node *false_expr;
-        } conditional;
-
-        struct {
-            Node *lhs; // Variable
-            Node *rhs;
-        } assignment;
-
-        struct {
-            Node *callee; // Function being called
-            Node **args;
-            int acount;
+        struct { // Call
+            Expr *func;
+            Expr **args;
+            unsigned arg_count;
         } call;
-    } u;
-} ExprNode;
+        struct { // Assignment
+            Expr *lhs;
+            Expr *rhs;
+        } assignment;
+        struct { // Ternary
+            Expr *cond;
+            Expr *then;
+            Expr *_else;
+        } ternary;
+    };
+};
 
-void purge_node(Node *node);
+/* -------------------- Block Structure -------------------- */
+struct Block {
+    Node base;
+    Node **items;
+    unsigned item_count;
+};
 
-// Parser.
+/* -------------------- Program Structure -------------------- */
+struct Program {
+    Node base;
+    Decl **decls;
+    unsigned decl_count;
+};
+
+/* -------------------- Parser State -------------------- */
 typedef struct {
-    const TokList *list; // Token array
-    int pos;             // Current position
-    Token token;         // Current token
-    Node *node;          // Root node
+    const TokList *list;
+    int pos;
+    Token *current;
 } Parser;
 
-extern const char *ntypestr[];
+typedef struct DeclaratorInfo {
+    char *name;
+    Type *type;
+    char **param_names; // For function parameters
+    Type **param_types;
+    unsigned param_count;
+} DeclaratorInfo;
 
+// Parser interface
 Parser *make_parser(const TokList *list);
-Node *parse_program(Parser *parser);
+Program *parse_program(Parser *parser);
 
-void purge_parser(Parser *parser);
+void print_ast(Node *node);
 
 #endif
