@@ -13,14 +13,14 @@
 static int precedence(TokType type);
 
 static Type *parse_type_specifier(Parser *prs);
-static TypeKind tok_to_type_kind(TokType type);
+static TypeKind tok_to_typekind(TokType type);
 static StgClass tok_to_sc(TokType type);
 static DeclInfo process_declarator(Parser *prs, Type *base_type);
 static Decl *parse_declaration(Parser *prs);
-static ConstType tok_to_const_type(TokType type);
+static ConstType tok_to_consttype(TokType type);
 
-static UnOp tok_to_un_op(TokType type);
-static BinOp tok_to_bin_op(TokType type);
+static UnOp tok_to_unop(TokType type);
+static BinOp tok_to_binop(TokType type);
 
 static Token *peek(Parser *prs);
 static Token *peek_next(Parser *prs);
@@ -32,11 +32,13 @@ static Stmt *parse_stmt(Parser *prs);
 
 static Expr *parse_expr(Parser *prs, int min_prec);
 static Expr *parse_primary_expr(Parser *prs);
+
 static Expr *create_const_expr(ConstType const_type, Token *tok);
-static Expr *create_var_expr(const char *name, int line);
-static Expr *create_unary_expr(UnOp op, Expr *u, int line);
-static Expr *create_binary_expr(BinOp op, Expr *left, Expr *right, int line);
-static Expr *create_call_expr(Expr *func, Expr **args, unsigned arg_count, int line);
+static Expr *create_var_expr(const char *name);
+static Expr *create_unary_expr(UnOp op, Expr *u);
+static Expr *create_binary_expr(BinOp op, Expr *left, Expr *right);
+static Expr *create_assign_expr(Expr *left, Expr *right);
+static Expr *create_call_expr(Expr *func, Expr **args, unsigned arg_count);
 
 static bool isbinop(TokType type);
 static bool isunop(TokType type);
@@ -76,19 +78,20 @@ static const UnOp unop_table[] = {
 };
 
 static const BinOp binop_table[] = {
-    [T_PLUS]     = BOP_ADD,  //
-    [T_MINUS]    = BOP_SUB,  //
-    [T_ASTERISK] = BOP_MUL,  //
-    [T_FSLASH]   = BOP_DIV,  //
-    [T_MODULUS]  = BOP_MOD,  //
-    [T_EQEQ]     = BOP_EQ,   //
-    [T_NTEQ]     = BOP_NEQ,  //
-    [T_LT]       = BOP_LT,   //
-    [T_LTEQ]     = BOP_LTEQ, //
-    [T_GT]       = BOP_GT,   //
-    [T_GTEQ]     = BOP_GTEQ, //
-    [T_AND]      = BOP_AND,  //
-    [T_OR]       = BOP_OR    //
+    [T_PLUS]     = BOP_ADD,    //
+    [T_MINUS]    = BOP_SUB,    //
+    [T_ASTERISK] = BOP_MUL,    //
+    [T_FSLASH]   = BOP_DIV,    //
+    [T_MODULUS]  = BOP_MOD,    //
+    [T_EQ]       = BOP_ASSIGN, //
+    [T_EQEQ]     = BOP_EQ,     //
+    [T_NTEQ]     = BOP_NEQ,    //
+    [T_LT]       = BOP_LT,     //
+    [T_LTEQ]     = BOP_LTEQ,   //
+    [T_GT]       = BOP_GT,     //
+    [T_GTEQ]     = BOP_GTEQ,   //
+    [T_AND]      = BOP_AND,    //
+    [T_OR]       = BOP_OR      //
 };
 
 /*********************************************
@@ -105,9 +108,9 @@ static void errexitinfo(Parser *prs, const char *msg) {
     exit(1);
 }
 
-static Token *expect(Parser *prs, TokType type, const char *msg) {
+static Token *expect(Parser *prs, TokType expr_type, const char *msg) {
     Token *next = peek(prs);
-    if (!next || next->type != type) {
+    if (!next || next->type != expr_type) {
         errexitinfo(prs, msg);
     }
     return advance(prs);
@@ -118,10 +121,10 @@ static Token *expect(Parser *prs, TokType type, const char *msg) {
  *********************************************/
 
 Parser *make_parser(const TokList *list) {
-    Parser *prs  = malloc(sizeof(Parser));
-    prs->list    = list;
-    prs->pos     = -1;
-    prs->current = NULL;
+    Parser *prs = malloc(sizeof(Parser));
+    prs->list   = list;
+    prs->pos    = -1;
+    prs->token  = NULL;
     return prs;
 }
 
@@ -135,11 +138,11 @@ static Token *peek_next(Parser *prs) {
 
 static Token *advance(Parser *prs) {
     if (prs->pos < prs->list->count - 1) {
-        prs->current = prs->list->tokens[++prs->pos];
+        prs->token = prs->list->tokens[++prs->pos];
     } else {
-        prs->current = NULL;
+        prs->token = NULL;
     }
-    return prs->current;
+    return prs->token;
 }
 
 /*********************************************
@@ -151,13 +154,12 @@ static Type *parse_type_specifier(Parser *prs) {
         errexitinfo(prs, "Expected type specifier");
     }
 
-    Token *tok      = peek(prs);
-    Type *type      = malloc(sizeof(Type));
-    type->base.type = NODE_TYPE;
-    type->base.line = tok->line;
-    type->kind      = tok_to_type_kind(tok->type);
-    advance(prs); // Consume the type token
-    return type;
+    Token *tok                = peek(prs);
+    Type *expr_type           = malloc(sizeof(Type));
+    expr_type->base.node_type = NODE_TYPE;
+    expr_type->type_kind      = tok_to_typekind(tok->type);
+    advance(prs);
+    return expr_type;
 }
 
 /*********************************************
@@ -168,11 +170,10 @@ static DeclInfo process_declarator(Parser *prs, Type *base_type) {
     // Handle pointers
     if (peek(prs) && peek(prs)->type == T_ASTERISK) {
         advance(prs);
-        Type *ptr_type      = malloc(sizeof(Type));
-        ptr_type->base.type = NODE_TYPE;
-        ptr_type->base.line = prs->current ? prs->current->line : 0;
-        ptr_type->kind      = TY_PTR;
-        ptr_type->inner     = base_type;
+        Type *ptr_type           = malloc(sizeof(Type));
+        ptr_type->base.node_type = NODE_TYPE;
+        ptr_type->type_kind      = TY_PTR;
+        ptr_type->ptr.ref        = base_type;
         return process_declarator(prs, ptr_type);
     }
 
@@ -207,12 +208,9 @@ static DeclInfo process_declarator(Parser *prs, Type *base_type) {
             Type *param_base    = parse_type_specifier(prs);
             DeclInfo param_info = process_declarator(prs, param_base);
 
-            if (param_info.type->kind == TY_FUNC) {
-                fprintf(
-                    stderr, "Error: Function parameters not supported (line %d)\n",
-                    param_info.type->base.line
-                );
-                exit(1);
+            // Add error check for invalid parameter type
+            if (!param_info.type) {
+                errexitinfo(prs, "Invalid parameter type");
             }
 
             param_types              = realloc(param_types, (param_count + 1) * sizeof(Type *));
@@ -222,20 +220,22 @@ static DeclInfo process_declarator(Parser *prs, Type *base_type) {
             param_count++;
 
             if (peek(prs)->type != T_COMMA) break;
-
             advance(prs);
         }
 
         expect(prs, T_RPAREN, "Expected ')' after parameters");
 
-        // Create function type wrapping previous type
-        Type *func_type        = malloc(sizeof(Type));
-        func_type->base.type   = NODE_TYPE;
-        func_type->base.line   = prs->current->line;
-        func_type->kind        = TY_FUNC;
-        func_type->ret         = info.type;
-        func_type->params      = param_types;
-        func_type->param_count = param_count;
+        // Create function expr_type wrapping previous expr_type
+        Type *func_type             = malloc(sizeof(Type));
+        func_type->base.node_type   = NODE_TYPE;
+        func_type->type_kind        = TY_FUNC;
+        func_type->func.ret         = base_type;
+        func_type->func.params      = param_types;
+        func_type->func.param_count = param_count;
+
+        if (!func_type->func.ret || !func_type->func.params) {
+            errexitinfo(prs, "Invalid function type definition");
+        }
 
         // Update declarator info
         info.type         = func_type;
@@ -251,45 +251,45 @@ static DeclInfo process_declarator(Parser *prs, Type *base_type) {
  *********************************************/
 
 static Decl *parse_declaration(Parser *prs) {
-    // Parse base type
+    // Parse base expr_type
     Type *base_type = parse_type_specifier(prs);
 
     // Process declarator
     DeclInfo decl_info = process_declarator(prs, base_type);
 
     // Build declaration
-    Decl *decl      = malloc(sizeof(Decl));
-    decl->base.type = NODE_DECL;
-    decl->base.line = decl_info.type->base.line;
-    decl->name      = decl_info.name;
-    decl->type      = decl_info.type;
-    decl->storage   = SC_NONE;
+    Decl *decl           = malloc(sizeof(Decl));
+    decl->base.node_type = NODE_DECL;
+    decl->name           = decl_info.name;
+    decl->type           = decl_info.type;
+    decl->class          = SC_NONE;
 
-    if (decl_info.type->kind == TY_FUNC) {
+    if (decl_info.type->type_kind == TY_FUNC) {
         // Create parameters
-        decl->params = malloc(decl_info.params.count * sizeof(Decl *));
+        decl->func.params = malloc(decl_info.params.count * sizeof(Decl *));
         for (unsigned i = 0; i < decl_info.params.count; i++) {
-            Decl *param      = malloc(sizeof(Decl));
-            param->base.type = NODE_DECL;
-            param->base.line = decl_info.type->base.line;
-            param->name      = decl_info.params.names ? decl_info.params.names[i] : NULL;
-            param->type      = decl->type->params ? decl->type->params[i] : NULL;
-            param->storage   = SC_NONE;
-            decl->params[i]  = param;
+            Decl *param           = malloc(sizeof(Decl));
+            param->base.node_type = NODE_DECL;
+            param->name           = decl_info.params.names ? decl_info.params.names[i] : NULL;
+            param->type           = decl->type->func.params ? decl->type->func.params[i] : NULL;
+            param->class          = SC_NONE;
+            decl->func.params[i]  = param;
         }
-        decl->param_count = decl_info.params.count;
+        decl->func.param_count = decl_info.params.count;
 
         // Parse function body
         if (peek(prs)->type == T_LBRACE) {
-            decl->body = parse_block(prs);
+            decl->func.body = parse_block(prs);
         } else {
             expect(prs, T_SCOLON, "Expected ';' after function declaration");
         }
-    } else {
+    }
+
+    else {
         // Variable initialization
         if (peek(prs)->type == T_EQ) {
             advance(prs);
-            decl->init = parse_expr(prs, 0);
+            decl->var.init = parse_expr(prs, 0);
         }
         expect(prs, T_SCOLON, "Expected ';' after declaration");
     }
@@ -301,11 +301,10 @@ static Decl *parse_declaration(Parser *prs) {
  *********************************************/
 
 static Block *parse_block(Parser *prs) {
-    Block *block      = malloc(sizeof(Block));
-    block->base.type  = NODE_BLOCK;
-    block->base.line  = prs->current->line;
-    block->items      = NULL;
-    block->item_count = 0;
+    Block *block          = malloc(sizeof(Block));
+    block->base.node_type = NODE_BLOCK;
+    block->items          = NULL;
+    block->item_count     = 0;
 
     expect(prs, T_LBRACE, "Expected '{'");
 
@@ -326,10 +325,9 @@ static Block *parse_block(Parser *prs) {
  *********************************************/
 
 static Stmt *parse_stmt(Parser *prs) {
-    Token *next     = peek(prs);
-    Stmt *stmt      = malloc(sizeof(Stmt));
-    stmt->base.type = NODE_STMT;
-    stmt->base.line = next->line;
+    Token *next          = peek(prs);
+    Stmt *stmt           = malloc(sizeof(Stmt));
+    stmt->base.node_type = NODE_STMT;
 
     switch (next->type) {
     case T_LBRACE:
@@ -360,13 +358,23 @@ static Expr *parse_expr(Parser *prs, int min_prec) {
     Expr *left  = parse_primary_expr(prs);
     Token *next = peek(prs);
 
-    while (isbinop(next->type) && precedence(next->type) >= min_prec) {
-        advance(prs); // consume operator
-        Expr *right = parse_expr(prs, precedence(next->type) + 1);
-        left        = create_binary_expr(tok_to_bin_op(next->type), left, right, next->line);
-        next        = peek(prs);
-    }
+    while (next && isbinop(next->type) && precedence(next->type) >= min_prec) {
+        TokType optoken = next->type;
+        int opprec      = precedence(optoken);
 
+        advance(prs); // Consume the operator
+
+        if (optoken == T_EQ) {
+            // Right-associative
+            Expr *right = parse_expr(prs, opprec);
+            left        = create_assign_expr(left, right);
+        } else {
+            // Left-associative
+            Expr *right = parse_expr(prs, opprec + 1);
+            left        = create_binary_expr(tok_to_binop(optoken), left, right);
+        }
+        next = peek(prs);
+    }
     return left;
 }
 
@@ -374,8 +382,7 @@ static Expr *parse_primary_expr(Parser *prs) {
     Token *next = peek(prs);
 
     if (next->type == T_IDENT) {
-        // printf("%s:%s\n", ttypestr[next->type], next->value);
-        Expr *var = create_var_expr(next->value, next->line);
+        Expr *var = create_var_expr(next->value);
         advance(prs);
         if (peek(prs) && peek(prs)->type == T_LPAREN) {
             advance(prs);
@@ -389,32 +396,24 @@ static Expr *parse_primary_expr(Parser *prs) {
                 advance(prs);
             }
             expect(prs, T_RPAREN, "Expected ')'");
-            return create_call_expr(var, args, arg_count, next->line);
+            return create_call_expr(var, args, arg_count);
         }
         return var;
     }
 
     else if (next->type == T_INT_LIT || next->type == T_FLOAT_LIT || next->type == T_STRING_LIT) {
-        Expr *c = create_const_expr(tok_to_const_type(next->type), next);
+        Expr *c = create_const_expr(tok_to_consttype(next->type), next);
         advance(prs);
 
         return c;
     }
 
-    else if (next->type == T_LPAREN) {
-        advance(prs);
-        Expr *inner = parse_expr(prs, 0);
-        expect(prs, T_RPAREN, "Expected ')'");
-
-        return inner;
-    }
-
     else if (isunop(next->type)) {
-        UnOp op = tok_to_un_op(next->type);
+        UnOp op = tok_to_unop(next->type);
         advance(prs);
         Expr *operand = parse_primary_expr(prs);
 
-        return create_unary_expr(op, operand, next->line);
+        return create_unary_expr(op, operand);
     }
     errexitinfo(prs, "Unexpected token in expression");
     exit(1);
@@ -424,12 +423,20 @@ static Expr *parse_primary_expr(Parser *prs) {
  * Expression Creation
  *********************************************/
 
+static Expr *create_assign_expr(Expr *left, Expr *right) {
+    Expr *expr             = malloc(sizeof(Expr));
+    expr->base.node_type   = NODE_EXPR;
+    expr->expr_type        = EXPR_ASSIGN;
+    expr->assignment.left  = left;
+    expr->assignment.right = right;
+    return expr;
+}
+
 static Expr *create_const_expr(ConstType const_type, Token *tok) {
-    Expr *expr          = malloc(sizeof(Expr));
-    expr->base.type     = NODE_EXPR;
-    expr->base.line     = tok->line;
-    expr->type          = EXPR_CONST;
-    expr->constant.type = const_type;
+    Expr *expr                = malloc(sizeof(Expr));
+    expr->base.node_type      = NODE_EXPR;
+    expr->expr_type           = EXPR_CONST;
+    expr->constant.const_type = const_type;
 
     switch (const_type) {
     case CONST_INT:   expr->constant.ival = atoi(tok->value); break;
@@ -441,44 +448,40 @@ static Expr *create_const_expr(ConstType const_type, Token *tok) {
     return expr;
 }
 
-static Expr *create_var_expr(const char *name, int line) {
-    Expr *expr          = malloc(sizeof(Expr));
-    expr->base.type     = NODE_EXPR;
-    expr->base.line     = line;
-    expr->type          = EXPR_VAR;
-    expr->variable.name = strdup(name);
-
-    return expr;
-}
-
-static Expr *create_unary_expr(UnOp op, Expr *operand, int line) {
-    Expr *expr       = malloc(sizeof(Expr));
-    expr->base.type  = NODE_EXPR;
-    expr->base.line  = line;
-    expr->type       = EXPR_UNARY;
-    expr->unary.op   = op;
-    expr->unary.expr = operand;
-
-    return expr;
-}
-
-static Expr *create_binary_expr(BinOp op, Expr *left, Expr *right, int line) {
-    Expr *expr         = malloc(sizeof(Expr));
-    expr->base.type    = NODE_EXPR;
-    expr->base.line    = line;
-    expr->type         = EXPR_BINARY;
-    expr->binary.op    = op;
-    expr->binary.left  = left;
-    expr->binary.right = right;
-
-    return expr;
-}
-
-static Expr *create_call_expr(Expr *func, Expr **args, unsigned arg_count, int line) {
+static Expr *create_var_expr(const char *name) {
     Expr *expr           = malloc(sizeof(Expr));
-    expr->base.type      = NODE_EXPR;
-    expr->base.line      = line;
-    expr->type           = EXPR_CALL;
+    expr->base.node_type = NODE_EXPR;
+    expr->expr_type      = EXPR_VAR;
+    expr->variable.name  = strdup(name);
+
+    return expr;
+}
+
+static Expr *create_unary_expr(UnOp op, Expr *operand) {
+    Expr *expr           = malloc(sizeof(Expr));
+    expr->base.node_type = NODE_EXPR;
+    expr->expr_type      = EXPR_UNARY;
+    expr->unary.op       = op;
+    expr->unary.expr     = operand;
+
+    return expr;
+}
+
+static Expr *create_binary_expr(BinOp op, Expr *left, Expr *right) {
+    Expr *expr           = malloc(sizeof(Expr));
+    expr->base.node_type = NODE_EXPR;
+    expr->expr_type      = EXPR_BINARY;
+    expr->binary.op      = op;
+    expr->binary.left    = left;
+    expr->binary.right   = right;
+
+    return expr;
+}
+
+static Expr *create_call_expr(Expr *func, Expr **args, unsigned arg_count) {
+    Expr *expr           = malloc(sizeof(Expr));
+    expr->base.node_type = NODE_EXPR;
+    expr->expr_type      = EXPR_CALL;
     expr->call.func      = func;
     expr->call.args      = args;
     expr->call.arg_count = arg_count;
@@ -490,8 +493,8 @@ static Expr *create_call_expr(Expr *func, Expr **args, unsigned arg_count, int l
  * Operator Helpers
  *********************************************/
 
-static TypeKind tok_to_type_kind(TokType type) {
-    switch (type) {
+static TypeKind tok_to_typekind(TokType expr_type) {
+    switch (expr_type) {
     case T_VOID:   return TY_VOID;
     case T_INT:    return TY_INT;
     case T_FLOAT:  return TY_FLOAT;
@@ -501,8 +504,8 @@ static TypeKind tok_to_type_kind(TokType type) {
     }
 }
 
-static ConstType tok_to_const_type(TokType type) {
-    switch (type) {
+static ConstType tok_to_consttype(TokType expr_type) {
+    switch (expr_type) {
     case T_INT_LIT:    return CONST_INT;
     case T_FLOAT_LIT:  return CONST_FLOAT;
     case T_STRING_LIT: return CONST_STR;
@@ -510,11 +513,11 @@ static ConstType tok_to_const_type(TokType type) {
     }
 }
 
-static UnOp tok_to_un_op(TokType type) {
+static UnOp tok_to_unop(TokType type) {
     return unop_table[type];
 }
 
-static BinOp tok_to_bin_op(TokType type) {
+static BinOp tok_to_binop(TokType type) {
     return binop_table[type];
 }
 
@@ -524,20 +527,22 @@ static int precedence(TokType type) {
 
 static bool isbinop(TokType type) {
     switch (type) {
-    case T_PLUS:
-    case T_MINUS:
-    case T_ASTERISK:
-    case T_FSLASH:
-    case T_MODULUS:
-    case T_EQEQ:
-    case T_NTEQ:
-    case T_LT:
-    case T_LTEQ:
-    case T_GT:
-    case T_GTEQ:
-    case T_AND:
-    case T_OR:       return true;
-    default:         return false;
+    case T_PLUS:     // "+
+    case T_MINUS:    // "-"
+    case T_ASTERISK: // "*"
+    case T_FSLASH:   // "/"
+    case T_MODULUS:  // "%"
+    case T_EQ:       // "="
+    case T_EQEQ:     // "=="
+    case T_NTEQ:     // "!="
+    case T_LT:       // "<"
+    case T_LTEQ:     // "<="
+    case T_GT:       // ">"
+    case T_GTEQ:     // ">="
+    case T_AND:      // "&&"
+    case T_OR:       // "||"
+        return true;
+    default: return false;
     }
 }
 
@@ -576,11 +581,10 @@ static StgClass tok_to_sc(TokType type) {
  *********************************************/
 
 Program *parse_program(Parser *prs) {
-    Program *prog    = malloc(sizeof(Program));
-    prog->base.type  = NODE_PROGRAM;
-    prog->base.line  = 0;
-    prog->decls      = NULL;
-    prog->decl_count = 0;
+    Program *prog        = malloc(sizeof(Program));
+    prog->base.node_type = NODE_PROGRAM;
+    prog->decls          = NULL;
+    prog->decl_count     = 0;
 
     while (peek(prs) && peek(prs)->type != T_EOF) {
         prog->decls = realloc(prog->decls, (prog->decl_count + 1) * sizeof(Decl *));
@@ -600,10 +604,10 @@ void purge_decl(Decl *decl);
 void purge_expr(Expr *expr) {
     if (!expr) return;
 
-    switch (expr->type) {
+    switch (expr->expr_type) {
     case EXPR_VAR: free(expr->variable.name); break;
     case EXPR_CONST:
-        if (expr->constant.type == CONST_STR && expr->constant.sval) {
+        if (expr->constant.const_type == CONST_STR && expr->constant.sval) {
             free(expr->constant.sval);
         }
         break;
@@ -639,7 +643,7 @@ void purge_block(Block *block) {
 
     for (unsigned i = 0; i < block->item_count; i++) {
         Node *node = block->items[i];
-        switch (node->type) {
+        switch (node->node_type) {
         case NODE_DECL: purge_decl((Decl *)node); break;
         case NODE_STMT: purge_stmt((Stmt *)node); break;
         default:        break;
@@ -652,14 +656,14 @@ void purge_block(Block *block) {
 void purge_type(Type *type) {
     if (!type) return;
 
-    switch (type->kind) {
-    case TY_PTR: purge_type(type->inner); break;
+    switch (type->type_kind) {
+    case TY_PTR: purge_type(type->ptr.ref); break;
     case TY_FUNC:
-        purge_type(type->ret);
-        for (unsigned i = 0; i < type->param_count; i++) {
-            purge_type(type->params[i]);
+        purge_type(type->func.ret);
+        for (unsigned i = 0; i < type->func.param_count; i++) {
+            purge_type(type->func.params[i]);
         }
-        free(type->params);
+        free(type->func.params);
         break;
     default: break;
     }
@@ -673,13 +677,13 @@ void purge_decl(Decl *decl) {
     purge_type(decl->type);
 
     // Free parameters
-    for (unsigned i = 0; i < decl->param_count; i++) {
-        purge_decl(decl->params[i]);
+    for (unsigned i = 0; i < decl->func.param_count; i++) {
+        purge_decl(decl->func.params[i]);
     }
-    free(decl->params);
+    free(decl->func.params);
 
-    purge_expr(decl->init);
-    purge_block(decl->body);
+    purge_expr(decl->var.init);
+    purge_block(decl->func.body);
     free(decl);
 }
 
@@ -728,14 +732,14 @@ void print_ast(Node *node) {
 static void print_node(Node *node, int indent) {
     if (!node) return;
 
-    switch (node->type) {
+    switch (node->node_type) {
     case NODE_PROGRAM: print_program((Program *)node, indent); break;
     case NODE_DECL:    print_decl((Decl *)node, indent); break;
     case NODE_BLOCK:   print_block((Block *)node, indent); break;
     case NODE_STMT:    print_stmt((Stmt *)node, indent); break;
     case NODE_EXPR:
     case NODE_TYPE:
-    default:           fprintf(stderr, "Unknown node type: %d\n", node->type);
+    default:           fprintf(stderr, "Unknown node expr_type: %d\n", node->node_type);
     }
 }
 
@@ -757,7 +761,7 @@ static void print_decl(Decl *decl, int indent) {
     print_indent(indent);
     printf("Declaration: %s\n", decl->name ? decl->name : "(anonymous)");
 
-    // Print type information with null check
+    // Print expr_type information with null check
     print_indent(indent + 1);
     printf("Type:\n");
     if (decl->type) {
@@ -768,19 +772,19 @@ static void print_decl(Decl *decl, int indent) {
     }
 
     // Print initialization only for variables
-    if (decl->type && decl->type->kind != TY_FUNC && decl->init) {
+    if (decl->type && decl->type->type_kind != TY_FUNC && decl->var.init) {
         print_indent(indent + 1);
         printf("Initializer:\n");
-        print_expr(decl->init, indent + 2);
+        print_expr(decl->var.init, indent + 2);
     }
 
-    // Print parameters with type validation
-    if (decl->param_count > 0) {
+    // Print parameters with expr_type validation
+    if (decl->func.param_count > 0) {
         print_indent(indent + 1);
-        printf("Parameters (%u):\n", decl->param_count);
-        for (unsigned i = 0; i < decl->param_count; i++) {
-            if (decl->params[i] && decl->params[i]->type) {
-                print_decl(decl->params[i], indent + 2);
+        printf("Parameters (%u):\n", decl->func.param_count);
+        for (unsigned i = 0; i < decl->func.param_count; i++) {
+            if (decl->func.params[i] && decl->func.params[i]->type) {
+                print_decl(decl->func.params[i], indent + 2);
             } else {
                 print_indent(indent + 2);
                 printf("INVALID PARAMETER\n");
@@ -789,10 +793,10 @@ static void print_decl(Decl *decl, int indent) {
     }
 
     // Print function body if exists
-    if (decl->body) {
+    if (decl->func.body) {
         print_indent(indent + 1);
         printf("Body:\n");
-        print_block(decl->body, indent + 2);
+        print_block(decl->func.body, indent + 2);
     }
 }
 
@@ -803,21 +807,21 @@ static void print_type(Type *type, int indent) {
         return;
     }
 
-    printf("%s", typekind_str(type->kind));
+    printf("%s", typekind_str(type->type_kind));
 
-    switch (type->kind) {
+    switch (type->type_kind) {
     case TY_PTR:
         printf(" to:\n");
-        print_type(type->inner, indent + 1);
+        print_type(type->ptr.ref, indent + 1);
         break;
     case TY_FUNC:
         printf(" returning:\n");
-        print_type(type->ret, indent + 1);
-        if (type->param_count > 0) {
+        print_type(type->func.ret, indent + 1);
+        if (type->func.param_count > 0) {
             print_indent(indent);
-            printf("Parameters (%u):\n", type->param_count);
-            for (unsigned i = 0; i < type->param_count; i++) {
-                print_type(type->params[i], indent + 1);
+            printf("Parameters (%u):\n", type->func.param_count);
+            for (unsigned i = 0; i < type->func.param_count; i++) {
+                print_type(type->func.params[i], indent + 1);
             }
         }
         break;
@@ -852,10 +856,10 @@ static void print_expr(Expr *expr, int indent) {
     print_indent(indent);
     printf("Expression: ");
 
-    switch (expr->type) {
+    switch (expr->expr_type) {
     case EXPR_CONST:
-        printf("%s: ", consttype_str(expr->constant.type));
-        switch (expr->constant.type) {
+        printf("%s: ", consttype_str(expr->constant.const_type));
+        switch (expr->constant.const_type) {
         case CONST_INT:   printf("%d\n", expr->constant.ival); break;
         case CONST_FLOAT: printf("%.4f\n", expr->constant.fval); break;
         case CONST_STR:
@@ -908,8 +912,8 @@ static const char *typekind_str(TypeKind kind) {
     }
 }
 
-static const char *stmttype_str(StmtType type) {
-    switch (type) {
+static const char *stmttype_str(StmtType expr_type) {
+    switch (expr_type) {
     case STMT_COMPOUND: return "compound";
     case STMT_RETURN:   return "return";
     case STMT_EXPR:     return "expression";

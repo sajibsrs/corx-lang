@@ -26,8 +26,7 @@ typedef enum {
 } NodeType;
 
 struct Node {
-    NodeType type;
-    int line;
+    NodeType node_type;
 };
 
 /* -------------------- Type System -------------------- */
@@ -43,16 +42,16 @@ typedef enum {
 
 struct Type {
     Node base;
-    TypeKind kind;
+    TypeKind type_kind;
     union {
         struct { // TY_PTR
-            Type *inner;
-        };
+            Type *ref;
+        } ptr;
         struct { // TY_FUNC
             Type *ret;
             Type **params;
             unsigned param_count;
-        };
+        } func;
     };
 };
 
@@ -62,22 +61,24 @@ typedef enum {
     SC_NONE,
     SC_STATIC,
     SC_EXTERN,
+    SC_THREAD,
 } StgClass;
 
+// Declarator node
 struct Decl {
-    Node base;
-    char *name;
-    Type *type;
-    StgClass storage;
+    Node base;      // Base node
+    char *name;     // Declaration name/identifier
+    Type *type;     // Declaration type
+    StgClass class; // Storage class
     union {
-        struct { // Function
+        struct { // Function declaration
             Decl **params;
             Block *body;
             unsigned param_count;
-        };
-        struct { // Variable
+        } func;
+        struct { // Variable declaration
             Expr *init;
-        };
+        } var;
     };
 };
 
@@ -106,7 +107,7 @@ struct Stmt {
             Stmt *then;
             Stmt *else_;
         } _if;
-        struct { // While/DoWhile
+        struct { // While/Do-while
             Expr *cond;
             Stmt *body;
         } _while;
@@ -131,7 +132,8 @@ typedef enum {
     EXPR_BINARY,
     EXPR_CALL,
     EXPR_ASSIGN,
-    EXPR_TERNARY
+    EXPR_TERNARY,
+    EXPR_CAST,
 } ExprType;
 
 typedef enum {
@@ -140,21 +142,21 @@ typedef enum {
     CONST_STR,
 } ConstType;
 
-// Binary operators
 typedef enum {
-    BOP_ADD,  // +
-    BOP_SUB,  // -
-    BOP_MUL,  // *
-    BOP_DIV,  // /
-    BOP_MOD,  // %
-    BOP_AND,  // &&
-    BOP_OR,   // ||
-    BOP_EQ,   // ==
-    BOP_NEQ,  // !=
-    BOP_LT,   // <
-    BOP_LTEQ, // <=
-    BOP_GT,   // >
-    BOP_GTEQ, // >=
+    BOP_ADD,    // +
+    BOP_SUB,    // -
+    BOP_MUL,    // *
+    BOP_DIV,    // /
+    BOP_MOD,    // %
+    BOP_AND,    // &&
+    BOP_OR,     // ||
+    BOP_ASSIGN, // =
+    BOP_EQ,     // ==
+    BOP_NEQ,    // !=
+    BOP_LT,     // <
+    BOP_LTEQ,   // <=
+    BOP_GT,     // >
+    BOP_GTEQ,   // >=
 } BinOp;
 
 typedef enum {
@@ -166,10 +168,10 @@ typedef enum {
 
 struct Expr {
     Node base;
-    ExprType type;
+    ExprType expr_type;
     union {
         struct { // Constant
-            ConstType type;
+            ConstType const_type;
             union {
                 int ival;
                 double fval;
@@ -194,14 +196,18 @@ struct Expr {
             unsigned arg_count;
         } call;
         struct { // Assignment
-            Expr *lhs;
-            Expr *rhs;
+            Expr *left;
+            Expr *right;
         } assignment;
-        struct { // Ternary
-            Expr *cond;
-            Expr *then;
-            Expr *_else;
-        } ternary;
+        struct { // conditional
+            Expr *middle;
+            Expr *left;
+            Expr *right;
+        } conditional;
+        struct { // Cast
+            Type *type;
+            Expr *expr;
+        } cast;
     };
 };
 
@@ -221,9 +227,9 @@ struct Program {
 
 /* -------------------- Parser State -------------------- */
 struct Parser {
-    const TokList *list;
-    int pos;
-    Token *current;
+    const TokList *list; // Token list
+    int pos;             // Current position
+    Token *token;        // Current token
 };
 
 struct DeclInfo {
@@ -238,6 +244,8 @@ struct DeclInfo {
 
 // Parser interface
 Parser *make_parser(const TokList *list);
+void purge_parser(Parser *prs);
+
 Program *parse_program(Parser *parser);
 
 void print_ast(Node *node);
