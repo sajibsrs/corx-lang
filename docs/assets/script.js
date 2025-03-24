@@ -80,6 +80,8 @@ const CORX_TYPES = [
     'enum',
     'struct',
     'contract',
+    'class',
+    'interface',
     'union',
     'lambda',
     'vargs',
