@@ -116,22 +116,20 @@ draw_visitor : visit(circle &c) {
     return area;
 }
 
-draw_visitor : visit(Rectangle &r) {
+draw_visitor : visit(rectangle &r) {
     float area = r.width * r.height;
     printn("Drawing a " + r.name + " with area: " + area);
     return area;
 }
 
-draw_visitor : visit(Square &s) {
+draw_visitor : visit(square &s) {
     float area = s.width * s.width;
     printn("Drawing a " + s.name + " with area: " + area);
     return area;
 }
 
-# main function to demonstrate usage
 int main(void) {
-
-    shape **shapes = new *shape[3];  # dynamically allocates an array of 3 pointers
+    shape **shapes = new *shape[3];  # allocates an array of 3 pointers
     shapes[0] = new circle();        # allocates on the heap
     shapes[1] = new rectangle();
     shapes[2] = new square();
@@ -151,7 +149,6 @@ int main(void) {
     }
 
     purge shapes;
-
     return 0;
 }
     </code></pre>
