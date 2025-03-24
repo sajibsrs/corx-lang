@@ -73,42 +73,35 @@
         <pre><code class="language-corx">
 module main;
 
-import io from "std";       # unwraps io
+import "std:io";
 
-contract action {
+interface action {
     bool make();
 };
 
-struct kernel {
-    int time = 3;           # time before it pops
+class kernel {
+    int time = 3;
 };
 
-struct popcorn : kernel {
+class popcorn : kernel {
     float temp;
-} action;                   # sign contract
+} action;
 
-# constructor
 popcorn : popcorn(float temp, int time) {
     this->time = time;
     this->temp = temp;
 }
 
-# destructor
 popcorn : ~popcorn() {}
 
-# contract fulfillment
 popcorn : make() {
-    if (this->temp >= 180.0) {
-        return true;
-    } else {
-        return false;
-    }
+    (this->temp >= 180.0) ? true : false;
 }
 
 popcorn *pcorn = new popcorn(200.0, 5);
 bool popped = pcorn->make();
 
-print(popped);             # should print 'true'
+print(popped); # should print 'true'
 
 purge pcorn;
         </code></pre>

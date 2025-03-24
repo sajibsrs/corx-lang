@@ -99,7 +99,7 @@ print(ptr); # prints the address of 'count' (e.g. 0x7ffeefbff5b0)
 int count = 42;
 int *ptr = &count;
 
-print(ptr*); # print the value stored in 'count' (42)
+print(*ptr); # print the value stored in 'count' (42)
         </code></pre>
 
         <br>
@@ -115,8 +115,8 @@ int count = 42;
 int *ptr = &count;  # 'ptr' contains address of 'count'
 int *pptr = &ptr;   # 'pptr' contains address of 'ptr'
 
-print(ptr*);  # prints the value stored in 'count' (42)
-print(ptr**); # prints the address of 'count' via double dereference
+print(*ptr);  # prints the value stored in 'count' (42)
+print(**ptr); # prints the address of 'count' via double dereference
         </code></pre>
 
         <br>

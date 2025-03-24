@@ -64,65 +64,71 @@
         <pre><code class="language-corx">
 module main;
 
-import * from "std:io"; # import all (std:io:printn)
+import "std:io";
 
-contract shape; # forward declaration
+# Forward declarations
+class circle;
+class rectangle;
+class square;
 
-# visitor contract
-contract visitor {
-    void visit(shape @s); # pass value by reference (value at)
+interface visitor {
+    float visit(circle &c);
+    float visit(rectangle &r);
+    float visit(square &s);
 };
 
-# shape contract
-contract shape {
-    void accept(visitor @v);
+interface shape {
+    void accept(visitor &v);
 };
 
-# circle implementing shape
-struct circle {
+class circle {
     float radius = 10.0;
     string name = "Circle";
 } shape;
 
-circle : void accept(visitor @v) {
-    v.visit(this);
+circle : accept(visitor &v) {
+    return v.visit(this);
 }
 
-# rectangle implementing shape
-struct rectangle {
+class rectangle {
     float width = 20.0;
     float height = 15.0;
     string name = "Rectangle";
 } shape;
 
-rectangle : void accept(visitor @v) {
-    v.visit(this);
+rectangle : accept(visitor &v) {
+    return v.visit(this);
 }
 
-# square inherits from rectangle
-struct square : rectangle {
-    float width = 20.0;
-    float height = 20.0;
+class square : rectangle {
     string name = "Square";
 };
 
-# method override
-square : void accept(visitor @v) {
-    this.width = 10.0;
-    this.height = 10.0;
-
-    v.visit(this);
-};
-
-# draw_visitor implementing visitor
-struct draw_visitor {
-} visitor;
-
-draw_visitor : void visit(shape @s) {
-    printn("Drawing a " + s.name);
+square : accept(visitor &v) {
+    return v.visit(this);
 }
 
-# main function
+class draw_visitor {} visitor;
+
+draw_visitor : visit(circle &c) {
+    float area = 3.1415 * c.radius * c.radius;
+    printn("Drawing a " + c.name + " with area: " + area);
+    return area;
+}
+
+draw_visitor : visit(Rectangle &r) {
+    float area = r.width * r.height;
+    printn("Drawing a " + r.name + " with area: " + area);
+    return area;
+}
+
+draw_visitor : visit(Square &s) {
+    float area = s.width * s.width;
+    printn("Drawing a " + s.name + " with area: " + area);
+    return area;
+}
+
+# main function to demonstrate usage
 int main(void) {
 
     shape **shapes = new *shape[3];  # dynamically allocates an array of 3 pointers
@@ -131,12 +137,15 @@ int main(void) {
     shapes[2] = new square();
 
     draw_visitor dv;
+    float total_area = 0.0;
 
     for (int i = 0; i < 3; i++) {
-        shapes[i]->accept(dv);
+        total_area += shapes[i]->accept(dv);
     }
 
-    # clean up
+    printn("Total area of all shapes: " + total_area);
+
+    # clean up memory
     for (int i = 0; i < 3; i++) {
         purge shapes[i];
     }
